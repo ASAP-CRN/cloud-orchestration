@@ -1,0 +1,57 @@
+name: Release Management
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag to process'
+        required: true
+        type: string
+
+jobs:
+  orchestrate-release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+
+    - name: Get version
+      id: get_version
+      run: |
+        if [ "${{ github.event_name }}" = "release" ]; then
+          VERSION="${{ github.event.release.tag_name }}"
+        else
+          VERSION="${{ inputs.version }}"
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+    - name: Run orchestration
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        ZENODO_TOKEN: ${{ secrets.ZENODO_TOKEN }}
+      run: |
+        asap-orchestrate release ${{ steps.get_version.outputs.version }}
+
+    - name: Create summary
+      run: |
+        echo "## Release ${{ steps.get_version.outputs.version }} Summary" >> $GITHUB_STEP_SUMMARY
+        echo "✅ Orchestration completed successfully" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Repositories Updated:" >> $GITHUB_STEP_SUMMARY
+        echo "- ASAP-CRN/cloud-datasets" >> $GITHUB_STEP_SUMMARY
+        echo "- ASAP-CRN/cloud-collections" >> $GITHUB_STEP_SUMMARY
+        echo "- ASAP-CRN/cloud-releases" >> $GITHUB_STEP_SUMMARY
+        echo "- ASAP-CRN/cloud-cde" >> $GITHUB_STEP_SUMMARY

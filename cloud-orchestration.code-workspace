@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../cloud-datasets"
+		},
+		{
+			"path": "../cloud-releases"
+		},
+		{
+			"path": "../cloud-cde"
+		},
+		{
+			"path": "../cloud-collections"
+		}
+	],
+	"settings": {}
+}

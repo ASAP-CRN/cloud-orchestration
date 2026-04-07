@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "asap-orchestrator"
+version = "0.1.0"
+description = "Orchestration tool for managing ASAP CRN cloud repositories"
+authors = [
+    {name = "ASAP CRN Team"}
+]
+dependencies = [
+    "requests",
+    "PyGitHub",
+    "zenodo-client",
+    "click",
+    "python-dotenv"
+]
+requires-python = ">=3.8"
+readme = "README.md"
+
+[project.scripts]
+asap-orchestrate = "asap_orchestrator.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"

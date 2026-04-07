@@ -1,0 +1,1393 @@
+{
+  "hafler-pmdbs-sn-rnaseq-pfc": {
+    "name": "hafler-pmdbs-sn-rnaseq-pfc",
+    "title": "team-hafler-pmdbs-sn-rnaseq-pfc",
+    "versions": {
+      "v1.0": {
+        "version": "v1.0",
+        "date": null,
+        "description": "pmdbs-sc-rnaseq dataset from team-hafler",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-hafler",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "pmdbs-sc-rnaseq",
+          "pmdbs-sc-rnaseq",
+          "hafler"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": "pmdbs-sc-rnaseq",
+        "buckets": {
+          "raw": "gs://asap-raw-team-hafler-pmdbs-sn-rnaseq-pfc",
+          "dev": "gs://asap-dev-team-hafler-pmdbs-sn-rnaseq-pfc",
+          "uat": "gs://asap-uat-team-hafler-pmdbs-sn-rnaseq-pfc",
+          "prod": "gs://asap-curated-team-hafler-pmdbs-sn-rnaseq-pfc"
+        },
+        "cde_version": "v2.1",
+        "releases": {
+          "v1.0.0": {
+            "cde_version": "v2.1",
+            "date": null
+          },
+          "v2.0.0": {
+            "cde_version": "v3.0",
+            "date": null
+          },
+          "v3.0.0": {
+            "cde_version": "v3.2",
+            "date": null
+          },
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  },
+  "lee-pmdbs-sn-rnaseq": {
+    "name": "lee-pmdbs-sn-rnaseq",
+    "title": "team-lee-pmdbs-sn-rnaseq",
+    "versions": {
+      "v1.0": {
+        "version": "v1.0",
+        "date": null,
+        "description": "pmdbs-sc-rnaseq dataset from team-lee",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-lee",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "pmdbs-sc-rnaseq",
+          "pmdbs-sc-rnaseq",
+          "lee"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": "pmdbs-sc-rnaseq",
+        "buckets": {
+          "raw": "gs://asap-raw-team-lee-pmdbs-sn-rnaseq",
+          "dev": "gs://asap-dev-team-lee-pmdbs-sn-rnaseq",
+          "uat": "gs://asap-uat-team-lee-pmdbs-sn-rnaseq",
+          "prod": "gs://asap-curated-team-lee-pmdbs-sn-rnaseq"
+        },
+        "cde_version": "v2.1",
+        "releases": {
+          "v1.0.0": {
+            "cde_version": "v2.1",
+            "date": null
+          },
+          "v2.0.0": {
+            "cde_version": "v3.0",
+            "date": null
+          },
+          "v3.0.0": {
+            "cde_version": "v3.2",
+            "date": null
+          },
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  },
+  "jakobsson-pmdbs-sn-rnaseq": {
+    "name": "jakobsson-pmdbs-sn-rnaseq",
+    "title": "team-jakobsson-pmdbs-sn-rnaseq",
+    "versions": {
+      "v1.0": {
+        "version": "v1.0",
+        "date": null,
+        "description": "pmdbs-sc-rnaseq dataset from team-jakobsson",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-jakobsson",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "pmdbs-sc-rnaseq",
+          "pmdbs-sc-rnaseq",
+          "jakobsson"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": "pmdbs-sc-rnaseq",
+        "buckets": {
+          "raw": "gs://asap-raw-team-jakobsson-pmdbs-sn-rnaseq",
+          "dev": "gs://asap-dev-team-jakobsson-pmdbs-sn-rnaseq",
+          "uat": "gs://asap-uat-team-jakobsson-pmdbs-sn-rnaseq",
+          "prod": "gs://asap-curated-team-jakobsson-pmdbs-sn-rnaseq"
+        },
+        "cde_version": "v2.1",
+        "releases": {
+          "v1.0.0": {
+            "cde_version": "v2.1",
+            "date": null
+          },
+          "v2.0.0": {
+            "cde_version": "v3.0",
+            "date": null
+          }
+        }
+      },
+      "v2.0": {
+        "version": "v2.0",
+        "date": null,
+        "description": "pmdbs-sc-rnaseq dataset from team-jakobsson",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-jakobsson",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "pmdbs-sc-rnaseq",
+          "pmdbs-other",
+          "jakobsson"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": null,
+        "buckets": {
+          "raw": "gs://asap-raw-team-jakobsson-pmdbs-sn-rnaseq",
+          "dev": "gs://asap-dev-team-jakobsson-pmdbs-sn-rnaseq",
+          "uat": "gs://asap-uat-team-jakobsson-pmdbs-sn-rnaseq",
+          "prod": "gs://asap-curated-team-jakobsson-pmdbs-sn-rnaseq"
+        },
+        "cde_version": "v3.1",
+        "releases": {
+          "v2.0.1": {
+            "cde_version": "v3.1",
+            "date": null
+          },
+          "v3.0.0": {
+            "cde_version": "v3.2",
+            "date": null
+          },
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  },
+  "scherzer-pmdbs-sn-rnaseq-mtg": {
+    "name": "scherzer-pmdbs-sn-rnaseq-mtg",
+    "title": "team-scherzer-pmdbs-sn-rnaseq-mtg",
+    "versions": {
+      "v1.0": {
+        "version": "v1.0",
+        "date": null,
+        "description": "pmdbs-sc-rnaseq dataset from team-scherzer",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-scherzer",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "pmdbs-sc-rnaseq",
+          "pmdbs-sc-rnaseq",
+          "scherzer"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": "pmdbs-sc-rnaseq",
+        "buckets": {
+          "raw": "gs://asap-raw-team-scherzer-pmdbs-sn-rnaseq-mtg",
+          "dev": "gs://asap-dev-team-scherzer-pmdbs-sn-rnaseq-mtg",
+          "uat": "gs://asap-uat-team-scherzer-pmdbs-sn-rnaseq-mtg",
+          "prod": "gs://asap-curated-team-scherzer-pmdbs-sn-rnaseq-mtg"
+        },
+        "cde_version": "v2.1",
+        "releases": {
+          "v1.0.0": {
+            "cde_version": "v2.1",
+            "date": null
+          },
+          "v2.0.0": {
+            "cde_version": "v3.0",
+            "date": null
+          },
+          "v3.0.0": {
+            "cde_version": "v3.2",
+            "date": null
+          }
+        }
+      },
+      "v1.1": {
+        "version": "v1.1",
+        "date": null,
+        "description": "pmdbs-sc-rnaseq dataset from team-scherzer",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-scherzer",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "pmdbs-sc-rnaseq",
+          "pmdbs-sc-rnaseq",
+          "scherzer"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": "pmdbs-sc-rnaseq",
+        "buckets": {
+          "raw": "gs://asap-raw-team-scherzer-pmdbs-sn-rnaseq-mtg",
+          "dev": "gs://asap-dev-team-scherzer-pmdbs-sn-rnaseq-mtg",
+          "uat": "gs://asap-uat-team-scherzer-pmdbs-sn-rnaseq-mtg",
+          "prod": "gs://asap-curated-team-scherzer-pmdbs-sn-rnaseq-mtg"
+        },
+        "cde_version": "v3.3",
+        "releases": {
+          "v3.0.1": {
+            "cde_version": "v3.3",
+            "date": null
+          },
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  },
+  "cohort-pmdbs-sc-rnaseq": {
+    "name": "cohort-pmdbs-sc-rnaseq",
+    "title": "asap-cohort-pmdbs-sc-rnaseq",
+    "versions": {
+      "v1.0.0": {
+        "version": "v1.0.0",
+        "date": null,
+        "description": "pmdbs-sc-rnaseq dataset from asap-cohort",
+        "doi": null,
+        "creators": [
+          {
+            "name": "asap-cohort",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "pmdbs-sc-rnaseq",
+          "pmdbs-sc-rnaseq",
+          "cohort"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": "pmdbs-sc-rnaseq",
+        "buckets": {
+          "raw": "gs://asap-raw-cohort-pmdbs-sc-rnaseq",
+          "dev": "gs://asap-dev-cohort-pmdbs-sc-rnaseq",
+          "uat": "gs://asap-uat-cohort-pmdbs-sc-rnaseq",
+          "prod": "gs://asap-curated-cohort-pmdbs-sc-rnaseq"
+        },
+        "cde_version": "v2.1",
+        "releases": {
+          "v1.0.0": {
+            "cde_version": "v2.1",
+            "date": null
+          }
+        }
+      },
+      "v2.0.0": {
+        "version": "v2.0.0",
+        "date": null,
+        "description": "pmdbs-sc-rnaseq dataset from asap-cohort",
+        "doi": null,
+        "creators": [
+          {
+            "name": "asap-cohort",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "pmdbs-sc-rnaseq",
+          "pmdbs-sc-rnaseq",
+          "cohort"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": "pmdbs-sc-rnaseq",
+        "buckets": {
+          "raw": "gs://asap-raw-cohort-pmdbs-sc-rnaseq",
+          "dev": "gs://asap-dev-cohort-pmdbs-sc-rnaseq",
+          "uat": "gs://asap-uat-cohort-pmdbs-sc-rnaseq",
+          "prod": "gs://asap-curated-cohort-pmdbs-sc-rnaseq"
+        },
+        "cde_version": "v3.0",
+        "releases": {
+          "v2.0.0": {
+            "cde_version": "v3.0",
+            "date": null
+          }
+        }
+      },
+      "v3.0.0": {
+        "version": "v3.0.0",
+        "date": null,
+        "description": "pmdbs-sc-rnaseq dataset from asap-cohort",
+        "doi": null,
+        "creators": [
+          {
+            "name": "asap-cohort",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "pmdbs-sc-rnaseq",
+          "pmdbs-sc-rnaseq",
+          "cohort"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": "pmdbs-sc-rnaseq",
+        "buckets": {
+          "raw": "gs://asap-raw-cohort-pmdbs-sc-rnaseq",
+          "dev": "gs://asap-dev-cohort-pmdbs-sc-rnaseq",
+          "uat": "gs://asap-uat-cohort-pmdbs-sc-rnaseq",
+          "prod": "gs://asap-curated-cohort-pmdbs-sc-rnaseq"
+        },
+        "cde_version": "v3.2",
+        "releases": {
+          "v3.0.0": {
+            "cde_version": "v3.2",
+            "date": null
+          }
+        }
+      },
+      "v3.1.0": {
+        "version": "v3.1.0",
+        "date": null,
+        "description": "pmdbs-sc-rnaseq dataset from asap-cohort",
+        "doi": null,
+        "creators": [
+          {
+            "name": "asap-cohort",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "pmdbs-sc-rnaseq",
+          "pmdbs-sc-rnaseq",
+          "cohort"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": "pmdbs-sc-rnaseq",
+        "buckets": {
+          "raw": "gs://asap-raw-cohort-pmdbs-sc-rnaseq",
+          "dev": "gs://asap-dev-cohort-pmdbs-sc-rnaseq",
+          "uat": "gs://asap-uat-cohort-pmdbs-sc-rnaseq",
+          "prod": "gs://asap-curated-cohort-pmdbs-sc-rnaseq"
+        },
+        "cde_version": "v3.3",
+        "releases": {
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  },
+  "hardy-pmdbs-sn-rnaseq": {
+    "name": "hardy-pmdbs-sn-rnaseq",
+    "title": "team-hardy-pmdbs-sn-rnaseq",
+    "versions": {
+      "v1.0": {
+        "version": "v1.0",
+        "date": null,
+        "description": "pmdbs-sc-rnaseq dataset from team-hardy",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-hardy",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "pmdbs-sc-rnaseq",
+          "pmdbs-sc-rnaseq",
+          "hardy"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": "pmdbs-sc-rnaseq",
+        "buckets": {
+          "raw": "gs://asap-raw-team-hardy-pmdbs-sn-rnaseq",
+          "dev": "gs://asap-dev-team-hardy-pmdbs-sn-rnaseq",
+          "uat": "gs://asap-uat-team-hardy-pmdbs-sn-rnaseq",
+          "prod": "gs://asap-curated-team-hardy-pmdbs-sn-rnaseq"
+        },
+        "cde_version": "v3.0",
+        "releases": {
+          "v2.0.0": {
+            "cde_version": "v3.0",
+            "date": null
+          },
+          "v3.0.0": {
+            "cde_version": "v3.2",
+            "date": null
+          },
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  },
+  "hardy-pmdbs-bulk-rnaseq": {
+    "name": "hardy-pmdbs-bulk-rnaseq",
+    "title": "team-hardy-pmdbs-bulk-rnaseq",
+    "versions": {
+      "v1.0": {
+        "version": "v1.0",
+        "date": null,
+        "description": "pmdbs-bulk-rnaseq dataset from team-hardy",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-hardy",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "pmdbs-bulk-rnaseq",
+          "pmdbs-bulk-rnaseq",
+          "hardy"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": "pmdbs-bulk-rnaseq",
+        "buckets": {
+          "raw": "gs://asap-raw-team-hardy-pmdbs-bulk-rnaseq",
+          "dev": "gs://asap-dev-team-hardy-pmdbs-bulk-rnaseq",
+          "uat": "gs://asap-uat-team-hardy-pmdbs-bulk-rnaseq",
+          "prod": "gs://asap-curated-team-hardy-pmdbs-bulk-rnaseq"
+        },
+        "cde_version": "v3.0",
+        "releases": {
+          "v2.0.0": {
+            "cde_version": "v3.0",
+            "date": null
+          },
+          "v3.0.0": {
+            "cde_version": "v3.2",
+            "date": null
+          },
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  },
+  "lee-pmdbs-bulk-rnaseq-mfg": {
+    "name": "lee-pmdbs-bulk-rnaseq-mfg",
+    "title": "team-lee-pmdbs-bulk-rnaseq-mfg",
+    "versions": {
+      "v1.0": {
+        "version": "v1.0",
+        "date": null,
+        "description": "pmdbs-bulk-rnaseq dataset from team-lee",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-lee",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "pmdbs-bulk-rnaseq",
+          "pmdbs-bulk-rnaseq",
+          "lee"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": "pmdbs-bulk-rnaseq",
+        "buckets": {
+          "raw": "gs://asap-raw-team-lee-pmdbs-bulk-rnaseq-mfg",
+          "dev": "gs://asap-dev-team-lee-pmdbs-bulk-rnaseq-mfg",
+          "uat": "gs://asap-uat-team-lee-pmdbs-bulk-rnaseq-mfg",
+          "prod": "gs://asap-curated-team-lee-pmdbs-bulk-rnaseq-mfg"
+        },
+        "cde_version": "v3.0",
+        "releases": {
+          "v2.0.0": {
+            "cde_version": "v3.0",
+            "date": null
+          },
+          "v3.0.0": {
+            "cde_version": "v3.2",
+            "date": null
+          },
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  },
+  "wood-pmdbs-bulk-rnaseq": {
+    "name": "wood-pmdbs-bulk-rnaseq",
+    "title": "team-wood-pmdbs-bulk-rnaseq",
+    "versions": {
+      "v1.0": {
+        "version": "v1.0",
+        "date": null,
+        "description": "pmdbs-bulk-rnaseq dataset from team-wood",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-wood",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "pmdbs-bulk-rnaseq",
+          "pmdbs-bulk-rnaseq",
+          "wood"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": "pmdbs-bulk-rnaseq",
+        "buckets": {
+          "raw": "gs://asap-raw-team-wood-pmdbs-bulk-rnaseq",
+          "dev": "gs://asap-dev-team-wood-pmdbs-bulk-rnaseq",
+          "uat": "gs://asap-uat-team-wood-pmdbs-bulk-rnaseq",
+          "prod": "gs://asap-curated-team-wood-pmdbs-bulk-rnaseq"
+        },
+        "cde_version": "v3.0",
+        "releases": {
+          "v2.0.0": {
+            "cde_version": "v3.0",
+            "date": null
+          },
+          "v3.0.0": {
+            "cde_version": "v3.2",
+            "date": null
+          },
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  },
+  "scherzer-pmdbs-sn-rnaseq-mtg-hybsel": {
+    "name": "scherzer-pmdbs-sn-rnaseq-mtg-hybsel",
+    "title": "team-scherzer-pmdbs-sn-rnaseq-mtg-hybsel",
+    "versions": {
+      "v1.0": {
+        "version": "v1.0",
+        "date": null,
+        "description": "pmdbs-other dataset from team-scherzer",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-scherzer",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "pmdbs-other",
+          "pmdbs-other",
+          "scherzer"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": null,
+        "buckets": {
+          "raw": "gs://asap-raw-team-scherzer-pmdbs-sn-rnaseq-mtg-hybsel",
+          "dev": "gs://asap-dev-team-scherzer-pmdbs-sn-rnaseq-mtg-hybsel",
+          "uat": "gs://asap-uat-team-scherzer-pmdbs-sn-rnaseq-mtg-hybsel",
+          "prod": "gs://asap-curated-team-scherzer-pmdbs-sn-rnaseq-mtg-hybsel"
+        },
+        "cde_version": "v3.0",
+        "releases": {
+          "v2.0.0": {
+            "cde_version": "v3.0",
+            "date": null
+          },
+          "v3.0.0": {
+            "cde_version": "v3.2",
+            "date": null
+          }
+        }
+      },
+      "v1.1": {
+        "version": "v1.1",
+        "date": null,
+        "description": "pmdbs-other dataset from team-scherzer",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-scherzer",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "pmdbs-other",
+          "other-pmdbs",
+          "scherzer"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": null,
+        "buckets": {
+          "raw": "gs://asap-raw-team-scherzer-pmdbs-sn-rnaseq-mtg-hybsel",
+          "dev": "gs://asap-dev-team-scherzer-pmdbs-sn-rnaseq-mtg-hybsel",
+          "uat": "gs://asap-uat-team-scherzer-pmdbs-sn-rnaseq-mtg-hybsel",
+          "prod": "gs://asap-curated-team-scherzer-pmdbs-sn-rnaseq-mtg-hybsel"
+        },
+        "cde_version": "v3.3",
+        "releases": {
+          "v3.0.1": {
+            "cde_version": "v3.3",
+            "date": null
+          },
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  },
+  "cohort-pmdbs-bulk-rnaseq": {
+    "name": "cohort-pmdbs-bulk-rnaseq",
+    "title": "asap-cohort-pmdbs-bulk-rnaseq",
+    "versions": {
+      "v1.0.0": {
+        "version": "v1.0.0",
+        "date": null,
+        "description": "pmdbs-bulk-rnaseq dataset from asap-cohort",
+        "doi": null,
+        "creators": [
+          {
+            "name": "asap-cohort",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "pmdbs-bulk-rnaseq",
+          "pmdbs-bulk-rnaseq",
+          "cohort"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": "pmdbs-bulk-rnaseq",
+        "buckets": {
+          "raw": "gs://asap-raw-cohort-pmdbs-bulk-rnaseq",
+          "dev": "gs://asap-dev-cohort-pmdbs-bulk-rnaseq",
+          "uat": "gs://asap-uat-cohort-pmdbs-bulk-rnaseq",
+          "prod": "gs://asap-curated-cohort-pmdbs-bulk-rnaseq"
+        },
+        "cde_version": "v3.0",
+        "releases": {
+          "v2.0.0": {
+            "cde_version": "v3.0",
+            "date": null
+          }
+        }
+      },
+      "v1.1.0": {
+        "version": "v1.1.0",
+        "date": null,
+        "description": "pmdbs-bulk-rnaseq dataset from asap-cohort",
+        "doi": null,
+        "creators": [
+          {
+            "name": "asap-cohort",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "pmdbs-bulk-rnaseq",
+          "pmdbs-bulk-rnaseq",
+          "cohort"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": "pmdbs-bulk-rnaseq",
+        "buckets": {
+          "raw": "gs://asap-raw-cohort-pmdbs-bulk-rnaseq",
+          "dev": "gs://asap-dev-cohort-pmdbs-bulk-rnaseq",
+          "uat": "gs://asap-uat-cohort-pmdbs-bulk-rnaseq",
+          "prod": "gs://asap-curated-cohort-pmdbs-bulk-rnaseq"
+        },
+        "cde_version": "v3.2",
+        "releases": {
+          "v3.0.0": {
+            "cde_version": "v3.2",
+            "date": null
+          }
+        }
+      },
+      "v1.2.0": {
+        "version": "v1.2.0",
+        "date": null,
+        "description": "pmdbs-bulk-rnaseq dataset from asap-cohort",
+        "doi": null,
+        "creators": [
+          {
+            "name": "asap-cohort",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "pmdbs-bulk-rnaseq",
+          "pmdbs-bulk-rnaseq",
+          "cohort"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": "pmdbs-bulk-rnaseq",
+        "buckets": {
+          "raw": "gs://asap-raw-cohort-pmdbs-bulk-rnaseq",
+          "dev": "gs://asap-dev-cohort-pmdbs-bulk-rnaseq",
+          "uat": "gs://asap-uat-cohort-pmdbs-bulk-rnaseq",
+          "prod": "gs://asap-curated-cohort-pmdbs-bulk-rnaseq"
+        },
+        "cde_version": "v3.3",
+        "releases": {
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  },
+  "biederer-mouse-sc-rnaseq": {
+    "name": "biederer-mouse-sc-rnaseq",
+    "title": "team-biederer-mouse-sc-rnaseq",
+    "versions": {
+      "v1.0": {
+        "version": "v1.0",
+        "date": null,
+        "description": "mouse-sc-rnaseq dataset from team-biederer",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-biederer",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "mouse-sc-rnaseq",
+          "mouse-other",
+          "biederer"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": null,
+        "buckets": {
+          "raw": "gs://asap-raw-team-biederer-mouse-sc-rnaseq",
+          "dev": "gs://asap-dev-team-biederer-mouse-sc-rnaseq",
+          "uat": "gs://asap-uat-team-biederer-mouse-sc-rnaseq",
+          "prod": "gs://asap-curated-team-biederer-mouse-sc-rnaseq"
+        },
+        "cde_version": "v3.1",
+        "releases": {
+          "v2.0.2": {
+            "cde_version": "v3.1",
+            "date": null
+          },
+          "v3.0.0": {
+            "cde_version": "v3.2",
+            "date": null
+          },
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  },
+  "cragg-mouse-sn-rnaseq-striatum": {
+    "name": "cragg-mouse-sn-rnaseq-striatum",
+    "title": "team-cragg-mouse-sn-rnaseq-striatum",
+    "versions": {
+      "v1.0": {
+        "version": "v1.0",
+        "date": null,
+        "description": "mouse-sc-rnaseq dataset from team-cragg",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-cragg",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "mouse-sc-rnaseq",
+          "mouse-other",
+          "cragg"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": null,
+        "buckets": {
+          "raw": "gs://asap-raw-team-cragg-mouse-sn-rnaseq-striatum",
+          "dev": "gs://asap-dev-team-cragg-mouse-sn-rnaseq-striatum",
+          "uat": "gs://asap-uat-team-cragg-mouse-sn-rnaseq-striatum",
+          "prod": "gs://asap-curated-team-cragg-mouse-sn-rnaseq-striatum"
+        },
+        "cde_version": "v3.1",
+        "releases": {
+          "v2.0.2": {
+            "cde_version": "v3.1",
+            "date": null
+          },
+          "v3.0.0": {
+            "cde_version": "v3.2",
+            "date": null
+          },
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  },
+  "edwards-pmdbs-spatial-geomx-th": {
+    "name": "edwards-pmdbs-spatial-geomx-th",
+    "title": "team-edwards-pmdbs-spatial-geomx-th",
+    "versions": {
+      "v1.0": {
+        "version": "v1.0",
+        "date": null,
+        "description": "pmdbs-spatial dataset from team-edwards",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-edwards",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "pmdbs-spatial",
+          "pmdbs-other",
+          "edwards"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": null,
+        "buckets": {
+          "raw": "gs://asap-raw-team-edwards-pmdbs-spatial-geomx-th",
+          "dev": "gs://asap-dev-team-edwards-pmdbs-spatial-geomx-th",
+          "uat": "gs://asap-uat-team-edwards-pmdbs-spatial-geomx-th",
+          "prod": "gs://asap-curated-team-edwards-pmdbs-spatial-geomx-th"
+        },
+        "cde_version": "v3.1",
+        "releases": {
+          "v2.0.2": {
+            "cde_version": "v3.1",
+            "date": null
+          },
+          "v3.0.0": {
+            "cde_version": "v3.2",
+            "date": null
+          },
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  },
+  "cragg-mouse-spatial-visium-striatum": {
+    "name": "cragg-mouse-spatial-visium-striatum",
+    "title": "team-cragg-mouse-spatial-visium-striatum",
+    "versions": {
+      "v1.0": {
+        "version": "v1.0",
+        "date": null,
+        "description": "mouse-spatial dataset from team-cragg",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-cragg",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "mouse-spatial",
+          "mouse-other",
+          "cragg"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": null,
+        "buckets": {
+          "raw": "gs://asap-raw-team-cragg-mouse-spatial-visium-striatum",
+          "dev": "gs://asap-dev-team-cragg-mouse-spatial-visium-striatum",
+          "uat": "gs://asap-uat-team-cragg-mouse-spatial-visium-striatum",
+          "prod": "gs://asap-curated-team-cragg-mouse-spatial-visium-striatum"
+        },
+        "cde_version": "v3.1",
+        "releases": {
+          "v2.0.3": {
+            "cde_version": "v3.1",
+            "date": null
+          },
+          "v3.0.0": {
+            "cde_version": "v3.2",
+            "date": null
+          },
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  },
+  "jakobsson-pmdbs-bulk-rnaseq": {
+    "name": "jakobsson-pmdbs-bulk-rnaseq",
+    "title": "team-jakobsson-pmdbs-bulk-rnaseq",
+    "versions": {
+      "v1.0": {
+        "version": "v1.0",
+        "date": null,
+        "description": "pmdbs-bulk-rnaseq dataset from team-jakobsson",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-jakobsson",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "pmdbs-bulk-rnaseq",
+          "other-pmdbs",
+          "jakobsson"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": null,
+        "buckets": {
+          "raw": "gs://asap-raw-team-jakobsson-pmdbs-bulk-rnaseq",
+          "dev": "gs://asap-dev-team-jakobsson-pmdbs-bulk-rnaseq",
+          "uat": "gs://asap-uat-team-jakobsson-pmdbs-bulk-rnaseq",
+          "prod": "gs://asap-curated-team-jakobsson-pmdbs-bulk-rnaseq"
+        },
+        "cde_version": "v3.2",
+        "releases": {
+          "v3.0.0": {
+            "cde_version": "v3.2",
+            "date": null
+          },
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  },
+  "alessi-invitro-ms-p-hek293-gtip": {
+    "name": "alessi-invitro-ms-p-hek293-gtip",
+    "title": "team-alessi-invitro-ms-p-hek293-gtip",
+    "versions": {
+      "v1.0": {
+        "version": "v1.0",
+        "date": null,
+        "description": "proteomics dataset from team-alessi",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-alessi",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "proteomics",
+          "proteomics",
+          "alessi"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": null,
+        "buckets": {
+          "raw": "gs://asap-raw-team-alessi-invitro-ms-p-hek293-gtip",
+          "dev": "gs://asap-dev-team-alessi-invitro-ms-p-hek293-gtip",
+          "uat": "gs://asap-uat-team-alessi-invitro-ms-p-hek293-gtip",
+          "prod": "gs://asap-curated-team-alessi-invitro-ms-p-hek293-gtip"
+        },
+        "cde_version": "v3.3",
+        "releases": {
+          "v3.0.1": {
+            "cde_version": "v3.3",
+            "date": null
+          },
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  },
+  "schlossmacher-mouse-sn-rnaseq-osn-aav-transd": {
+    "name": "schlossmacher-mouse-sn-rnaseq-osn-aav-transd",
+    "title": "team-schlossmacher-mouse-sn-rnaseq-osn-aav-transd",
+    "versions": {
+      "v1.0": {
+        "version": "v1.0",
+        "date": null,
+        "description": "mouse-sc-rnaseq dataset from team-schlossmacher",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-schlossmacher",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "mouse-sc-rnaseq",
+          "other-mouse",
+          "schlossmacher"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": null,
+        "buckets": {
+          "raw": "gs://asap-raw-team-schlossmacher-mouse-sn-rnaseq-osn-aav-transd",
+          "dev": "gs://asap-dev-team-schlossmacher-mouse-sn-rnaseq-osn-aav-transd",
+          "uat": "gs://asap-uat-team-schlossmacher-mouse-sn-rnaseq-osn-aav-transd",
+          "prod": "gs://asap-curated-team-schlossmacher-mouse-sn-rnaseq-osn-aav-transd"
+        },
+        "cde_version": "v3.3",
+        "releases": {
+          "v3.0.1": {
+            "cde_version": "v3.3",
+            "date": null
+          },
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  },
+  "scherzer-pmdbs-spatial-visium-mtg": {
+    "name": "scherzer-pmdbs-spatial-visium-mtg",
+    "title": "team-scherzer-pmdbs-spatial-visium-mtg",
+    "versions": {
+      "v1.0": {
+        "version": "v1.0",
+        "date": null,
+        "description": "pmdbs-spatial dataset from team-scherzer",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-scherzer",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "pmdbs-spatial",
+          "other-pmdbs",
+          "scherzer"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": null,
+        "buckets": {
+          "raw": "gs://asap-raw-team-scherzer-pmdbs-spatial-visium-mtg",
+          "dev": "gs://asap-dev-team-scherzer-pmdbs-spatial-visium-mtg",
+          "uat": "gs://asap-uat-team-scherzer-pmdbs-spatial-visium-mtg",
+          "prod": "gs://asap-curated-team-scherzer-pmdbs-spatial-visium-mtg"
+        },
+        "cde_version": "v3.3",
+        "releases": {
+          "v3.0.1": {
+            "cde_version": "v3.3",
+            "date": null
+          },
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  },
+  "scherzer-pmdbs-genetics": {
+    "name": "scherzer-pmdbs-genetics",
+    "title": "team-scherzer-pmdbs-genetics",
+    "versions": {
+      "v1.0": {
+        "version": "v1.0",
+        "date": null,
+        "description": "pmdbs-genetics dataset from team-scherzer",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-scherzer",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "pmdbs-genetics",
+          "other-pmdbs",
+          "scherzer"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": null,
+        "buckets": {
+          "raw": "gs://asap-raw-team-scherzer-pmdbs-genetics",
+          "dev": "gs://asap-dev-team-scherzer-pmdbs-genetics",
+          "uat": "gs://asap-uat-team-scherzer-pmdbs-genetics",
+          "prod": "gs://asap-curated-team-scherzer-pmdbs-genetics"
+        },
+        "cde_version": "v3.3",
+        "releases": {
+          "v3.0.1": {
+            "cde_version": "v3.3",
+            "date": null
+          },
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  },
+  "alessi-mouse-sn-rnaseq-dorsal-striatum-g2019s": {
+    "name": "alessi-mouse-sn-rnaseq-dorsal-striatum-g2019s",
+    "title": "team-alessi-mouse-sn-rnaseq-dorsal-striatum-g2019s",
+    "versions": {
+      "v1.0": {
+        "version": "v1.0",
+        "date": null,
+        "description": "mouse-sc-rnaseq dataset from team-alessi",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-alessi",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "mouse-sc-rnaseq",
+          "other-mouse",
+          "alessi"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": null,
+        "buckets": {
+          "raw": "gs://asap-raw-team-alessi-mouse-sn-rnaseq-dorsal-striatum-g2019s",
+          "dev": "gs://asap-dev-team-alessi-mouse-sn-rnaseq-dorsal-striatum-g2019s",
+          "uat": "gs://asap-uat-team-alessi-mouse-sn-rnaseq-dorsal-striatum-g2019s",
+          "prod": "gs://asap-curated-team-alessi-mouse-sn-rnaseq-dorsal-striatum-g2019s"
+        },
+        "cde_version": "v3.3",
+        "releases": {
+          "v3.0.1": {
+            "cde_version": "v3.3",
+            "date": null
+          },
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  },
+  "jakobsson-invitro-bulk-rnaseq-dopaminergic": {
+    "name": "jakobsson-invitro-bulk-rnaseq-dopaminergic",
+    "title": "team-jakobsson-invitro-bulk-rnaseq-dopaminergic",
+    "versions": {
+      "v1.0": {
+        "version": "v1.0",
+        "date": null,
+        "description": "invitro-bulk-rnaseq dataset from team-jakobsson",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-jakobsson",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "invitro-bulk-rnaseq",
+          "invitro",
+          "jakobsson"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": null,
+        "buckets": {
+          "raw": "gs://asap-raw-team-jakobsson-invitro-bulk-rnaseq-dopaminergic",
+          "dev": "gs://asap-dev-team-jakobsson-invitro-bulk-rnaseq-dopaminergic",
+          "uat": "gs://asap-uat-team-jakobsson-invitro-bulk-rnaseq-dopaminergic",
+          "prod": "gs://asap-curated-team-jakobsson-invitro-bulk-rnaseq-dopaminergic"
+        },
+        "cde_version": "v3.3",
+        "releases": {
+          "v3.0.2": {
+            "cde_version": "v3.3",
+            "date": null
+          },
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  },
+  "jakobsson-invitro-bulk-rnaseq-microglia": {
+    "name": "jakobsson-invitro-bulk-rnaseq-microglia",
+    "title": "team-jakobsson-invitro-bulk-rnaseq-microglia",
+    "versions": {
+      "v1.0": {
+        "version": "v1.0",
+        "date": null,
+        "description": "invitro-bulk-rnaseq dataset from team-jakobsson",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-jakobsson",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "invitro-bulk-rnaseq",
+          "invitro",
+          "jakobsson"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": null,
+        "buckets": {
+          "raw": "gs://asap-raw-team-jakobsson-invitro-bulk-rnaseq-microglia",
+          "dev": "gs://asap-dev-team-jakobsson-invitro-bulk-rnaseq-microglia",
+          "uat": "gs://asap-uat-team-jakobsson-invitro-bulk-rnaseq-microglia",
+          "prod": "gs://asap-curated-team-jakobsson-invitro-bulk-rnaseq-microglia"
+        },
+        "cde_version": "v3.3",
+        "releases": {
+          "v3.0.2": {
+            "cde_version": "v3.3",
+            "date": null
+          },
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  },
+  "sulzer-pmdbs-sn-rnaseq": {
+    "name": "sulzer-pmdbs-sn-rnaseq",
+    "title": "team-sulzer-pmdbs-sn-rnaseq",
+    "versions": {
+      "v1.0": {
+        "version": "v1.0",
+        "date": null,
+        "description": "pmdbs-sc-rnaseq dataset from team-sulzer",
+        "doi": null,
+        "creators": [
+          {
+            "name": "team-sulzer",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "pmdbs-sc-rnaseq",
+          "pmdbs-sc-rnaseq",
+          "sulzer"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": "pmdbs-sc-rnaseq",
+        "buckets": {
+          "raw": "gs://asap-raw-team-sulzer-pmdbs-sn-rnaseq",
+          "dev": "gs://asap-dev-team-sulzer-pmdbs-sn-rnaseq",
+          "uat": "gs://asap-uat-team-sulzer-pmdbs-sn-rnaseq",
+          "prod": "gs://asap-curated-team-sulzer-pmdbs-sn-rnaseq"
+        },
+        "cde_version": "v3.3",
+        "releases": {
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  },
+  "cohort-mouse-sc-rnaseq": {
+    "name": "cohort-mouse-sc-rnaseq",
+    "title": "asap-cohort-mouse-sc-rnaseq",
+    "versions": {
+      "v1.0.0": {
+        "version": "v1.0.0",
+        "date": null,
+        "description": "mouse-sc-rnaseq dataset from asap-cohort",
+        "doi": null,
+        "creators": [
+          {
+            "name": "asap-cohort",
+            "affiliation": "ASAP CRN"
+          }
+        ],
+        "keywords": [
+          "mouse-sc-rnaseq",
+          "mouse-sc-rnaseq",
+          "cohort"
+        ],
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": "mouse-sc-rnaseq",
+        "buckets": {
+          "raw": "gs://asap-raw-cohort-mouse-sc-rnaseq",
+          "dev": "gs://asap-dev-cohort-mouse-sc-rnaseq",
+          "uat": "gs://asap-uat-cohort-mouse-sc-rnaseq",
+          "prod": "gs://asap-curated-cohort-mouse-sc-rnaseq"
+        },
+        "cde_version": "v3.3",
+        "releases": {
+          "v4.0.0": {
+            "cde_version": "v3.3",
+            "date": null
+          }
+        }
+      }
+    }
+  }
+}
