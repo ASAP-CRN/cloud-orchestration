@@ -85,11 +85,10 @@ A release ties a specific version of every dataset and collection together into 
 ### cloud-datasets
 ```
 datasets.json                            # Master index of all datasets
-datasets/<team>-<tissue>-<modality>/
+<team>-<tissue>-<modality>/
 ├── dataset.json                         # Metadata: DOI, GCS buckets, releases, CDE version
 ├── DOI/                                 # Zenodo deposition files and DOI references
 ├── refs/                                # Reference files for current version
-├── scripts/                             # Scripts for current version
 └── archive/<version>/                   # Immutable snapshots of past versions
     └── DOI/                             # Version-specific DOI files
 ```
@@ -97,9 +96,8 @@ datasets/<team>-<tissue>-<modality>/
 ### cloud-collections
 ```
 collections.json                         # Master index of all collections
-collections/<collection-name>/
+<collection-name>/
 ├── collection.json                      # Metadata: DOI versions, datasets per release version
-├── scripts/                             # Scripts for current version
 └── archive/<version>/                   # Immutable snapshots of past versions
     └── collection.json                  # Version-specific metadata snapshot
 ```
@@ -107,9 +105,9 @@ collections/<collection-name>/
 ### cloud-releases
 ```
 releases.json                            # Master index of all releases
-releases/<release-version>/
-├── release.json                         # Snapshot: all datasets, new_datasets, collections, CDE version
-└── scripts/                             # Release-specific scripts
+<release-version>/
+├── release.json                         # Snapshot: all datasets, new_datasets, collections, CDE 
+└── *README*.pdf                            # Release-specific README
 ```
 
 ### cloud-cde
