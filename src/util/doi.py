@@ -9,6 +9,7 @@ import os
 import pandas as pd
 from markdown import markdown
 
+
 from .zenodo_util import *
 from .util import read_meta_table
 
@@ -49,6 +50,7 @@ NULL = "NA"
 #     return html
 
 
+# %%
 def setup_DOI_info(
     ds_path: str | Path,
     doi_doc_path: str | Path,
@@ -56,25 +58,8 @@ def setup_DOI_info(
     cde_ver: str = "v3.3",
 ):
     ds_path = Path(ds_path)
-    study_df_path = ds_path / f"metadata/cde/{cde_ver}/STUDY.csv"
-    if not study_df_path.exists():
-        # create a placeholder studyDF
-        study_df = pd.DataFrame()
-        study_df.loc[0, "ASAP_lab_name"] = NULL
-        study_df.loc[0, "PI_full_name"] = NULL
-        study_df.loc[0, "PI_email"] = NULL
-        study_df.loc[0, "submitter_name"] = NULL
-        study_df.loc[0, "submitter_email"] = NULL
-        study_df.loc[0, "publication_DOI"] = NULL
-        study_df.loc[0, "ASAP_grant_id"] = NULL
-        study_df.loc[0, "ASAP_team_name"] = ds_path.name.split("-")[0].upper()
 
-    else:
-        study_df = read_meta_table(study_df_path)
-
-    # print(study_df)
-
-    ingest_DOI_doc(ds_path, doi_doc_path, study_df, publication_date=publication_date)
+    ingest_DOI_doc(ds_path, doi_doc_path, publication_date=publication_date)
     make_readme_file(ds_path)
     # depricate updating study table
     # update_study_table(ds_path, cde_ver=cde_ver)
@@ -83,7 +68,6 @@ def setup_DOI_info(
 def ingest_DOI_doc(
     ds_path: str | Path,
     doi_doc_path: str | Path,
-    study_df: pd.DataFrame,
     publication_date: None | str = None,
 ):
     """
@@ -93,19 +77,7 @@ def ingest_DOI_doc(
     doi_doc_path = Path(doi_doc_path)
     long_dataset_name = ds_path.name
 
-    # get details from the study df
-    ASAP_lab_name = study_df["ASAP_lab_name"].values[0]
-    PI_full_name = study_df["PI_full_name"].values[0]
-    PI_email = study_df["PI_email"].values[0]
-    submitter_name = study_df["submitter_name"].values[0]
-    submitter_email = study_df["submitter_email"].values[0]
-    publication_DOI = study_df["publication_DOI"].values[0]
-    grant_ids = study_df["ASAP_grant_id"].values[0]
-    print(grant_ids)
-    team_name = (
-        study_df["ASAP_team_name"].values[0].lower().replace("team-", "").capitalize()
-    )
-
+ 
     # read the docx
 
     # should read this from ds_path/version
@@ -147,64 +119,38 @@ def ingest_DOI_doc(
             project_description = (
                 table_data[1][1].strip().replace("\n", " ").replace("\u2019", "'")
             )
+            if len(table_data) > 2:
+                ASAP_team_name = (
+                    table_data[2][1].strip()
+                )
+            else:
+                ASAP_team_name = None
+            if len(table_data) > 3:
+                grant_ids = (
+                    table_data[3][1].strip()
+                )
+            else:
+                grant_ids = None
+            
             print("got project title/description")
 
         else:
-            print("what is this extra thing?")
-            print(table_data)
+            # test if its the "Project Team" table
+            if table_data[0][1] == "First name" and table_data[0][2] == "Last name" and table_data[0][3] == "Email":
+                pj_team_table = table_data
+            else:
+                print(f"what is this extra thing?: {name}")
+                print(table_data)
 
-    # created
-    # timestamp	Creation time of deposition (in ISO8601 format).
-    # doi
-    # string	Digital Object Identifier (DOI). When you publish your deposition, we register a DOI in DataCite for your upload, unless you manually provided us with one. This field is only present for published depositions.
-    # doi_url
-    # url	Persistent link to your published deposition. This field is only present for published depositions.
-    # files
-    # array	A list of deposition files resources.
-    # id
-    # integer	Deposition identifier
-    # metadata
-    # object	A deposition metadata resource
-    # modified
-    # timestamp	Last modification time of deposition (in ISO8601 format).
-    # owner
-    # integer	User identifier of the owner of the deposition.
-    # record_id
-    # integer	Record identifier. This field is only present for published depositions.
-    # record_url
-    # url	URL to public version of record for this deposition. This field is only present for published depositions.
-    # state
-    # string	One of the values:
-    # * inprogress: Deposition metadata can be updated. If deposition is also unsubmitted (see submitted) files can be updated as well.
-    # * done: Deposition has been published.
-    # * error: Deposition is in an error state - contact our support.
-
-    # submitted
-    # bool	True if the deposition has been published, False otherwise.
 
     # title
     # string	Title of deposition (automatically set from metadata). Defaults to empty string.
     title = dataset_title.strip().replace("Singel", "Single")
 
     # upload_type  string	Yes	Controlled vocabulary:
-    # * publication: Publication
-    # * poster: Poster
-    # * presentation: Presentation
-    # * dataset: Dataset
-    # * image: Image
-    # * video: Video/Audio
-    # * software: Software
-    # * lesson: Lesson
-    # * physicalobject: Physical object
-    # * other: Other
     upload_type = "dataset"
 
     # creators
-    # array of objects	Yes	The creators/authors of the deposition. Each array element is an object with the attributes:
-    # * name: Name of creator in the format Family name, Given names
-    # * affiliation: Affiliation of creator (optional).
-    # * orcid: ORCID identifier of creator (optional).
-    # * gnd: GND identifier of creator (optional).
     creators = []
     for indiv in data:
         name = f"{indiv[0].strip()}, {indiv[1].strip()}"  # , ".join(indiv[:2])
@@ -245,9 +191,6 @@ def ingest_DOI_doc(
         # creators.append({"name": name, "affiliation": affiliation, "orcid": oricid})
 
     # description
-    # string (allows HTML)	Yes	Abstract or description for deposition.
-    # description = dataset_description
-
     dataset_description = dataset_description.strip()
     project_description = project_description.strip()
     # fix description to enable the numbered and bulletted lists...
@@ -274,6 +217,44 @@ def ingest_DOI_doc(
 > This Zenodo deposit was created by the ASAP CRN Cloud staff on behalf of the dataset authors. It provides a citable reference for a CRN Cloud Dataset
 
 """
+
+
+   # fill details 
+
+    ASAP_lab_name = ""
+
+    # get details from the pj_team_table 
+    field_name = [ tb[0] for tb in pj_team_table]
+
+    PI_full_name = ""
+    PI_email = ""
+    submitter_name = ""
+    submitter_email = ""
+    cPI_full_name = []
+    cPI_email = []
+    for name,row in zip(field_name, pj_team_table):
+        # skip if blank
+        if len(row[1])<1:
+            continue
+
+        if name == "Principal Investigator":
+            PI_full_name = f"{row[1]} {row[2]}"
+            PI_email = f"{row[3]}"
+        elif name == "Co-Principal Investigator":
+            cPI_full_name.append(f"{row[1]} {row[2]}")
+            cPI_email.append(f"{row[3]}")
+        elif name == "Data Submitter":
+            submitter_name = f"{row[1]} {row[2]}"
+            submitter_email = f"{row[3]}"
+
+
+    publication_DOI = ""
+
+    print(grant_ids)
+    team_name = ds_path.name.split('-')[0].capitalize() 
+    
+
+
 
     # Convert to html for good formatting
     description = markdown(description)
@@ -349,6 +330,8 @@ def ingest_DOI_doc(
         "ASAP_lab_name": ASAP_lab_name,
         "PI_full_name": PI_full_name,
         "PI_email": PI_email,
+        "coPI_full_name": cPI_full_name,
+        "coPI_email": cPI_email,
         "submitter_name": submitter_name,
         "submitter_email": submitter_email,
         "publication_DOI": publication_DOI,
@@ -362,6 +345,7 @@ def ingest_DOI_doc(
     # df = pd.DataFrame(project_dict, index=[0])
     # df.to_csv(doi_path / f"{long_dataset_name}.csv", index=False)
     # write the files.
+
 
 
 def make_readme_file(ds_path: Path):
@@ -400,6 +384,10 @@ def make_readme_file(ds_path: Path):
     publication_DOI = data.get("publication_DOI")
     grant_ids = data.get("grant_ids")
     team_name = data.get("team_name")
+
+
+    coPI_full_name = data.get("coPI_full_name")
+    coPI_email = data.get("coPI_email")
 
     # # avoid unicodes that mess up latex
     # rep_from = "α"
@@ -444,8 +432,20 @@ def make_readme_file(ds_path: Path):
     readme_content += f"\n\n**ASAP Team:** {team_name}\n\n"
     readme_content += f"**Dataset Name:** {ds_path.name}, v{version}\n\n"
 
-    readme_content += f"**Principal Investigator:** {PI_full_name}, {PI_email}\n\n"
-    readme_content += f"**Dataset Submitter:** {submitter_name}, {submitter_email}\n\n"
+    readme_content += f"**Principal Investigator:** {PI_full_name} <{PI_email}>\n\n"
+
+    if len(coPI_full_name) > 1:
+        preamble = f"**Co-Principal Investigators:**"
+    else:
+        preamble = f"**Co-Principal Investigator:**"
+
+    for coPI, coPI_email in zip(coPI_full_name, coPI_email):
+        if coPI is not None:           
+            readme_content += f"{preamble} {coPI} <{coPI_email}>, \n"
+    
+    readme_content += f"\n"
+
+    readme_content += f"**Dataset Submitter:** {submitter_name} <{submitter_email}>\n\n"
     readme_content += f"**Publication DOI:** {publication_DOI}\n\n"
     readme_content += f"**Grant IDs:** {grant_ids}\n\n"
     readme_content += f"**ASAP Lab:** {ASAP_lab_name}\n\n"
@@ -464,6 +464,10 @@ def make_readme_file(ds_path: Path):
 
 """
 
+
+    # strip \xa0
+    readme_content = readme_content.replace("\xa0", " ")
+
     readme_content_HTML = markdown(readme_content)
 
     print(f"{long_dataset_name=}")
@@ -474,6 +478,8 @@ def make_readme_file(ds_path: Path):
     make_pdf_file(
         readme_content_HTML, os.path.join(doi_path, f"{long_dataset_name}_README.pdf")
     )
+
+
 
 
 # def make_pdf_file(ds_path: Path):
@@ -503,6 +509,12 @@ def make_pdf_file(html_content: str, output_filepath: str | Path):
 
     return not pisa_status.err  # True if conversion was successful
 
+
+
+
+
+
+############
 
 def update_study_table(ds_path: str | Path, cde_ver: str = "v3.3"):
     """ """

@@ -1,9 +1,13 @@
 
-# ASAP CRN 
-# 25 March 2026
+
+
+# %% [markdown]
+# ASAP CRN Metadata validation
+#
+#
+# 21 May 2026
 # Andy Henrie
 # DO NOT EXECUTE
-
 
 #%%
 import pandas as pd
@@ -39,19 +43,20 @@ datasets_path = root_path / "datasets"
 
 # %%
 
+# v1.0 datasets, v4.4 cde
 datasets = [
-'alessi-mefs-ms-p-vps35-d620n-wt',
-'alessi-mefs-ms-p-vps35-d620n-dmso-mli2',
-'sulzer-fecal-metagenome-fp-spf',
-'alessi-invitro-ms-p-hek293-gtip'
-]
-# alessi-mefs-ms-p-vps35-d620n-dmso-mli2, DOI: 10.5281/zenodo.18476410. 
-#  alessi-mefs-ms-p-vps35-d620n-wt, DOI: 10.5281/zenodo.18476408 
-#  sulzer-fecal-metagenome-fp-spf, DOI: 10.5281/zenodo.18989559
-# alessi-invitro-ms-p-hek293-gtip, DOI: 10.5281/zenodo.17355407 
+    "voet-pmdbs-sn-multimodal",
+    "voet-pmdbs-sn-atacseq-scalebio-hydrop",
+    "voet-pmdbs-sn-atacseq-scalebio-10x",
+    "voet-pmdbs-sn-atacseq-hydrop",
+    "voet-pmdbs-sn-atacseq-10x",
+    "voet-pmdbs-sn-rnaseq-parsebio",
+    "voet-pmdbs-sn-rnaseq",
+    "scherzer-pmdbs-sn-rnaseq-midbrain-hybsel",
+    "scherzer-pmdbs-lr-wgs"
+    ]
 
 
-This document. 
 
 # %%
 
@@ -78,6 +83,7 @@ for dataset in datasets:
 
 # %%
 # %%
+
 
 
 # %%
