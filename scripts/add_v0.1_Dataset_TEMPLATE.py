@@ -1,103 +1,100 @@
-# %% 
+# %% [markdown]
+# # ASAP CRN — New WIP Dataset Acceptance Template
 #
-# template script for creating a new tranch of WIP Datasets
-# Andy Henrie
-# DO NOT EXECUTE
-#. requires a "datsets.json" configuration file
+# Copy this file and rename it, e.g. `add_v4.1.0_datasets.py`.
+# Fill in every section marked with TODO before running cell by cell.
+#
+# **Lifecycle covered here:**
+#   1. Define dataset metadata (name, collection, CDE version, buckets)
+#   2. Create `dataset.json` stubs in `cloud-datasets/WIP/`
+#   3. Ingest DOI reference `.docx` files to generate Zenodo metadata
+#   4. Create Zenodo draft DOIs at `v0.1`
+#
+# DO NOT EXECUTE THIS FILE DIRECTLY — it is a template only.
 
-#%%
-import pandas as pd
+# %% Setup
 from pathlib import Path
-import os, sys
-import shutil
-
-
-repo_root = Path(__file__).resolve().parents[1]
-wf_common_path = repo_root / "src" / "asap_orchestrator"
-
 import asap_orchestrator as ao
 
-
-%load_ext autoreload
-%autoreload 2
-
-# %%
+# TODO: confirm the root path resolves correctly for your environment
 root_path = Path(__file__).resolve().parents[2]
-dest_path = root_path / "cloud-datasets/WIP"
-source_path = root_path / "asap-crn-cloud-dataset-metadata/datasets/"
+datasets_repo_path = root_path / "cloud-datasets"
 
+# %% [Step 1] Release parameters
+# TODO: set the publication date and CDE version for this acceptance tranche
+PUBLICATION_DATE = "YYYY-MM-DD"   # e.g. "2026-05-01"
+CDE_VERSION = "vX.Y"              # e.g. "v3.3"
 
+# %% [Step 2] Define the datasets being accepted
+# Each ao.define_dataset() call describes one team-contributed dataset.
+# `collection` is the curated collection name (e.g. "pmdbs-sc-rnaseq") or
+# None for uncurated/urgent datasets that go straight into a release without
+# a collection version bump.
+#
+# Bucket names are inferred from `name` automatically:
+#   raw:  gs://asap-raw-<name>
+#   dev:  gs://asap-dev-<name>
+#   uat:  gs://asap-uat-<name>
+#   prod: gs://asap-curated-<name>
+# Override `buckets=` if the actual bucket names differ.
 
-# %%
-# step 1:  create dataset.json stub
-#.         need a dataset name, reference file path, and date
-
-version = "v0.1"
-
-dataset_names = [
-    "teamX-A",
-    "teamX-B"
+new_dataset_defs = [
+    ao.define_dataset(
+        name="teamX-tissue-modality",           # TODO: replace
+        collection="tissue-modality",           # TODO: replace, or None
+        cde_version=CDE_VERSION,
+        title="Full human-readable dataset title",  # TODO: replace
+        description="Brief description of what this dataset contains.",  # TODO: replace
+    ),
+    # Add more ao.define_dataset() entries here...
 ]
-ref_paths = [
-    "/path/to/X-A.docx",
-    "/path/to/X-B.docx"
-]
 
-date = "0000-00-00"
+# %% [Step 3] Create WIP stubs in cloud-datasets/WIP/
+# Creates <name>/dataset.json, <name>/DOI/, and <name>/refs/ for each dataset.
+for ds_def in new_dataset_defs:
+    ds_path = ao.create_dataset_stub(ds_def, datasets_repo_path, wip=True)
+    print(f"Created: {ds_path}")
 
-datasets = {}
+# %% [Step 4] Ingest DOI reference documents
+# Place the team-supplied .docx reference file in <name>/refs/ first, then
+# run this cell to populate DOI/<name>.json, project.json, and the README.
+#
+# Update the filename in `ref_doc` for each dataset as needed.
 
-# create example datasets A and B
-for name,ref in zip(dataset_names,ref_paths):
-    dataset = {"name":name,
-                "ref":ref,
-                "date":date}
-    dataset["version"] = "v0.1"
-    datasets[name] = dataset
-    
+for ds_def in new_dataset_defs:
+    ds_path = datasets_repo_path / "WIP" / ds_def.name
+    # TODO: update the filename to match the actual reference document
+    ref_doc = ds_path / "refs" / f"{ds_def.name}.docx"
+    if ref_doc.exists():
+        ao.setup_DOI_info(ds_path, ref_doc, publication_date=PUBLICATION_DATE)
+        print(f"DOI info ingested: {ds_def.name}")
+    else:
+        print(f"WARNING: ref doc not found — place it at {ref_doc}")
 
+# %% [Step 5] Create Zenodo draft DOIs (v0.1)
+# Requires ZENODO_TOKEN (or ZENODO_SANDBOX_TOKEN) set in your environment.
+# Each dataset gets a new Zenodo deposition draft; the concept DOI is written
+# back to dataset.json and DOI/dataset.doi.
 
+zenodo = ao.setup_zenodo()
 
-# %%
-# ingest references
+for ds_def in new_dataset_defs:
+    ds_path = datasets_repo_path / "WIP" / ds_def.name
+    deposition = ao.create_dataset_doi(
+        ds_path, zenodo, version="v0.1", publication_date=PUBLICATION_DATE
+    )
+    doi = deposition.get("doi") or deposition.get("metadata", {}).get("prereserve_doi", {}).get("doi", "draft")
+    print(f"{ds_def.name}: {doi}")
 
-for ds,dsinfo in datasets.items:
+# %% [Step 6] (Optional) Upload README anchor file to each draft
+# Uploads the generated <name>_README.pdf as the anchor file for each DOI.
 
-    ds_name = dsinfo["name"]
-    ds_ref = dsinfo["ref"]
-    ds_date = dsinfo["date"]
-    ds_path = dest_path / ds_name
-    ao.ingest_DOI_doc()
-    ao.setup_DOI_info(ds_path, ds_ref, publication_date=ds_date)
-    # force v0.1
-    ao.write_version("0.1", ds_path / "version")
-
-
-# %%
-# make v0.1 DOI
-
-for ds,dsinfo in datasets.items:
-    # find the ref name for ingest
-    print(f"Processing {ds}")
-    ds_path = ldataset_path / ds
-
-    zenodo = ao.setup_zenodo()
-
-    current_dataset_version = "0.1"
-    local_metadata = ao.create_draft_metadata(ds_path, version=current_dataset_version)
-    local_metadata.pop("grants")
-    local_metadata["version"] = current_dataset_version
-    deposition, metadata = ao.create_draft_doi(zenodo, ds_path, version=current_dataset_version,metadata= local_metadata)
-    v1_beta_doi_id = deposition['id']
-
-    file_path = ds_path / "DOI" / f"{ds_path.name}_README.pdf"
-    # deposition = update_doi_metadata(zenodo, v1_beta_doi_id, metadata)
-    deposition = ao.add_anchor_file_to_doi(zenodo,  file_path, v1_beta_doi_id)
-    deposition = ao.publish_doi(zenodo, v1_beta_doi_id)
-
-    ao.archive_deposition_local(ds_path, "beta-deposition", deposition)
-    finalize_DOI(ds_path, deposition)
-
-
-
-# %%
+for ds_def in new_dataset_defs:
+    ds_path = datasets_repo_path / "WIP" / ds_def.name
+    readme_pdf = ds_path / "DOI" / f"{ds_def.name}_README.pdf"
+    doi_id = ao.get_doi_from_dataset(ds_path, version=True)
+    if readme_pdf.exists():
+        ao.add_anchor_file_to_doi(zenodo, readme_pdf, doi_id)
+        print(f"Uploaded README: {ds_def.name}")
+    else:
+        print(f"WARNING: README PDF not found for {ds_def.name}")

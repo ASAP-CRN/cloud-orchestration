@@ -1,9 +1,6 @@
-import os, sys
-import pandas as pd
-from pathlib import Path
-import datetime
+import os
 import shutil
-import numpy as np
+from pathlib import Path
 
 __all__ = [
     "get_dataset_version",
@@ -56,3 +53,22 @@ def write_version(version: str, version_path: Path):
 
     with open(version_path, "w") as f:
         f.write(version)
+
+
+def archive_CDE(cde_path: Path, version: str, archive_root: Path) -> Path:
+    """Copy a CDE version directory into an archive location.
+
+    Args:
+        cde_path: Path to the current CDE version directory.
+        version: Version string used as the archive subdirectory name.
+        archive_root: Root directory to archive into.
+
+    Returns:
+        Path to the archived CDE directory.
+    """
+    cde_path = Path(cde_path)
+    dst = Path(archive_root) / version
+    if dst.exists():
+        shutil.rmtree(dst)
+    shutil.copytree(cde_path, dst)
+    return dst
