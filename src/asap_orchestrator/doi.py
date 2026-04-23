@@ -11,7 +11,7 @@ from markdown import markdown
 
 
 from .zenodo_util import *
-from .util import read_meta_table
+# from .util import read_meta_table
 
 # import markdown
 # from html import escape
@@ -54,15 +54,12 @@ NULL = "NA"
 def setup_DOI_info(
     ds_path: str | Path,
     doi_doc_path: str | Path,
-    publication_date: None | str = None,
-    cde_ver: str = "v3.3",
-):
+    publication_date: None | str = None):
     ds_path = Path(ds_path)
 
     ingest_DOI_doc(ds_path, doi_doc_path, publication_date=publication_date)
     make_readme_file(ds_path)
-    # depricate updating study table
-    # update_study_table(ds_path, cde_ver=cde_ver)
+
 
 
 def ingest_DOI_doc(
@@ -516,24 +513,24 @@ def make_pdf_file(html_content: str, output_filepath: str | Path):
 
 ############
 
-def update_study_table(ds_path: str | Path, cde_ver: str = "v3.3"):
-    """ """
-    ds_path = Path(ds_path)
-    metadata_path = os.path.join(ds_path, f"metadata/cde/{cde_ver}")
-    STUDY = read_meta_table(os.path.join(metadata_path, "STUDY.csv"))
+# def update_study_table(ds_path: str | Path, cde_ver: str = "v3.3"):
+#     """ """
+#     ds_path = Path(ds_path)
+#     metadata_path = os.path.join(ds_path, f"metadata/cde/{cde_ver}")
+#     STUDY = read_meta_table(os.path.join(metadata_path, "STUDY.csv"))
 
-    # load jsons
-    doi_path = os.path.join(ds_path, "DOI")
-    with open(os.path.join(doi_path, f"project.json"), "r") as f:
-        data = json.load(f)
-    # data = clean_json_read(doi_path / f"project.json")
+#     # load jsons
+#     doi_path = os.path.join(ds_path, "DOI")
+#     with open(os.path.join(doi_path, f"project.json"), "r") as f:
+#         data = json.load(f)
+#     # data = clean_json_read(doi_path / f"project.json")
 
-    STUDY["project_name"] = data["project_name"]
-    STUDY["project_description"] = data["project_description"]
-    STUDY["dataset_title"] = data["dataset_title"]
-    STUDY["dataset_description"] = data["dataset_description"]
-    # export STUDY
-    STUDY.to_csv(os.path.join(metadata_path, "STUDY.csv"), index=False)
+#     STUDY["project_name"] = data["project_name"]
+#     STUDY["project_description"] = data["project_description"]
+#     STUDY["dataset_title"] = data["dataset_title"]
+#     STUDY["dataset_description"] = data["dataset_description"]
+#     # export STUDY
+#     STUDY.to_csv(os.path.join(metadata_path, "STUDY.csv"), index=False)
 
 
 def setup_zenodo(sandbox: bool = None):
@@ -848,26 +845,26 @@ def archive_deposition_local(ds_path: Path, arch_name: str, deposition: dict):
         json.dump(deposition, f, indent=2)
 
 
-def update_study_table_with_doi(study_df: pd.DataFrame, ds_path: str | Path):
-    """ """
-    ds_path = Path(ds_path)
-    metadata_path = os.path.join(ds_path, "metadata")
-    STUDY = read_meta_table(os.path.join(metadata_path, "STUDY.csv"))
+# def update_study_table_with_doi(study_df: pd.DataFrame, ds_path: str | Path):
+#     """ """
+#     ds_path = Path(ds_path)
+#     metadata_path = os.path.join(ds_path, "metadata")
+#     STUDY = read_meta_table(os.path.join(metadata_path, "STUDY.csv"))
 
-    # load jsons
-    doi_path = os.path.join(ds_path, "DOI")
+#     # load jsons
+#     doi_path = os.path.join(ds_path, "DOI")
 
-    with open(os.path.join(doi_path, "dataset.doi"), "r") as f:
-        ds_doi = f.read().strip()
-    study_df["dataset_DOI"] = ds_doi
-    study_df["dataset_DOI_url"] = f"https://doi.org/{ds_doi}"
+#     with open(os.path.join(doi_path, "dataset.doi"), "r") as f:
+#         ds_doi = f.read().strip()
+#     study_df["dataset_DOI"] = ds_doi
+#     study_df["dataset_DOI_url"] = f"https://doi.org/{ds_doi}"
 
-    # get dataset version from version file
-    with open(os.path.join(ds_path, "version"), "r") as f:
-        ds_ver = f.read().strip()
-    study_df["dataset_version"] = ds_ver
+#     # get dataset version from version file
+#     with open(os.path.join(ds_path, "version"), "r") as f:
+#         ds_ver = f.read().strip()
+#     study_df["dataset_version"] = ds_ver
 
-    return study_df
+#     return study_df
 
 
 # def clean_json_read(file_path):

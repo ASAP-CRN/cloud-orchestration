@@ -19,10 +19,16 @@ Functionality involves several steps which create effects in _Datasets_, _Collec
 As contributions to the ASAP CRN Cloud are _Accepted_ one of the first steps is to create a zenodo Dataset DOI.  Datasets are _accepted_ as "v0.1".  When Datasets are first released, the Datasets are version bumped to "v1.0".   Any additional changes to Datasets can result in major or minor version bumps (depending on the revisions being made.) A Dataset's _all versions_ reference is contained in the "dataset.doi" file. Individual release version references are kept in "version.doi" files organized by version.
 
 functions:
-- `create_dataset_doi`:  
-- `update_dataset_doi`:  
-- `publish_dataset_doi`:  
-- `update_dataset_version`:
+- `create_dataset`
+    - `make_wip_dataset`
+    - `create_dataset_doi`:  
+- `publish_dataset`:  
+    - `publish_dataset_doi`:  
+- `update_dataset`:  
+    - `update_dataset_doi`:  
+    - `update_dataset_version`:
+
+Scripts named by tranches of datasets will use these functions to compose configurations for each dataset (new_dataset.json), and then either update or create and then publish those datasets.
 
 
 ### Releases
@@ -32,14 +38,16 @@ Regular _"Urgent" Releases_ to ASAP CRN Cloud are made for newly _Accepted_ but 
 - `define_release`:  Enumerates the release number, what type of release (Urgent, Minor, Major), and which individual Datasets and Colections belong to the Release.
 - `perform_release`: Create `release.json`, and manage the release archive, and produce the releases.json
 
+Scripts named by versions will use these functions to compose configurations for each release update (new_release.json), and then create those releases.  Note that new_collections.json may be defined using the functions detailed below.
 
-### Releases
-Regular _"Urgent" Releases_ to ASAP CRN Cloud are made for newly _Accepted_ but uncurated Datasets.    Less regular "Major" or "Minor" Releases are made to release new or updated _Curated_ Datasets.  _Curated_ Datasets are organized into Collections which share common Curation workflows/pipelines.   
+
+### Collection
+"Major" or "Minor" Releases are made to release new or updated _Curated_ Datasets.  _Curated_ Datasets are organized into Collections which share common Curation workflows/pipelines.   
+
 
 #### functions:
-- `define_release`:  Enumerates the release number, what type of release (Urgent, Minor, Major), and which individual Datasets and Colections belong to the Release.
-- `perform_release`: Create `release.json`, and manage the release archive, and produce the releases.json
-
+- `define_collection`:  Reads the Collection update from the `define_release` described above. 
+- `update_collection`:  Reads the Collection details created from `define_collection` described above and updates the details. 
 
 
 
