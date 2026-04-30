@@ -1,19 +1,22 @@
 {
 	"folders": [
 		{
-			"path": "."
+			"path": "../asap-crn-cloud-dataset-metadata"
 		},
 		{
-			"path": "../cloud-datasets"
+			"path": "."
 		},
 		{
 			"path": "../cloud-releases"
 		},
 		{
-			"path": "../cloud-cde"
+			"path": "../cloud-datasets"
 		},
 		{
 			"path": "../cloud-collections"
+		},
+		{
+			"path": "../cloud-cde"
 		}
 	],
 	"settings": {}
