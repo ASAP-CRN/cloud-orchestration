@@ -623,15 +623,15 @@ def get_doi_from_dataset(ds_path: Path, version: bool = True):
     Returns:
         str: DOI
     """
-    doi_path = os.path.join(ds_path, "DOI")
-    doi_file = "version.doi" if version else "dataset.doi"
+    doi_path = ds_path / "DOI"
+    doi_file = doi_path / "version.doi" if version else doi_path / "dataset.doi"
 
     # fall back to doi if version does not exist
-    if not os.path.exists(os.path.join(doi_path, doi_file)):
-        doi_file = "doi"
+    if not doi_path.exists():
         print(f"Warning: {doi_file} does not exist. Falling back to old format 'doi' ")
+        return None
 
-    with open(os.path.join(doi_path, doi_file), "r") as f:
+    with open(doi_file, "r") as f:
         doi_id = f.read().strip()
     doi_id = doi_id.split(".")[-1]
     return doi_id

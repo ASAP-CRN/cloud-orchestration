@@ -91,6 +91,9 @@ from .doi import (
     add_anchor_file_to_doi,
     finalize_DOI,
     archive_deposition_local,
+    update_doi_metadata,
+    publish_doi,
+    make_readme_file,
 )
 
 from .util import *
@@ -126,6 +129,9 @@ __all__ = [
     "add_anchor_file_to_doi",
     "finalize_DOI",
     "archive_deposition_local",
+    "update_doi_metadata",
+    "publish_doi",
+    "make_readme_file",
     # util
     "get_dataset_version",
     "get_release_version",

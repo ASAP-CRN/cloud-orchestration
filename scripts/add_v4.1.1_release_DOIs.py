@@ -23,9 +23,13 @@
 # %% Setup
 from pathlib import Path
 import asap_orchestrator as ao
+from asap_orchestrator.doi import bump_doi_version
 
 # TODO: confirm the root path resolves correctly for your environment
 
+%load_ext autoreload
+%autoreload 2
+# 
 
 root_path = Path(__file__).resolve().parents[2]
 datasets_repo_path = root_path / "cloud-datasets"
@@ -97,7 +101,7 @@ for ds in datasets:
     # assert v1.0
     ds_version = "1.0"
     # write version
-    write_version(ds_version, ds_path / "version")
+    ao.write_version(ds_version, ds_path / "version")
 
     # # load deposition 
     # # bump version
@@ -109,17 +113,58 @@ for ds in datasets:
 # back to dataset.json and DOI/dataset.doi.
 
 zenodo = ao.setup_zenodo()
+ds = datasets[0]
 
-for ds_def in new_dataset_defs:
-    ds_path = datasets_repo_path / "WIP" / ds_def.name
-    deposition = ao.create_dataset_doi(
-        ds_path, zenodo, version="v0.1", publication_date=PUBLICATION_DATE
-    )
-    doi = deposition.get("doi") or deposition.get("metadata", {}).get("prereserve_doi", {}).get("doi", "draft")
-    print(f"{ds_def.name}: {doi}")
+for ds in datasets:
+    ds_path = datasets_repo_path / "WIP" / ds
+    # TODO: update the filename to match the actual reference document
+    v1_beta_doi_id = ao.get_doi_from_dataset(ds_path, version=True)
+    deposition = zenodo.get_deposition(v1_beta_doi_id)
 
-# %% [Step 6] (Optional) Upload README anchor file to each draft
-# Uploads the generated <name>_README.pdf as the anchor file for each DOI.
+    # ao.update_dataset_doi(ds_path, zenodo, deposition, version="v1.0", publication_date=PUBLICATION_DATE)
+    # define update_dataset_doi    
+    deposition = ao.bump_doi_version(zenodo, v1_beta_doi_id)
+
+
+    metadata = deposition.get("metadata")
+    new_doi_id = f"{deposition['id']}"
+
+    print(f"Updated DOI for {ds}: {new_doi_id}")
+
+    # update v1.0
+    metadata['version'] = '1.0'
+    deposition = ao.update_doi_metadata(zenodo, new_doi_id, metadata)
+
+
+    file_path = ds_path / "DOI" / f"{ds_path.name}_README.pdf"
+    # deposition = update_doi_metadata(zenodo, v1_beta_doi_id, metadata)
+    deposition = ao.add_anchor_file_to_doi(zenodo,  file_path, new_doi_id)
+
+    ao.archive_deposition_local(ds_path, "pre-release-deposition", deposition)
+    ao.finalize_DOI(ds_path, deposition)
+
+# %% [Step 67] publish DOI and move WIP dataset tree to cloud-datasets root
+
+for ds in datasets:
+    ds_path = datasets_repo_path / "WIP" / ds
+    # TODO: update the filename to match the actual reference document
+    doi_id = ao.get_doi_from_dataset(ds_path, version=True)
+    deposition = zenodo.get_deposition(doi_id)
+
+
+    deposition = ao.publish_doi(zenodo, doi_id)
+    ao.archive_deposition_local(ds_path, "final-deposition", deposition)
+    ao.finalize_DOI(ds_path, deposition)
+
+    # move WIP to root
+    final_ds_path = datasets_repo_path / ds
+    if final_ds_path.exists():
+        print(f"WARNING: {final_ds_path} already exists. Please resolve before moving.")
+    else:
+        shutil.move(str(ds_path), str(final_ds_path))
+        print(f"Moved {ds_path} to {final_ds_path}")
+
+# %%
 
 for ds_def in new_dataset_defs:
     ds_path = datasets_repo_path / "WIP" / ds_def.name
@@ -130,6 +175,37 @@ for ds_def in new_dataset_defs:
         print(f"Uploaded README: {ds_def.name}")
     else:
         print(f"WARNING: README PDF not found for {ds_def.name}")
+
+
+
+
+
+        # find the ref name for ingest
+        print(f"Processing {dataset}")
+        ds_path = datasets_path / dataset
+
+        # get doi info:
+        v1_beta_doi_id = get_doi_from_dataset(ds_path)
+
+        # begin DOI bumping to v1.0
+        # write version = 1.0
+        write_version("1.0", ds_path / "version")
+        setup_DOI_info(ds_path, intake_doc, publication_date="2026-03-30")
+
+        deposition = bump_doi_version(zenodo, v1_beta_doi_id)
+        metadata = deposition.get("metadata")
+        new_doi_id = f"{deposition['id']}"
+
+        # update v1.0
+        metadata['version'] = '1.0'
+        deposition = update_doi_metadata(zenodo, new_doi_id, metadata)
+        file_path = ds_path / "DOI" / f"{ds_path.name}_README.pdf"
+        # deposition = update_doi_metadata(zenodo, v1_beta_doi_id, metadata)
+        deposition = add_anchor_file_to_doi(zenodo,  file_path, new_doi_id)
+
+        archive_deposition_local(ds_path, "pre-release-deposition", deposition)
+        finalize_DOI(ds_path, deposition)
+
 
 
 # %% [markdown]
