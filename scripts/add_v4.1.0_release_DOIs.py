@@ -72,6 +72,7 @@ datasets = [
 #
 # Update the filename in `ref_doc` for each dataset as needed.
 
+
 for ds in datasets:
     ds_path = datasets_repo_path / "WIP" / ds
     # TODO: update the filename to match the actual reference document
@@ -190,7 +191,7 @@ CDE_VERSION = "v3.3"              # e.g. "v3.3"
 
 zenodo = ao.setup_zenodo()
 
-for ds in bump_datasets[11:]:
+for ds in bump_datasets:
     ds_path = datasets_repo_path / ds
     # TODO: update the filename to match the actual reference document
     version = False if "cohort" in ds else True
@@ -296,6 +297,9 @@ for ds in bump_datasets[11:]:
 
 for ds in bump_datasets:
     ds_path = datasets_repo_path / ds
+    if "cohort" in ds:
+        print(f"Skipping DOI publish for {ds} since this is a cohort dataset and we only want to bump the version without publishing a new DOI for the cohort scRNA-seq dataset.")
+        continue
     doi_id = ao.get_doi_from_dataset(ds_path, version=True)
     deposition = zenodo.get_deposition(doi_id)
     deposition = ao.publish_doi(zenodo, doi_id)

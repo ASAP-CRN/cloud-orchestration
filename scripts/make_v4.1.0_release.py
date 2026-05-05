@@ -51,14 +51,17 @@ datasets = [
     'lee-mouse-ms-mb-striatum-g2019s-hf-diet',
     'lee-mouse-ms-mb-lung-g2019s-hf-diet',
     'lee-mouse-ms-mb-kidney-g2019s-hf-diet',
+    
+    'lee-mouse-ms-mb-plasma-g2019s-nuc-quant',
+    'lee-mouse-ms-mb-striatum-g2019s-nuc-quant',
+    'lee-mouse-ms-mb-midbrain-g2019s-nuc-quant',
+
     'lee-mouse-ms-l-plasma-g2019s-hf-diet',
     'lee-mouse-ms-l-liver-g2019s-hf-diet',
     'lee-mouse-ms-l-striatum-g2019s-hf-diet',
     'lee-mouse-ms-l-lung-g2019s-hf-diet',
     'lee-mouse-ms-l-kidney-g2019s-hf-diet',
-    'lee-mouse-ms-mb-plasma-g2019s-nuc-quant',
-    'lee-mouse-ms-mb-striatum-g2019s-nuc-quant',
-    'lee-mouse-ms-mb-midbrain-g2019s-nuc-quant',
+
     'alessi-mouse-ms-p-lung-vps35-d620n-wt',
     'alessi-mouse-ms-p-brain-vps35-d620n-wt',
     'alessi-mouse-ms-p-brain-vps35-d620n-dmso-mli2',
@@ -84,8 +87,36 @@ bump_datasets = [
 ]
 
 
+# first  we need to create the v1.0 Datasets
+# %%
+
+
+for dataset in datasets:
+    # find the ref name for ingest
+    print(f"Processing {dataset}")
+    ds_path = datasets_path / dataset
+    intake_doc = ds_path / "refs/APEX-ATG2A MS Data Set.docx"
+
+    # write version = 0.1
+    write_version("0.1", ds_path / "version")
+    # refs_path = ds_path / "refs"
+    # ref_files = list(refs_path.glob("*.docx"))
+
+    # if len(ref_files) == 1:
+    #     intake_doc = ref_files[0]
+    # else:
+    #     print("Multiple ref files found.  Please select the correct one.")
+    #     break
+
+    print(intake_doc)
+
+    # INGEST DOI DOCS
+    setup_DOI_info(ds_path, intake_doc, publication_date="2026-04-15")
 
 # %%
+
+
+
 
 for dataset in datasets:
     print(f"Processing {dataset}")

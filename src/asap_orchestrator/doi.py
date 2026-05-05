@@ -36,6 +36,7 @@ __all__ = [
     "create_draft_metadata",
     "replace_anchor_file_in_doi",
     "add_anchor_file_to_doi",
+    "create_dataset_json",
 ]
 
 NULL = "NA"
@@ -49,6 +50,100 @@ NULL = "NA"
 #     # Then convert markdown to HTML
 #     html = markdown.markdown(escaped_text)
 #     return html
+
+
+def create_dataset_json(
+    ds_path: Path | str,
+    cloud_datasets_path: Path | str | None = None,
+    collection: str | None = None,
+    cde_version: str = "",
+    keywords: list[str] | None = None,
+    description: str | None = None,
+    release_info: dict | None = None,
+) -> dict:
+    """Build and optionally write a dataset.json for a dataset being prepared for release.
+
+    Reads the concept DOI from ``DOI/dataset.doi`` and the dataset version from
+    the ``version`` file in *ds_path*.  Bucket paths follow the ASAP CRN team
+    convention::
+
+        raw:  gs://asap-raw-team-<name>
+        dev:  gs://asap-dev-team-<name>
+        uat:  gs://asap-uat-team-<name>
+        prod: gs://asap-curated-team-<name>
+
+    Args:
+        ds_path: Path to the dataset directory in asap-crn-cloud-dataset-metadata.
+        cloud_datasets_path: Target directory in the cloud-datasets repo.  When
+            provided, writes ``dataset.json`` into that directory.
+        collection: Collection name (e.g. ``"pmdbs-sc-rnaseq"``), or ``None``.
+        cde_version: CDE schema version string (e.g. ``"v3.3"``).
+        keywords: Keyword list for discovery; defaults to
+            ``[collection, team]`` when *collection* is set, else ``[team]``.
+        description: Short description string; auto-generated from *collection*
+            and team name when omitted.
+        release_info: Optional dict of additional release information to include in the dataset.json, e.g. ``{"release_date": "2026-05-01", "doi": "10.5281/zenodo.YYYYYYY"}``.  This is added to the top level of the dataset.json and can be used to include release-specific information that may not be relevant for the v0.1 DOI metadata.
+
+    Returns:
+        The dataset.json dict.
+    """
+    ds_path = Path(ds_path)
+    name = ds_path.name
+    team = name.split("-")[0]
+
+    doi_dir = ds_path / "DOI"
+    doi_file = doi_dir / "dataset.doi"
+    doi = doi_file.read_text().strip() if doi_file.exists() else ""
+
+    version_file = ds_path / "version"
+    raw_version = version_file.read_text().strip() if version_file.exists() else "1.0"
+    version = raw_version if raw_version.startswith("v") else f"v{raw_version}"
+
+    if keywords is None:
+        keywords = [team, collection] if collection else [team]
+    else:
+        keywords += [team, collection] if collection else [team]
+
+    if description is None:
+        description = (
+            f"{collection} dataset from team-{team}"
+            if collection
+            else f"Dataset from team-{team}"
+        )
+
+    if release_info is None:
+        release_info = {}
+
+    data = {
+        "name": name,
+        "title": f"team-{name}",
+        "description": description,
+        "version": version,
+        "doi": doi or None,
+        "creators": [
+            {"name": f"team-{team}", "affiliation": "ASAP CRN"}
+        ],  # need to figure out the best way to represent team-based authorship in the dataset.json; this is a placeholder that can be updated with more specific information if desired
+        "keywords": keywords,
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": collection,
+        "buckets": {
+            "raw": f"gs://asap-raw-team-{name}",
+            "dev": f"gs://asap-dev-team-{name}",
+            "uat": f"gs://asap-uat-team-{name}",
+            "prod": f"gs://asap-curated-team-{name}",
+        },
+        "cde_version": cde_version or None,
+        "releases": {},
+    }
+
+    if cloud_datasets_path is not None:
+        target = Path(cloud_datasets_path)
+        target.mkdir(parents=True, exist_ok=True)
+        with open(target / "dataset.json", "w") as f:
+            json.dump(data, f, indent=4)
+
+    return data
 
 
 def _make_metadata_from_project(project_dict: dict) -> dict:
@@ -469,10 +564,8 @@ def make_readme_file(ds_path: Path):
     for creator in creators:
         readme_content += f"* {creator['name']}"
         if "orcid" in creator:
-            # format as link
-            readme_content += (
-                f"; [ORCID:{creator['orcid'].split("/")[-1]}]({creator['orcid']})"
-            )
+            orcid = creator["orcid"]
+            readme_content += f"; [ORCID:{orcid.split('/')[-1]}]({orcid})"
         if "affiliation" in creator:
             # remove newlines from affiliation
             # # check if its a list
@@ -869,7 +962,7 @@ def finalize_DOI(ds_path: Path, deposition: dict, prerelease: bool = False):
     if "conceptdoi" in deposition:
         conceptdoi = deposition["conceptdoi"]
     else:
-        conceptdoi = f"10.5281/zenodo.{deposition["conceptrecid"]}"
+        conceptdoi = f"10.5281/zenodo.{deposition['conceptrecid']}"
     conceptdoi_url = doi_url.replace(doi, conceptdoi)
 
     doi_path = os.path.join(ds_path, "DOI")

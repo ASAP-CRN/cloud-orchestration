@@ -57,8 +57,16 @@ Usage::
 
 __version__ = "0.1.0"
 
+from .models import (
+    Dataset,
+    Creator,
+    DatasetBuckets,
+    ReleaseRecord,
+    VersionRecord,
+)
 from .dataset import (
     DatasetDefinition,
+    Dataset,
     define_dataset,
     create_dataset_stub,
     read_dataset_entry,
@@ -94,11 +102,18 @@ from .doi import (
     update_doi_metadata,
     publish_doi,
     make_readme_file,
+    create_dataset_json,
 )
 
 from .util import *
 
 __all__ = [
+    # models
+    "Dataset",
+    "Creator",
+    "DatasetBuckets",
+    "ReleaseRecord",
+    "VersionRecord",
     # dataset
     "DatasetDefinition",
     "define_dataset",
@@ -132,6 +147,7 @@ __all__ = [
     "update_doi_metadata",
     "publish_doi",
     "make_readme_file",
+    "create_dataset_json",
     # util
     "get_dataset_version",
     "get_release_version",

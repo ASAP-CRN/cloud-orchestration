@@ -199,7 +199,7 @@ class ZenodoClient(object):
 
         return self._get_deposition_by_id(dep_id)
 
-    def _get_deposition_by_id(self, dep_id: str | None = None):
+    def _get_deposition_by_id(self, dep_id: str | None = None) -> dict:
         """gets the deposition based on deposition_id id
 
         this provides details on the project, including metadata
@@ -229,10 +229,8 @@ class ZenodoClient(object):
 
         # print(r.url)
 
-        if r.ok:
-            return r.json()
-        else:
-            return r.raise_for_status()
+        r.raise_for_status()
+        return r.json()
 
     def _get_deposition_files(self):
         """gets the file deposition
@@ -396,7 +394,7 @@ class ZenodoClient(object):
         return self._all_depositions
 
     @property
-    def deposition(self):
+    def deposition(self) -> dict:
         return self._get_deposition_by_id()
 
     def delete_deposition(self, dep_id: str):
@@ -482,7 +480,7 @@ class ZenodoClient(object):
     def create_new_deposition(
         self,
         # metadata: dict,
-    ):
+    ) -> dict:
         """Creates a new deposition
 
         After a deposition is created the zenodopy object will point to the deposition
@@ -503,24 +501,10 @@ class ZenodoClient(object):
             headers={"Content-Type": "application/json"},
         )
 
-        if r.ok:
-            self.deposition_id = r.json()["id"]
-            self.bucket = r.json()["links"]["bucket"]
-
-            # deposition = self.change_metadata(
-            #     metadata=metadata,
-            # )
-            # return deposition
-            self.deposition_id = r.json()["id"]
-            self.bucket = r.json()["links"]["bucket"]
-
-            return r.json()
-
-        else:
-            print(
-                "** Project not created, something went wrong. Check that your ACCESS_TOKEN is in ~/.zenodo_token "
-            )
-            return r.raise_for_status()
+        r.raise_for_status()
+        self.deposition_id = r.json()["id"]
+        self.bucket = r.json()["links"]["bucket"]
+        return r.json()
 
     # this is pretty useless....
     def set_deposition_id(self, dep_id):
@@ -582,7 +566,7 @@ class ZenodoClient(object):
             # 409 Conflict: Deposition is in the process of being integrated, please wait 5 minutes before trying again.
             return r.raise_for_status()
 
-    def change_metadata(self, metadata: dict):
+    def change_metadata(self, metadata: dict) -> dict:
         """
         Change project's metadata.
 
@@ -600,10 +584,9 @@ class ZenodoClient(object):
         """
 
         if self.deposition_id is None:
-            print(
-                " ** the object is not pointing to a project. Use either .set_deposition_id() or .create_deposition() before changing metadata ** "
+            raise ValueError(
+                "Not pointing to a project. Call .set_deposition_id() or .create_new_deposition() first."
             )
-            return
 
         data_payload = {"metadata": metadata}
         r = requests.put(
@@ -612,10 +595,8 @@ class ZenodoClient(object):
             data=json.dumps(data_payload),
             headers={"Content-Type": "application/json"},
         )
-        if r.ok:
-            return r.json()
-        else:
-            return r.raise_for_status()
+        r.raise_for_status()
+        return r.json()
 
     def delete_file(self, file_id: str):
         """delete a file from the deposition
@@ -679,40 +660,25 @@ class ZenodoClient(object):
                     response = r.raise_for_status()
             return response
 
-    def make_new_version(self):
+    def make_new_version(self) -> dict:
         """update an existing record for a new version"""
-        # create a draft deposition
         url_action = self._get_deposition_by_id()["links"]["newversion"]
         print(url_action)
         r = requests.post(url_action, params={"access_token": self.token})
         r.raise_for_status()
 
-        # parse current project to the draft deposition
-        # new_dep_id = r.json()["links"]["latest_draft"].split("/")[-1]
-
-        # adding this to let new id propogate in the backend
+        # adding this to let new id propagate in the backend
         time.sleep(2)
-
-        # self.set_deposition_id(new_dep_id)
         time.sleep(5)
-        if r.ok:
-            return r.json()
-        else:
-            return r.raise_for_status()
+        return r.json()
 
-    def publish(self):
+    def publish(self) -> dict:
         """publish a record"""
         dep_id = self.deposition_id
         url_action = self._get_deposition_by_id(dep_id)["links"]["publish"]
         r = requests.post(url_action, params={"access_token": self.token})
         r.raise_for_status()
-
-        if r.ok:
-            response = r.json()
-        else:
-            print("Oh no! something went wrong")
-            response = r.raise_for_status()
-        return response
+        return r.json()
 
     def get_urls_from_doi(self, doi: str | None = None):
         """the files urls for the given doi

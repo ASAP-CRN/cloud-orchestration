@@ -4,17 +4,17 @@ Provides operations for Dataset DOI creation and version maintenance.
 """
 from __future__ import annotations
 
-import json
 import shutil
-from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+from .models import Creator, Dataset, DatasetBuckets, ReleaseRecord, VersionRecord
 from .zenodo_util import ZenodoClient
 
 __all__ = [
     "DatasetDefinition",
+    "Dataset",
     "define_dataset",
     "create_dataset_stub",
     "read_dataset_entry",
@@ -25,48 +25,8 @@ __all__ = [
     "update_datasets_index",
 ]
 
-
-@dataclass
-class DatasetDefinition:
-    """Describes a dataset being defined or updated.
-
-    Produced by :func:`define_dataset` and consumed by
-    :func:`create_dataset_stub`.  Also used to build release and collection
-    manifests via :meth:`to_release_entry`.
-
-    Attributes:
-        name: Dataset name following ``<team>-<tissue>-<modality>`` convention.
-        collection: Collection this dataset belongs to, e.g. ``"pmdbs-sc-rnaseq"``.
-            ``None`` for uncurated/urgent datasets.
-        version: Dataset version string, e.g. ``"v0.1"`` or ``"v1.0"``.
-        doi: Zenodo concept DOI (all-versions).  Empty string until assigned.
-        cde_version: CDE schema version applied to this dataset.
-        title: Human-readable title.
-        description: Short description of the dataset.
-        creators: List of ``{"name": ..., "affiliation": ...}`` dicts.
-        keywords: List of keyword strings for Zenodo metadata.
-        buckets: GCS bucket paths keyed by environment (``raw``, ``dev``,
-            ``uat``, ``prod``).
-        references: List of reference strings for Zenodo metadata.
-        license: SPDX license identifier (default ``"CC-BY-4.0"``).
-    """
-
-    name: str
-    collection: Optional[str] = None
-    version: str = "v0.1"
-    doi: str = ""
-    cde_version: str = ""
-    title: str = ""
-    description: str = ""
-    creators: list[dict] = field(default_factory=list)
-    keywords: list[str] = field(default_factory=list)
-    buckets: dict = field(default_factory=dict)
-    references: list = field(default_factory=list)
-    license: str = "CC-BY-4.0"
-
-    def to_release_entry(self) -> dict:
-        """Return the ``{"name", "doi", "version"}`` dict for a release manifest."""
-        return {"name": self.name, "doi": self.doi, "version": self.version}
+# Backward-compatible alias re-exported from models
+DatasetDefinition = Dataset
 
 
 def define_dataset(
@@ -82,8 +42,8 @@ def define_dataset(
     buckets: Optional[dict] = None,
     references: Optional[list] = None,
     license: str = "CC-BY-4.0",
-) -> DatasetDefinition:
-    """Build a :class:`DatasetDefinition` for a new or updated dataset.
+) -> Dataset:
+    """Build a :class:`Dataset` for a new or updated dataset.
 
     Bucket paths are inferred from *name* when not provided, following the
     ASAP CRN naming convention::
@@ -110,44 +70,49 @@ def define_dataset(
         license: SPDX license id.
 
     Returns:
-        A :class:`DatasetDefinition` ready for :func:`create_dataset_stub`.
+        A :class:`Dataset` ready for :func:`create_dataset_stub`.
     """
     team = name.split("-")[0]
 
     if buckets is None:
-        buckets = {
-            "raw": f"gs://asap-raw-{name}",
-            "dev": f"gs://asap-dev-{name}",
-            "uat": f"gs://asap-uat-{name}",
-            "prod": f"gs://asap-curated-{name}",
-        }
+        resolved_buckets = DatasetBuckets(
+            raw=f"gs://asap-raw-{name}",
+            dev=f"gs://asap-dev-{name}",
+            uat=f"gs://asap-uat-{name}",
+            prod=f"gs://asap-curated-{name}",
+        )
+    else:
+        resolved_buckets = DatasetBuckets(**buckets)
+
     if keywords is None:
         keywords = [k for k in [collection, team] if k]
     if creators is None:
-        creators = [{"name": f"team-{team}", "affiliation": "ASAP CRN"}]
+        resolved_creators = [Creator(name=f"team-{team}", affiliation="ASAP CRN")]
+    else:
+        resolved_creators = [Creator(**c) for c in creators]
 
     auto_description = (
         f"{collection} dataset from team-{team}" if collection else f"Dataset from team-{team}"
     )
 
-    return DatasetDefinition(
+    return Dataset(
         name=name,
         collection=collection,
         version=version,
-        doi=doi,
-        cde_version=cde_version,
+        doi=doi or None,
+        cde_version=cde_version or None,
         title=title or name,
         description=description or auto_description,
-        creators=creators,
+        creators=resolved_creators,
         keywords=keywords,
-        buckets=buckets,
-        references=references or [],
+        buckets=resolved_buckets,
+        references=list(references) if references else [],
         license=license,
     )
 
 
 def create_dataset_stub(
-    dataset_def: DatasetDefinition,
+    dataset_def: Dataset,
     datasets_repo_path: Path | str,
     wip: bool = True,
 ) -> Path:
@@ -172,23 +137,7 @@ def create_dataset_stub(
     (ds_path / "DOI").mkdir(exist_ok=True)
     (ds_path / "refs").mkdir(exist_ok=True)
 
-    data = {
-        "name": dataset_def.name,
-        "title": dataset_def.title,
-        "description": dataset_def.description,
-        "version": dataset_def.version,
-        "doi": dataset_def.doi or None,
-        "creators": dataset_def.creators,
-        "keywords": dataset_def.keywords,
-        "license": dataset_def.license,
-        "references": dataset_def.references,
-        "collection": dataset_def.collection,
-        "buckets": dataset_def.buckets,
-        "cde_version": dataset_def.cde_version or None,
-        "releases": {},
-    }
-
-    _write_dataset_json(ds_path, data)
+    dataset_def.save(ds_path)
     return ds_path
 
 
@@ -202,12 +151,11 @@ def read_dataset_entry(ds_path: Path | str) -> dict:
         ds_path: Path to the dataset directory in cloud-datasets.
     """
     ds_path = Path(ds_path)
-    data = _read_dataset_json(ds_path)
-    return {
-        "name": data.get("name", ds_path.name),
-        "doi": data.get("doi", ""),
-        "version": data.get("version", ""),
-    }
+    try:
+        dataset = Dataset.load(ds_path)
+        return dataset.to_release_entry()
+    except FileNotFoundError:
+        return {"name": ds_path.name, "doi": "", "version": ""}
 
 
 # ── helpers ────────────────────────────────────────────────────────────────────
@@ -221,6 +169,7 @@ def _read_doi_metadata(ds_path: Path) -> dict:
     meta_file = _doi_dir(ds_path) / f"{ds_path.name}.json"
     if not meta_file.exists():
         raise FileNotFoundError(f"DOI metadata not found: {meta_file}")
+    import json
     with open(meta_file) as f:
         data = json.load(f)
     return data.get("metadata", data)
@@ -228,6 +177,7 @@ def _read_doi_metadata(ds_path: Path) -> dict:
 
 def _write_doi_files(ds_path: Path, deposition: dict, *, prerelease: bool) -> None:
     """Write version.doi, dataset.doi, anchor file, and deposition.json."""
+    import json
     doi_dir = _doi_dir(ds_path)
     doi_dir.mkdir(parents=True, exist_ok=True)
 
@@ -256,19 +206,6 @@ def _write_doi_files(ds_path: Path, deposition: dict, *, prerelease: bool) -> No
 
     with open(doi_dir / "deposition.json", "w") as f:
         json.dump(deposition, f, indent=2)
-
-
-def _read_dataset_json(ds_path: Path) -> dict:
-    p = ds_path / "dataset.json"
-    if not p.exists():
-        return {}
-    with open(p) as f:
-        return json.load(f)
-
-
-def _write_dataset_json(ds_path: Path, data: dict) -> None:
-    with open(ds_path / "dataset.json", "w") as f:
-        json.dump(data, f, indent=2)
 
 
 # ── public API ─────────────────────────────────────────────────────────────────
@@ -310,11 +247,12 @@ def create_dataset_doi(
 
     _write_doi_files(ds_path, deposition, prerelease=True)
 
-    dataset = _read_dataset_json(ds_path)
-    with open(_doi_dir(ds_path) / "dataset.doi") as f:
-        dataset["doi"] = f.read().strip()
-    dataset.setdefault("version", version)
-    _write_dataset_json(ds_path, dataset)
+    dataset = Dataset.load(ds_path)
+    concept_doi = (_doi_dir(ds_path) / "dataset.doi").read_text().strip()
+    dataset.doi = concept_doi or None
+    if not dataset.version:
+        dataset.version = version
+    dataset.save(ds_path)
 
     return deposition
 
@@ -407,8 +345,8 @@ def update_dataset_version(
             when provided creates a Zenodo version draft for the new version.
     """
     ds_path = Path(ds_path)
-    dataset = _read_dataset_json(ds_path)
-    old_version = dataset.get("version", "v0.1")
+    dataset = Dataset.load(ds_path)
+    old_version = dataset.version
 
     archive_dir = ds_path / "archive" / old_version
     archive_dir.mkdir(parents=True, exist_ok=True)
@@ -428,23 +366,17 @@ def update_dataset_version(
             new_dep = zenodo.make_new_version()
             _write_doi_files(ds_path, new_dep, prerelease=True)
 
-    # Read the version DOI after potential Zenodo update
     version_doi = ""
     doi_file = _doi_dir(ds_path) / "version.doi"
     if doi_file.exists():
         version_doi = doi_file.read_text().strip()
 
-    dataset["version"] = new_version
-
-    all_versions = dataset.setdefault("all_versions", {})
-    all_versions[new_version] = {"doi": version_doi, "releases": {}}
-
-    releases = dataset.setdefault("releases", {})
-    releases[release_version] = {
-        "cde_version": cde_version,
-        "dataset_version": new_version,
-    }
-    _write_dataset_json(ds_path, dataset)
+    dataset.version = new_version
+    dataset.all_versions[new_version] = VersionRecord(doi=version_doi)
+    dataset.releases[release_version] = ReleaseRecord(
+        cde_version=cde_version, dataset_version=new_version
+    )
+    dataset.save(ds_path)
 
 
 def update_datasets_index(datasets_repo_path: Path | str) -> None:
@@ -453,21 +385,24 @@ def update_datasets_index(datasets_repo_path: Path | str) -> None:
     Args:
         datasets_repo_path: Path to the cloud-datasets repository root.
     """
+    import json
+
     datasets_repo_path = Path(datasets_repo_path)
     index: dict[str, dict] = {}
     for ds_dir in sorted(datasets_repo_path.iterdir()):
-        ds_json = ds_dir / "dataset.json"
-        if ds_dir.is_dir() and ds_json.exists():
-            with open(ds_json) as f:
-                data = json.load(f)
-            name = data.get("name", ds_dir.name)
-            index[name] = {
-                "name": name,
-                "title": data.get("title", ""),
-                "version": data.get("version", ""),
-                "doi": data.get("doi", ""),
-                "collection": data.get("collection", ""),
-                "release": data.get("releases", {}),
-            }
+        if not ds_dir.is_dir():
+            continue
+        try:
+            dataset = Dataset.load(ds_dir)
+        except FileNotFoundError:
+            continue
+        index[dataset.name] = {
+            "name": dataset.name,
+            "title": dataset.title,
+            "version": dataset.version,
+            "doi": dataset.doi or "",
+            "collection": dataset.collection or "",
+            "release": {k: v.model_dump() for k, v in dataset.releases.items()},
+        }
     with open(datasets_repo_path / "datasets.json", "w") as f:
         json.dump(index, f, indent=2)
