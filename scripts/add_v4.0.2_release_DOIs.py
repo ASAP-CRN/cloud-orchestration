@@ -42,6 +42,9 @@ PUBLICATION_DATE = "2026-04-30"   # e.g. "2026-05-01"
 CDE_VERSION = "v4.3"              # e.g. "v3.3"
 
 
+RELEASE_VERSION = "v4.0.2" 
+
+
 # %% [Step 5b].  Tranche of v1.0 datasets
 
 # v1.0 datasets, v4.3 cde
@@ -49,12 +52,12 @@ datasets = [
 'alessi-mefs-ms-p-vps35-d620n-wt',
 'alessi-mefs-ms-p-vps35-d620n-dmso-mli2',
 'sulzer-fecal-metagenome-fp-spf',
-'alessi-invitro-ms-p-hek293-gtip'
+# 'alessi-invitro-ms-p-hek293-gtip'
 ]
 
-# %% [Step 1] 
-#   write version = 1.0 to version file
-# copy to root if needed at end of script
+# release info is the same for all of these
+target_keywords = ["mefs", "ms-p", "invitro","fecal-metagenome"]  # used to identify which datasets to apply this release_info to; e.g. if your release includes datasets from multiple teams or with different characteristics, you can use this field to specify which datasets get which release_info
+
 
 for ds in datasets:
     ds_path = datasets_repo_path / "WIP" / ds
@@ -63,12 +66,36 @@ for ds in datasets:
     # read version
     current_version = (ds_path / "version").read_text().strip()
     if current_version != "0.1":
-        print(f"WARNING: expected version 0.1 for {d}, but found {current_version}")
+        print(f"WARNING: expected version 0.1 for {ds_path.name}, but found {current_version}")
         continue
     # assert v1.0
     ds_version = "1.0"
     # write version
     ao.write_version(ds_version, ds_path / "version")
+    keys = ds.split("-")
+    keywords = [key for key in target_keywords if key in ds]  # e.g. "lee-mouse-liver-bulk-rnaseq-g2019s" -> ["mouse", "liver", "bulk-rnaseq"]
+    # add "proteomics" keyword to ms-p datasets if not already included
+    if "ms-p" in keywords and "proteomics" not in keywords:
+        keywords.append("proteomics")
+        
+    release_info = {
+        RELEASE_VERSION: {
+        "cde_version": CDE_VERSION,
+        "dataset_version": ds_version
+        }
+    }
+
+    # description = f"{"-".join(ds.split('-')[1:])} from team-{ds.split('-')[0]}"
+    dataset_json = ao.create_dataset_json(
+        ds_path,
+        cloud_datasets_path=ds_path,  # TODO: write to ds_path here.
+        collection = None,  # TODO: add collection name if applicable
+        cde_version = CDE_VERSION,
+        keywords = keywords,  # TODO: add list of keywords if desired
+        description = None,  # TODO: add description if desired
+        release_info = release_info,  # optional dict of additional release-specific info to include in dataset.json
+    )
+ 
 
     # move WIP to root
     final_ds_path = datasets_repo_path / ds
@@ -78,3 +105,10 @@ for ds in datasets:
         shutil.move(str(ds_path), str(final_ds_path))
         print(f"Moved {ds_path} to {final_ds_path}")
 
+
+# %%
+# 'alessi-invitro-ms-p-hek293-gtip'
+# updated by hand.
+
+
+# TODO:  make sure that the "archives" are updated

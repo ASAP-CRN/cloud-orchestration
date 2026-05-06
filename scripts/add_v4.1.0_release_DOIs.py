@@ -27,6 +27,7 @@ import asap_orchestrator as ao
 from asap_orchestrator.doi import bump_doi_version, make_readme_file
 
 import shutil
+
 # TODO: confirm the root path resolves correctly for your environment
 
 %load_ext autoreload
@@ -310,3 +311,198 @@ for ds in bump_datasets:
 # %%
 # %%
 
+datasets = [
+    'lee-mouse-ms-p-lung-g2019s-hf-diet',
+    'lee-mouse-ms-mb-plasma-g2019s-hf-diet', #    'lee-mouse-ms-mb-plasma-2019s-hf-diet',
+    'lee-mouse-ms-mb-liver-g2019s-hf-diet',
+    'lee-mouse-ms-mb-striatum-g2019s-hf-diet',
+    'lee-mouse-ms-mb-lung-g2019s-hf-diet',
+    'lee-mouse-ms-mb-kidney-g2019s-hf-diet',
+    'lee-mouse-ms-l-plasma-g2019s-hf-diet',
+    'lee-mouse-ms-l-liver-g2019s-hf-diet',
+    'lee-mouse-ms-l-striatum-g2019s-hf-diet',
+    'lee-mouse-ms-l-lung-g2019s-hf-diet',
+    'lee-mouse-ms-l-kidney-g2019s-hf-diet',
+    'lee-mouse-ms-mb-plasma-g2019s-nuc-quant',
+    'lee-mouse-ms-mb-striatum-g2019s-nuc-quant',
+    'lee-mouse-ms-mb-midbrain-g2019s-nuc-quant',
+    'alessi-mouse-ms-p-lung-vps35-d620n-wt',
+    'alessi-mouse-ms-p-brain-vps35-d620n-wt',
+    'alessi-mouse-ms-p-brain-vps35-d620n-dmso-mli2',
+    'alessi-mouse-ms-p-lung-vps35-d620n-dmso-mli2',
+]
+
+# release info is the same for all of these
+target_keywords = [ "mouse","lung","plasma","liver","striatum","kidney","brain","midbrain"]  # used to identify which datasets to apply this release_info to; e.g. if your release includes datasets from multiple teams or with different characteristics, you can use this field to specify which datasets get which release_info
+
+aliases = {
+"proteomics": "ms-p",
+"metabelomics": "ms-mb",
+"lipidomics": "ms-l"
+}
+RELEASE_VERSION = "v4.1.0"
+CDE_VERSION = "v4.3"              # e.g. "v3.3"
+
+for ds in datasets:
+    ds_path = datasets_repo_path /  ds
+
+    # confirm we have v0.1
+    # read version
+    current_version = (ds_path / "version").read_text().strip()
+    if current_version != "1.0":
+        print(f"WARNING: expected version 1.0 for {ds_path.name}, but found {current_version}")
+
+    # assert v1.0
+    ds_version = "1.0"
+    # write version
+    ao.write_version(ds_version, ds_path / "version")
+    keys = ds.split("-")
+    keywords = [key for key in target_keywords if key in ds]  # e.g. "lee-mouse-liver-bulk-rnaseq-g2019s" -> ["mouse", "liver", "bulk-rnaseq"]
+    # add "proteomics" keyword to ms-p datasets if not already included
+    if "ms-p" in keywords and "proteomics" not in keywords:
+        keywords.append("proteomics")
+        
+    release_info = {
+        RELEASE_VERSION: {
+        "cde_version": CDE_VERSION,
+        "dataset_version": ds_version
+        }
+    }
+
+    # description = f"{"-".join(ds.split('-')[1:])} from team-{ds.split('-')[0]}"
+    dataset_json = ao.create_dataset_json(
+        ds_path,
+        cloud_datasets_path=None,  # TODO: write to ds_path here.
+        collection = None,  # TODO: add collection name if applicable
+        cde_version = CDE_VERSION,
+        keywords = keywords,  # TODO: add list of keywords if desired
+        description = None,  # TODO: add description if desired
+        release_info = release_info,  # optional dict of additional release-specific info to include in dataset.json
+    )
+    # need to integrate the release_info into the existing dataset.json if it exists, rather than overwriting the whole file. this way we preserve any existing metadata and just add the new release info under the new release version key.
+    dataset_json_path = ds_path / "dataset.json"
+    if dataset_json_path.exists():
+        with open(dataset_json_path, "r") as f:
+            existing_data = json.load(f)
+        existing_releases = existing_data.get("releases", {})
+        existing_releases.update(dataset_json.get("releases", {}))
+        existing_data["releases"] = existing_releases
+        with open(dataset_json_path, "w") as f:
+            json.dump(existing_data, f, indent=4)
+    else:
+        with open(dataset_json_path, "w") as f:
+            json.dump(dataset_json, f, indent=4)
+
+
+# %%
+
+# cde v3.3
+bump_datasets = [
+'cohort-pmdbs-bulk-rnaseq',# v1.2.1
+'cohort-pmdbs-sc-rnaseq', # v3.1.1
+'hafler-pmdbs-sn-rnaseq-pfc',# v1.1
+'hardy-pmdbs-bulk-rnaseq', # v1.1
+'hardy-pmdbs-sn-rnaseq',# v1.1
+'jakobsson-pmdbs-sn-rnaseq',# v2.1
+'lee-pmdbs-bulk-rnaseq-mfg',# v1.1
+'lee-pmdbs-sn-rnaseq', # v1.1
+'scherzer-pmdbs-genetics',# v1.1
+'scherzer-pmdbs-sn-rnaseq-mtg',# v1.2
+'scherzer-pmdbs-sn-rnaseq-mtg-hybsel',# v1.2
+'scherzer-pmdbs-spatial-visium-mtg',# v1.1
+'sulzer-pmdbs-sn-rnaseq',# v1.1 
+'wood-pmdbs-bulk-rnaseq', # v1.1 
+]
+
+
+ds_versions = {
+'cohort-pmdbs-bulk-rnaseq': "1.2.1",
+'cohort-pmdbs-sc-rnaseq': "3.1.1",
+'hafler-pmdbs-sn-rnaseq-pfc': "1.1",
+'hardy-pmdbs-bulk-rnaseq': "1.1",       
+'hardy-pmdbs-sn-rnaseq': "1.1",
+'jakobsson-pmdbs-sn-rnaseq': "2.1",
+'lee-pmdbs-bulk-rnaseq-mfg': "1.1",
+'lee-pmdbs-sn-rnaseq': "1.1",
+'scherzer-pmdbs-genetics': "1.1",
+'scherzer-pmdbs-sn-rnaseq-mtg': "1.2",
+'scherzer-pmdbs-sn-rnaseq-mtg-hybsel': "1.2",
+'scherzer-pmdbs-spatial-visium-mtg': "1.1",
+'sulzer-pmdbs-sn-rnaseq': "1.1",
+'wood-pmdbs-bulk-rnaseq': "1.1",
+}
+PUBLICATION_DATE = "2026-04-30"   # e.g. "202
+# %%
+
+
+CDE_VERSION = "v3.3"              # e.g. "v3.3"
+
+# release info is the same for all of these
+target_keywords = [ "mouse","lung","plasma","liver","striatum","kidney","brain","midbrain"]  # used to identify which datasets to apply this release_info to; e.g. if your release includes datasets from multiple teams or with different characteristics, you can use this field to specify which datasets get which release_info
+
+aliases = {
+"ms-p":"proteomics",
+"ms-mb": "metabelomics",
+"ms-l": "lipidomics",
+}
+
+# %%
+
+for ds in bump_datasets:
+    ds_path = datasets_repo_path / ds
+
+    keys = ds.split("-")
+    keywords = [key for key in target_keywords if key in ds] 
+    # add aliases for keywords if not already included
+
+    for kw, alias in aliases.items():
+        if kw in keywords and alias not in keywords:  
+            keywords.append(alias)
+    
+    version_file = ds_path / "version"
+    if not version_file.exists():
+        # write version
+        ds_version = ds_versions[ds]
+        ao.write_version(ds_version, ds_path / "version")
+    else:
+        current_version = version_file.read_text().strip()
+        if current_version != ds_versions[ds]:
+            print(f"WARNING: expected version {ds_versions[ds]} for {ds_path.name}, but found {current_version}. Please resolve this version mismatch before proceeding.")
+            ds_version = ds_versions[ds]
+            ao.write_version(ds_version, ds_path / "version")
+
+
+    release_info = {
+        RELEASE_VERSION: {
+        "cde_version": CDE_VERSION,
+        "dataset_version": ds_version
+        }
+    }
+
+    # description = f"{"-".join(ds.split('-')[1:])} from team-{ds.split('-')[0]}"
+    dataset_json = ao.create_dataset_json(
+        ds_path,
+        cloud_datasets_path=None,  # TODO: write to ds_path here.
+        collection = None,  # TODO: add collection name if applicable
+        cde_version = CDE_VERSION,
+        keywords = keywords,  # TODO: add list of keywords if desired
+        description = None,  # TODO: add description if desired
+        release_info = release_info,  # optional dict of additional release-specific info to include in dataset.json
+    )
+
+
+    # need to integrate the release_info into the existing dataset.json if it exists, rather than overwriting the whole file. this way we preserve any existing metadata and just add the new release info under the new release version key.
+    dataset_json_path = ds_path / "dataset.json"
+    if dataset_json_path.exists():
+        with open(dataset_json_path, "r") as f:
+            existing_data = json.load(f)
+        existing_releases = existing_data.get("releases", {})
+        existing_releases.update(dataset_json.get("releases", {}))
+        existing_data["releases"] = existing_releases
+        with open(dataset_json_path, "w") as f:
+            json.dump(existing_data, f, indent=4)
+    else:
+        with open(dataset_json_path, "w") as f:
+            json.dump(dataset_json, f, indent=4)
+
+# %%

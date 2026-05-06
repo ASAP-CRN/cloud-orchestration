@@ -134,7 +134,7 @@ def create_dataset_json(
             "prod": f"gs://asap-curated-team-{name}",
         },
         "cde_version": cde_version or None,
-        "releases": {},
+        "releases": release_info,
     }
 
     if cloud_datasets_path is not None:
