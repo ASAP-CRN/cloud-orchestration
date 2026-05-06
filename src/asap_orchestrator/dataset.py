@@ -119,8 +119,8 @@ def create_dataset_stub(
     """Write a ``dataset.json`` stub for a new dataset.
 
     Places the dataset under ``WIP/<name>/`` when *wip* is ``True``, or
-    directly under ``<datasets_repo_path>/<name>/`` otherwise.  Also creates
-    empty ``DOI/`` and ``refs/`` subdirectories.
+    under ``datasets/<name>/`` otherwise.  Also creates empty ``DOI/`` and
+    ``refs/`` subdirectories.
 
     Args:
         dataset_def: Dataset definition from :func:`define_dataset`.
@@ -131,7 +131,7 @@ def create_dataset_stub(
         Path to the newly created dataset directory.
     """
     datasets_repo_path = Path(datasets_repo_path)
-    parent = datasets_repo_path / "WIP" if wip else datasets_repo_path
+    parent = datasets_repo_path / "WIP" if wip else datasets_repo_path / "datasets"
     ds_path = parent / dataset_def.name
     ds_path.mkdir(parents=True, exist_ok=True)
     (ds_path / "DOI").mkdir(exist_ok=True)
@@ -389,7 +389,7 @@ def update_datasets_index(datasets_repo_path: Path | str) -> None:
 
     datasets_repo_path = Path(datasets_repo_path)
     index: dict[str, dict] = {}
-    for ds_dir in sorted(datasets_repo_path.iterdir()):
+    for ds_dir in sorted((datasets_repo_path / "datasets").iterdir()):
         if not ds_dir.is_dir():
             continue
         try:

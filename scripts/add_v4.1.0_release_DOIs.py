@@ -15,7 +15,7 @@
 #   6a. confirm reference exists and v0.1 DOI available
 #   6b. create v1.0 DOI reference files, including additional annotation for .pdf (e.g. version bump copy)
 #   6c. create unpublished v1.0 zenodo reference
-#  7. publish DOI and copy WIP dataset tree to cloud-datasets root
+#  7. publish DOI and move WIP dataset tree to cloud-datasets/datasets/
 
 
 #
@@ -146,7 +146,7 @@ for ds in datasets:
     ao.archive_deposition_local(ds_path, "pre-release-deposition", deposition)
     ao.finalize_DOI(ds_path, deposition)
 
-# %% [Step 7] publish DOI and move WIP dataset tree to cloud-datasets root
+# %% [Step 7] publish DOI and move WIP dataset tree to cloud-datasets/datasets/
 
 zenodo = ao.setup_zenodo()
 for ds in datasets:
@@ -159,8 +159,8 @@ for ds in datasets:
     ao.archive_deposition_local(ds_path, "final-deposition", deposition)
     ao.finalize_DOI(ds_path, deposition)
 
-    # move WIP to root
-    final_ds_path = datasets_repo_path / ds
+    # move WIP to datasets/
+    final_ds_path = datasets_repo_path / "datasets" / ds
     if final_ds_path.exists():
         print(f"WARNING: {final_ds_path} already exists. Please resolve before moving.")
     else:
@@ -193,7 +193,7 @@ CDE_VERSION = "v3.3"              # e.g. "v3.3"
 zenodo = ao.setup_zenodo()
 
 for ds in bump_datasets:
-    ds_path = datasets_repo_path / ds
+    ds_path = datasets_repo_path / "datasets" / ds
     # TODO: update the filename to match the actual reference document
     version = False if "cohort" in ds else True
     current_doi_id = ao.get_doi_from_dataset(ds_path, version=version)
@@ -297,7 +297,7 @@ for ds in bump_datasets:
 # publish the updated DOIs for the bumped datasets
 
 for ds in bump_datasets:
-    ds_path = datasets_repo_path / ds
+    ds_path = datasets_repo_path / "datasets" / ds
     if "cohort" in ds:
         print(f"Skipping DOI publish for {ds} since this is a cohort dataset and we only want to bump the version without publishing a new DOI for the cohort scRNA-seq dataset.")
         continue
@@ -344,7 +344,7 @@ RELEASE_VERSION = "v4.1.0"
 CDE_VERSION = "v4.3"              # e.g. "v3.3"
 
 for ds in datasets:
-    ds_path = datasets_repo_path /  ds
+    ds_path = datasets_repo_path / "datasets" / ds
 
     # confirm we have v0.1
     # read version
@@ -449,7 +449,7 @@ aliases = {
 # %%
 
 for ds in bump_datasets:
-    ds_path = datasets_repo_path / ds
+    ds_path = datasets_repo_path / "datasets" / ds
 
     keys = ds.split("-")
     keywords = [key for key in target_keywords if key in ds] 

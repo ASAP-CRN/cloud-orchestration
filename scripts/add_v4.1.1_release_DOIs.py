@@ -156,8 +156,8 @@ for ds in datasets:
     ao.archive_deposition_local(ds_path, "final-deposition", deposition)
     ao.finalize_DOI(ds_path, deposition)
 
-    # move WIP to root
-    final_ds_path = datasets_repo_path / ds
+    # move WIP to datasets/
+    final_ds_path = datasets_repo_path / "datasets" / ds
     if final_ds_path.exists():
         print(f"WARNING: {final_ds_path} already exists. Please resolve before moving.")
     else:

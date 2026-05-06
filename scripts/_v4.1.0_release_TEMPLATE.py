@@ -60,7 +60,7 @@ previously_released_names = [
 ]
 
 all_dataset_entries = [
-    ao.read_dataset_entry(datasets_repo_path / name)
+    ao.read_dataset_entry(datasets_repo_path / "datasets" / name)
     for name in previously_released_names
 ] + [ds.to_release_entry() for ds in new_dataset_defs]
 
@@ -126,7 +126,7 @@ for col_def in collection_defs:
 #   - updates all_versions entry
 
 for ds_def in new_dataset_defs:
-    ds_path = datasets_repo_path / ds_def.name
+    ds_path = datasets_repo_path / "datasets" / ds_def.name
     if not ds_path.exists():
         # Dataset may still be under WIP/ — promote it first
         wip_path = datasets_repo_path / "WIP" / ds_def.name
