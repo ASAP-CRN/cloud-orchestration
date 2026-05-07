@@ -95,6 +95,7 @@ for ds in datasets:
         dv = rel_data.get("dataset_version", "").strip().lstrip("v")
         if dv:
             release_versions.append(dv)
+
     if release_versions:
         latest_release_version = max(release_versions)  # assumes semantic versioning that sorts correctly as strings
         expected_archive = archive_path / f"v{latest_release_version}"
@@ -113,48 +114,17 @@ for ds in datasets:
                 else:
                     print(f"  [{ds}] warning: expected {src} does not exist; skipping copy to archive")
     
-
-    for release_version, release_info in releases.items():
-        # check if latest_release
-
-        # check if all release version have corresponding archive folders
-        dataset_version = release_info.get("dataset_version", "").strip().lstrip("v") # defensive
-        expected_archive = archive_path / f"v{dataset_version}"
-        if not expected_archive.exists():
-            print(f"  [{ds}] missing archive for dataset ver: {release_version} — creating {expected_archive}")
-            expected_archive.mkdir(parents=True, exist_ok=True)
-            # copy DOI/ refs/ dataset.json, version files into archive from ds_path/
-            for item in ["dataset.json", "version", "DOI", "refs"]:
-                src = ds_path / item
-                dst = expected_archive / item
-                if src.exists():
-                    if src.is_dir():
-                        shutil.copytree(src, dst)
-                    else:
-                        shutil.copy2(src, dst)
-                else:
-                    print(f"  [{ds}] warning: expected {src} does not exist; skipping copy to archive")
-        else:
-            # optionally, check for expected files within each archive (e.g. dataset.json, version, DOI/ and refs/
-            # 
-            # 
-           
-            expected_files = ["dataset.json", "version", "DOI", "refs"]
-            for item in expected_files:
-                item_path = expected_archive / item
-                if not item_path.exists():
-                    print(f"  [{ds}] warning: expected {item_path} does not exist in archive for dataset ver: {dataset_version}")
-                    # copy from ds_path/ if it exists
-                    src = ds_path / item
-                    dst = item_path
-                    if src.exists():
-                        if src.is_dir():
-                            shutil.copytree(src, dst)
-                        else:
-                            shutil.copy2(src, dst)
-                    else:
-                        print(f"  [{ds}] warning: expected {src} does not exist; skipping copy to archive")
-
+    else:
+        print(f"  [{ds}] warning: no release versions found in dataset.json; skipping archive check")
+    for rel_key, rel_data in releases.items():
+        # just confirm that each release's dataset_version has a corresponding archive directory
+        dv = rel_data.get("dataset_version", "").strip().lstrip("v")
+        if dv:
+            expected_archive = archive_path / f"v{dv}"
+            if not expected_archive.exists():
+                print(f"  [{ds}] missing archive for release version {dv} (release key: {rel_key}) — creating {expected_archive}")
+            
+    
 # %% [Step 4] ensure each dataset has a DOI directory with expected files
 
 # %% [Step 4] ensure each dataset has a DOI directory with expected files
