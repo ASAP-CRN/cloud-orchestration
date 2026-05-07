@@ -1,0 +1,34 @@
+{
+  "name": "dataset-name",
+  "title": "long-datset-name",
+  "description": "DESCRIPTION",
+  "version": "v0.1",
+  "doi": null,
+  "creators": [
+    {
+      "name": "team-X",
+      "affiliation": "ASAP CRN"
+    }
+  ],
+  "keywords": [
+    "A",
+    "B",
+    "x"
+  ],
+  "license": "CC-BY-4.0",
+  "references": [],
+  "collection": null,
+  "buckets": {
+    "raw": "gs://asap-raw-long-dataset-name",
+    "dev": "gs://asap-dev-long-dataset-name",
+    "uat": "gs://asap-uat-long-dataset-name",
+    "prod": "gs://asap-curated-long-dataset-name"
+  },
+  "cde_version": "v4.3",
+  "releases": {
+    "vX": {
+      "cde_version": null,
+      "dataset_version": null
+    }
+  }
+}

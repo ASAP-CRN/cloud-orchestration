@@ -36,176 +36,31 @@ for line in http_status_codes:
     code, name, desc = line.split("\t")
     http_stat_codes[code] = {"name": name, "desc": desc}
 
-[
-    "created",
-    "modified",
-    "id",
-    "conceptrecid",
-    "doi",
-    "conceptdoi",
-    "doi_url",
-    "metadata",
-    "title",
-    "links",
-    "record_id",
-    "owner",
-    "files",
-    "state",
-    "submitted",
-]
-
-
-@dataclass
-class publishedZenodoDeposition:
-    created: str
-    modified: str
-    id: int
-    conceptrecid: int
-    doi: str
-    conceptdoi: str
-    doi_url: str
-    metadata: dict
-    title: str
-    links: dict
-    record_id: int
-    owner: int
-    files: list
-    state: str
-    submitted: bool
-
-    @classmethod
-    def from_dict(cls, deposition_dict: dict) -> "publishedZenodoDeposition":
-
-        created = deposition_dict.get("created", None)
-        modified = deposition_dict.get("modified", None)
-        id = deposition_dict.get("id", None)
-        conceptrecid = deposition_dict.get("conceptrecid", None)
-        doi = deposition_dict.get("doi", None)
-        conceptdoi = deposition_dict.get("conceptdoi", None)
-        doi_url = deposition_dict.get("doi_url", None)
-        metadata = deposition_dict.get("metadata", None)
-        title = deposition_dict.get("title", None)
-        links = deposition_dict.get("links", None)
-        record_id = deposition_dict.get("record_id", None)
-        owner = deposition_dict.get("owner", None)
-        files = deposition_dict.get("files", None)
-        state = deposition_dict.get("state", None)
-        submitted = deposition_dict.get("submitted", None)
-
-        return cls(
-            created,
-            modified,
-            id,
-            conceptrecid,
-            doi,
-            conceptdoi,
-            doi_url,
-            metadata,
-            title,
-            links,
-            record_id,
-            owner,
-            files,
-            state,
-            submitted,
-        )
-
-
-@dataclass
-class ZenodoMetadata:
-    title: str
-    upload_type: str = "other"
-    description: str | None = None
-    publication_date: str = field(
-        default_factory=lambda: datetime.now().strftime("%Y-%m-%d")
-    )
-    version: str = "0.1"
-    access_right: str = "open"  # can set to "embargoed"
-    embargo_date: str | None = None  # if embargoed
-    access_conditions: str | None = None  # if embargoed
-    keywords: list[str] = field(
-        default_factory=lambda: ["Zenodo", "ASAP", "ASAP CRN", "Parkinson's"]
-    )
-    creators: list[dict] = field(
-        default_factory=lambda: [{"name": "Jhon, Doe", "orcid": "0000-0003-2584-3576"}]
-    )
-    publication_type: str = "other"
-    resource_type: str = "dataset"
-    communities: list[dict] = field(default_factory=lambda: [{"identifier": "asaphub"}])
-    grants: list[dict] = field(default_factory=lambda: [])
-    license: dict = field(default_factory=lambda: {"license": {"id": "cc-by-4.0"}})
-    refrences: list[str] = field(
-        default_factory=lambda: [
-            "Aligning Science Across Parkinson’s Collaborative Research Network Cloud, https://cloud.parkinsonsroadmap.org/collections, RRID:SCR_023923"
-        ]
-    )
-
-    @classmethod
-    def parse_metadata_from_json(cls, json_file_path: Path) -> "ZenodoMetadata":
-        """Parse metadata from a JSON file into a ZenodoMetadata object."""
-        json_file_path = Path(json_file_path).expanduser()
-        if not os.path.exists(json_file_path):
-            raise ValueError(
-                f"{json_file_path} does not exist. Please check you entered the correct path."
-            )
-
-        with json_file_path.open("r") as json_file:
-            data = json.load(json_file)
-
-        metadata_dict = data.get("metadata", {})
-
-        title = metadata_dict.get("title", None)
-        if title is None:
-            raise ValueError("Title is required")
-        upload_type = metadata_dict.get("upload_type", "other")
-        description = metadata_dict.get("description", None)
-        publication_date = metadata_dict.get("publication_date", None)
-        version = metadata_dict.get("version", "0.1")
-        access_right = metadata_dict.get("access_right", "open")
-        embargo_date = metadata_dict.get("embargo_date", None)
-        access_conditions = metadata_dict.get("access_conditions", None)
-        keywords = metadata_dict.get("keywords", ["zenodo", "github", "git"])
-        creators = metadata_dict.get("creators", [])
-        publication_type = metadata_dict.get("publication_type", "other")
-        resource_type = metadata_dict.get("resource_type", "dataset")
-        communities = metadata_dict.get("communities", [{"identifier": "asaphub"}])
-        grants = metadata_dict.get("grants", [])
-        license = metadata_dict.get("license", {"id": "cc-by-4.0"})
-        return cls(
-            title=title,
-            upload_type=upload_type,
-            description=description,
-            publication_date=publication_date,
-            version=version,
-            access_right=access_right,
-            embargo_date=embargo_date,
-            access_conditions=access_conditions,
-            keywords=keywords,
-            creators=creators,
-            publication_type=publication_type,
-            resource_type=resource_type,
-            communities=communities,
-            grants=grants,
-            license=license,
-        )
+# [
+#     "created",
+#     "modified",
+#     "id",
+#     "conceptrecid",
+#     "doi",
+#     "conceptdoi",
+#     "doi_url",
+#     "metadata",
+#     "title",
+#     "links",
+#     "record_id",
+#     "owner",
+#     "files",
+#     "state",
+#     "submitted",
+# ]
 
 
 class ZenodoClient(object):
     """Zenodo Client object
 
-    Use this class to instantiate a zenodopy object
+    Use this class to instantiate a zenodo object
     to interact with your Zenodo account
 
-        ```
-        import zenodopy
-        zeno = zenodopy.Client()
-        zeno.help()
-        ```
-
-    Setup instructions:
-        ```
-        zeno.setup_instructions
-        ```
     """
 
     title: str | None = None
@@ -236,7 +91,7 @@ class ZenodoClient(object):
         self._token = self._load_from_env() if token is None else token
         # 'metadata/prereservation_doi/doi'
 
-        self._all_depositions = self._get_all_depositions()  # list[dict] =
+        # self._all_depositions = self._get_all_depositions()  # list[dict] =
 
     def __repr__(self):
         return f"zenodoapi('{self.title}','{self.bucket}','{self.deposition_id}')"
@@ -277,6 +132,8 @@ class ZenodoClient(object):
                         if key == target_key:
                             api_token = value.strip()
                             break
+                    else:
+                        api_token = line.strip()
 
         else:
             api_token = dotrc
@@ -286,8 +143,8 @@ class ZenodoClient(object):
         return api_token
 
     def _load_from_env(self):
-        """reads the web3.storage token from env
-        configuration file is ~/.web3_storage_token
+        """reads the e token from env
+        configuration file is ~/.zenodo_token
         Returns:
             str: ACCESS_TOKEN to connect to web3 storage
         """
@@ -328,7 +185,21 @@ class ZenodoClient(object):
             deps[f"{doi}"] = deposition  # ZenodoDeposition.from_dict(deposition)
         return deps
 
-    def _get_deposition_by_id(self, dep_id: str | None = None):
+    def get_deposition(self, dep_id: str | None = None):
+        """gets the deposition based on deposition_id id
+
+        this provides details on the project, including metadata
+
+        Args:
+            dep_id (str): project deposition ID, if None, uses the deposition_id of the class
+
+        Returns:
+            dict: dictionary containing project details
+        """
+
+        return self._get_deposition_by_id(dep_id)
+
+    def _get_deposition_by_id(self, dep_id: str | None = None) -> dict:
         """gets the deposition based on deposition_id id
 
         this provides details on the project, including metadata
@@ -355,12 +226,11 @@ class ZenodoClient(object):
             f"{self._endpoint}/deposit/depositions/{dep_id}",
             params={"access_token": self.token},
         )
+
         # print(r.url)
 
-        if r.ok:
-            return r.json()
-        else:
-            return r.raise_for_status()
+        r.raise_for_status()
+        return r.json()
 
     def _get_deposition_files(self):
         """gets the file deposition
@@ -524,7 +394,7 @@ class ZenodoClient(object):
         return self._all_depositions
 
     @property
-    def deposition(self):
+    def deposition(self) -> dict:
         return self._get_deposition_by_id()
 
     def delete_deposition(self, dep_id: str):
@@ -610,7 +480,7 @@ class ZenodoClient(object):
     def create_new_deposition(
         self,
         # metadata: dict,
-    ):
+    ) -> dict:
         """Creates a new deposition
 
         After a deposition is created the zenodopy object will point to the deposition
@@ -631,41 +501,29 @@ class ZenodoClient(object):
             headers={"Content-Type": "application/json"},
         )
 
-        if r.ok:
-            self.deposition_id = r.json()["id"]
-            self.bucket = r.json()["links"]["bucket"]
-
-            # deposition = self.change_metadata(
-            #     metadata=metadata,
-            # )
-            # return deposition
-            self.deposition_id = r.json()["id"]
-            self.bucket = r.json()["links"]["bucket"]
-
-            return r.json()
-
-        else:
-            print(
-                "** Project not created, something went wrong. Check that your ACCESS_TOKEN is in ~/.zenodo_token "
-            )
-            return r.raise_for_status()
+        r.raise_for_status()
+        self.deposition_id = r.json()["id"]
+        self.bucket = r.json()["links"]["bucket"]
+        return r.json()
 
     # this is pretty useless....
-    def set_deposition_id(self, dep_id: str | None = None):
+    def set_deposition_id(self, dep_id):
         """set the project by id"""
-        depositions = self._get_depositions()
 
-        if depositions is not None:
-            for d in depositions:
-                if d["id"] == int(dep_id):
-                    self.title = d["title"]
-                    self.bucket = self._get_bucket_by_id(d["id"])
-                    self.deposition_id = f"{d["id"]}"
-                    return
-            else:
-                print(
-                    f" ** Deposition ID: {dep_id} does not exist in your depositions  ** "
-                )
+        self.deposition_id = dep_id
+        # depositions = self._get_depositions()
+
+        # if depositions is not None:
+        #     for d in depositions:
+        #         if d["id"] == int(dep_id):
+        #             self.title = d["title"]
+        #             self.bucket = self._get_bucket_by_id(d["id"])
+        #             self.deposition_id = f"{d["id"]}"
+        #             return
+        #     else:
+        #         print(
+        #             f" ** Deposition ID: {dep_id} does not exist in your depositions  ** "
+        #         )
 
     def set_deposition_dataset_id(self, dataset_id: str | None = None):
         """set the deposition to the root of the generic dataset_id (conceptrecid)"""
@@ -708,7 +566,7 @@ class ZenodoClient(object):
             # 409 Conflict: Deposition is in the process of being integrated, please wait 5 minutes before trying again.
             return r.raise_for_status()
 
-    def change_metadata(self, metadata: dict):
+    def change_metadata(self, metadata: dict) -> dict:
         """
         Change project's metadata.
 
@@ -726,10 +584,9 @@ class ZenodoClient(object):
         """
 
         if self.deposition_id is None:
-            print(
-                " ** the object is not pointing to a project. Use either .set_deposition_id() or .create_deposition() before changing metadata ** "
+            raise ValueError(
+                "Not pointing to a project. Call .set_deposition_id() or .create_new_deposition() first."
             )
-            return
 
         data_payload = {"metadata": metadata}
         r = requests.put(
@@ -738,10 +595,8 @@ class ZenodoClient(object):
             data=json.dumps(data_payload),
             headers={"Content-Type": "application/json"},
         )
-        if r.ok:
-            return r.json()
-        else:
-            return r.raise_for_status()
+        r.raise_for_status()
+        return r.json()
 
     def delete_file(self, file_id: str):
         """delete a file from the deposition
@@ -805,40 +660,25 @@ class ZenodoClient(object):
                     response = r.raise_for_status()
             return response
 
-    def make_new_version(self):
+    def make_new_version(self) -> dict:
         """update an existing record for a new version"""
-        # create a draft deposition
         url_action = self._get_deposition_by_id()["links"]["newversion"]
         print(url_action)
         r = requests.post(url_action, params={"access_token": self.token})
         r.raise_for_status()
 
-        # parse current project to the draft deposition
-        # new_dep_id = r.json()["links"]["latest_draft"].split("/")[-1]
-
-        # adding this to let new id propogate in the backend
+        # adding this to let new id propagate in the backend
         time.sleep(2)
-
-        # self.set_deposition_id(new_dep_id)
         time.sleep(5)
-        if r.ok:
-            return r.json()
-        else:
-            return r.raise_for_status()
+        return r.json()
 
-    def publish(self):
+    def publish(self) -> dict:
         """publish a record"""
         dep_id = self.deposition_id
         url_action = self._get_deposition_by_id(dep_id)["links"]["publish"]
         r = requests.post(url_action, params={"access_token": self.token})
         r.raise_for_status()
-
-        if r.ok:
-            response = r.json()
-        else:
-            print("Oh no! something went wrong")
-            response = r.raise_for_status()
-        return response
+        return r.json()
 
     def get_urls_from_doi(self, doi: str | None = None):
         """the files urls for the given doi

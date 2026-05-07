@@ -11,7 +11,8 @@ from markdown import markdown
 
 
 from .zenodo_util import *
-from .util import read_meta_table
+
+# from .util import read_meta_table
 
 # import markdown
 # from html import escape
@@ -35,6 +36,7 @@ __all__ = [
     "create_draft_metadata",
     "replace_anchor_file_in_doi",
     "add_anchor_file_to_doi",
+    "create_dataset_json",
 ]
 
 NULL = "NA"
@@ -50,25 +52,166 @@ NULL = "NA"
 #     return html
 
 
+def create_dataset_json(
+    ds_path: Path | str,
+    cloud_datasets_path: Path | str | None = None,
+    collection: str | None = None,
+    cde_version: str = "",
+    keywords: list[str] | None = None,
+    description: str | None = None,
+    release_info: dict | None = None,
+) -> dict:
+    """Build and optionally write a dataset.json for a dataset being prepared for release.
+
+    Reads the concept DOI from ``DOI/dataset.doi`` and the dataset version from
+    the ``version`` file in *ds_path*.  Bucket paths follow the ASAP CRN team
+    convention::
+
+        raw:  gs://asap-raw-team-<name>
+        dev:  gs://asap-dev-team-<name>
+        uat:  gs://asap-uat-team-<name>
+        prod: gs://asap-curated-team-<name>
+
+    Args:
+        ds_path: Path to the dataset directory in asap-crn-cloud-dataset-metadata.
+        cloud_datasets_path: Target directory in the cloud-datasets repo.  When
+            provided, writes ``dataset.json`` into that directory.
+        collection: Collection name (e.g. ``"pmdbs-sc-rnaseq"``), or ``None``.
+        cde_version: CDE schema version string (e.g. ``"v3.3"``).
+        keywords: Keyword list for discovery; defaults to
+            ``[collection, team]`` when *collection* is set, else ``[team]``.
+        description: Short description string; auto-generated from *collection*
+            and team name when omitted.
+        release_info: Optional dict of additional release information to include in the dataset.json, e.g. ``{"release_date": "2026-05-01", "doi": "10.5281/zenodo.YYYYYYY"}``.  This is added to the top level of the dataset.json and can be used to include release-specific information that may not be relevant for the v0.1 DOI metadata.
+
+    Returns:
+        The dataset.json dict.
+    """
+    ds_path = Path(ds_path)
+    name = ds_path.name
+    team = name.split("-")[0]
+
+    doi_dir = ds_path / "DOI"
+    doi_file = doi_dir / "dataset.doi"
+    doi = doi_file.read_text().strip() if doi_file.exists() else ""
+
+    version_file = ds_path / "version"
+    raw_version = version_file.read_text().strip() if version_file.exists() else "1.0"
+    version = raw_version if raw_version.startswith("v") else f"v{raw_version}"
+
+    if keywords is None:
+        keywords = [team, collection] if collection else [team]
+    else:
+        keywords += [team, collection] if collection else [team]
+
+    if description is None:
+        description = (
+            f"{collection} dataset from team-{team}"
+            if collection
+            else f"Dataset from team-{team}"
+        )
+
+    if release_info is None:
+        release_info = {}
+
+    data = {
+        "name": name,
+        "title": f"team-{name}",
+        "description": description,
+        "version": version,
+        "doi": doi or None,
+        "creators": [
+            {"name": f"team-{team}", "affiliation": "ASAP CRN"}
+        ],  # need to figure out the best way to represent team-based authorship in the dataset.json; this is a placeholder that can be updated with more specific information if desired
+        "keywords": keywords,
+        "license": "CC-BY-4.0",
+        "references": [],
+        "collection": collection,
+        "buckets": {
+            "raw": f"gs://asap-raw-team-{name}",
+            "dev": f"gs://asap-dev-team-{name}",
+            "uat": f"gs://asap-uat-team-{name}",
+            "prod": f"gs://asap-curated-team-{name}",
+        },
+        "cde_version": cde_version or None,
+        "releases": release_info,
+    }
+
+    if cloud_datasets_path is not None:
+        target = Path(cloud_datasets_path)
+        target.mkdir(parents=True, exist_ok=True)
+        with open(target / "dataset.json", "w") as f:
+            json.dump(data, f, indent=4)
+
+    return data
+
+
+def _make_metadata_from_project(project_dict: dict) -> dict:
+    metadata = {
+        "title": project_dict["dataset_title"],
+        "upload_type": "dataset",
+        "description": project_dict["dataset_description"],
+        "publication_date": project_dict["publication_date"],
+        "version": project_dict["version"],
+        # "access_right": "open",
+        "creators": project_dict["creators"],
+        "resource_type": "dataset",
+        "communities": [{"identifier": "asaphub"}],
+        "references": [
+            "Aligning Science Across Parkinson's Collaborative Research Network Cloud, https://cloud.parkinsonsroadmap.org/collections, RRID:SCR_023923",
+            f"Team {project_dict['team_name']}",
+        ],
+        "license": {"id": "cc-by-4.0"},
+    }
+
+    if not pd.isna(project_dict.get("grant_ids")):
+        grant_ids = project_dict.get("grant_ids")
+        if isinstance(grant_ids, str):
+            if "," in grant_ids:
+                grant_ids = grant_ids.split(",")
+            elif ";" in grant_ids:
+                grant_ids = grant_ids.split(";")
+            else:
+                grant_ids = [grant_ids]
+
+            grants = [
+                {"id": f"10.13039/100018231::{grant_id.strip()}"}
+                for grant_id in grant_ids
+            ]
+            metadata["grants"] = grants
+
+    else:
+        print("Warning: No grant ids found")
+
+    return metadata
+
+
 # %%
 def setup_DOI_info(
     ds_path: str | Path,
     doi_doc_path: str | Path,
     publication_date: None | str = None,
-    cde_ver: str = "v3.3",
+    version: None | str = None,
+    force: bool = False,
 ):
     ds_path = Path(ds_path)
 
-    ingest_DOI_doc(ds_path, doi_doc_path, publication_date=publication_date)
+    ingest_DOI_doc(
+        ds_path,
+        doi_doc_path,
+        publication_date=publication_date,
+        version=version,
+        force=force,
+    )
     make_readme_file(ds_path)
-    # depricate updating study table
-    # update_study_table(ds_path, cde_ver=cde_ver)
 
 
 def ingest_DOI_doc(
     ds_path: str | Path,
     doi_doc_path: str | Path,
     publication_date: None | str = None,
+    version: None | str = None,
+    force: bool = False,
 ):
     """
     read docx, extract the information, and save in os.path.join(dataset, DOI) subdirectory
@@ -77,13 +220,44 @@ def ingest_DOI_doc(
     doi_doc_path = Path(doi_doc_path)
     long_dataset_name = ds_path.name
 
- 
-    # read the docx
-
-    # should read this from ds_path/version
     # just read in as text
     with open(os.path.join(ds_path, "version"), "r") as f:
         ds_ver = f.read().strip()
+
+    if not force:
+        # doi_json_path = ds_path / "DOI" / f"{long_dataset_name}.json"
+        doi_json_path = ds_path / "DOI" / f"project.json"
+        if doi_json_path.exists():
+            print(
+                f"DOI info already exists for {ds_path}, skipping ingestion. Use force=True to overwrite."
+            )
+            # overwrite publication_date and version in the existing json if they exist, but leave the rest of the info alone
+            with open(doi_json_path, "r") as f:
+                existing_data = json.load(f)
+            if publication_date is not None:
+                existing_data["publication_date"] = publication_date
+
+            # FORCE BASED ON VERSION FILE
+            existing_data["version"] = ds_ver
+
+            with open(doi_json_path, "w") as f:
+                json.dump(existing_data, f, indent=4)
+
+            print(f"Existing data: {existing_data.keys()=}")
+            metadata = _make_metadata_from_project(existing_data)
+            export_data = {"metadata": metadata}
+
+            # dump json
+            doi_path = ds_path / "DOI"
+
+            with open(doi_path / f"{long_dataset_name}.json", "w") as f:
+                json.dump(export_data, f, indent=4)
+
+            return
+
+    # read the docx
+
+    # should read this from ds_path/version
     # ds_ver = "v2.0"
 
     # Load the document
@@ -120,28 +294,27 @@ def ingest_DOI_doc(
                 table_data[1][1].strip().replace("\n", " ").replace("\u2019", "'")
             )
             if len(table_data) > 2:
-                ASAP_team_name = (
-                    table_data[2][1].strip()
-                )
+                ASAP_team_name = table_data[2][1].strip()
             else:
                 ASAP_team_name = None
             if len(table_data) > 3:
-                grant_ids = (
-                    table_data[3][1].strip()
-                )
+                grant_ids = table_data[3][1].strip()
             else:
                 grant_ids = None
-            
+
             print("got project title/description")
 
         else:
             # test if its the "Project Team" table
-            if table_data[0][1] == "First name" and table_data[0][2] == "Last name" and table_data[0][3] == "Email":
+            if (
+                table_data[0][1] == "First name"
+                and table_data[0][2] == "Last name"
+                and table_data[0][3] == "Email"
+            ):
                 pj_team_table = table_data
             else:
                 print(f"what is this extra thing?: {name}")
                 print(table_data)
-
 
     # title
     # string	Title of deposition (automatically set from metadata). Defaults to empty string.
@@ -218,13 +391,12 @@ def ingest_DOI_doc(
 
 """
 
-
-   # fill details 
+    # fill details
 
     ASAP_lab_name = ""
 
-    # get details from the pj_team_table 
-    field_name = [ tb[0] for tb in pj_team_table]
+    # get details from the pj_team_table
+    field_name = [tb[0] for tb in pj_team_table]
 
     PI_full_name = ""
     PI_email = ""
@@ -232,9 +404,9 @@ def ingest_DOI_doc(
     submitter_email = ""
     cPI_full_name = []
     cPI_email = []
-    for name,row in zip(field_name, pj_team_table):
+    for name, row in zip(field_name, pj_team_table):
         # skip if blank
-        if len(row[1])<1:
+        if len(row[1]) < 1:
             continue
 
         if name == "Principal Investigator":
@@ -247,14 +419,10 @@ def ingest_DOI_doc(
             submitter_name = f"{row[1]} {row[2]}"
             submitter_email = f"{row[3]}"
 
-
     publication_DOI = ""
 
     print(grant_ids)
-    team_name = ds_path.name.split('-')[0].capitalize() 
-    
-
-
+    team_name = ds_path.name.split("-")[0].capitalize()
 
     # Convert to html for good formatting
     description = markdown(description)
@@ -276,20 +444,6 @@ def ingest_DOI_doc(
             "%Y-%m-%d"
         )  # "2.0"?  also do "v1.0"
 
-    metadata = {
-        "title": title,
-        "upload_type": upload_type,
-        "description": description,
-        "publication_date": publication_date,
-        "version": version,
-        # "access_right": "open",
-        "creators": creators,
-        "resource_type": "dataset",
-        "communities": communities,
-        "references": refrences,
-        "license": license,
-    }
-
     if not pd.isna(grant_ids):
         if "," in grant_ids:
             grant_ids = grant_ids.split(",")
@@ -298,22 +452,9 @@ def ingest_DOI_doc(
         else:
             grant_ids = [grant_ids]
 
-        grants = [{"id": f"10.13039/100018231::{grant_id}"} for grant_id in grant_ids]
-        metadata["grants"] = grants
-
     else:
+        grant_ids = None
         print("Warning: No grant ids found")
-
-    export_data = {"metadata": metadata}
-
-    # dump json
-    doi_path = os.path.join(ds_path, "DOI")
-
-    if not os.path.exists(doi_path):
-        os.makedirs(doi_path, exist_ok=True)
-
-    with open(os.path.join(doi_path, f"{long_dataset_name}.json"), "w") as f:
-        json.dump(export_data, f, indent=4)
 
     # also dump the table to make the documents and
     # ## save a simple table to update STUDY table
@@ -342,10 +483,20 @@ def ingest_DOI_doc(
     with open(os.path.join(doi_path, f"project.json"), "w") as f:
         json.dump(project_dict, f, indent=4)
 
+    metadata = _make_metadata_from_project(project_dict)
+    export_data = {"metadata": metadata}
+    # dump json
+    doi_path = os.path.join(ds_path, "DOI")
+
+    if not os.path.exists(doi_path):
+        os.makedirs(doi_path, exist_ok=True)
+
+    with open(os.path.join(doi_path, f"{long_dataset_name}.json"), "w") as f:
+        json.dump(export_data, f, indent=4)
+
     # df = pd.DataFrame(project_dict, index=[0])
     # df.to_csv(doi_path / f"{long_dataset_name}.csv", index=False)
     # write the files.
-
 
 
 def make_readme_file(ds_path: Path):
@@ -385,9 +536,8 @@ def make_readme_file(ds_path: Path):
     grant_ids = data.get("grant_ids")
     team_name = data.get("team_name")
 
-
-    coPI_full_name = data.get("coPI_full_name")
-    coPI_email = data.get("coPI_email")
+    coPI_full_name = data.get("coPI_full_name", [])
+    coPI_email = data.get("coPI_email", [])
 
     # # avoid unicodes that mess up latex
     # rep_from = "α"
@@ -414,10 +564,8 @@ def make_readme_file(ds_path: Path):
     for creator in creators:
         readme_content += f"* {creator['name']}"
         if "orcid" in creator:
-            # format as link
-            readme_content += (
-                f"; [ORCID:{creator['orcid'].split("/")[-1]}]({creator['orcid']})"
-            )
+            orcid = creator["orcid"]
+            readme_content += f"; [ORCID:{orcid.split('/')[-1]}]({orcid})"
         if "affiliation" in creator:
             # remove newlines from affiliation
             # # check if its a list
@@ -440,9 +588,9 @@ def make_readme_file(ds_path: Path):
         preamble = f"**Co-Principal Investigator:**"
 
     for coPI, coPI_email in zip(coPI_full_name, coPI_email):
-        if coPI is not None:           
+        if coPI is not None:
             readme_content += f"{preamble} {coPI} <{coPI_email}>, \n"
-    
+
     readme_content += f"\n"
 
     readme_content += f"**Dataset Submitter:** {submitter_name} <{submitter_email}>\n\n"
@@ -464,7 +612,6 @@ def make_readme_file(ds_path: Path):
 
 """
 
-
     # strip \xa0
     readme_content = readme_content.replace("\xa0", " ")
 
@@ -478,8 +625,6 @@ def make_readme_file(ds_path: Path):
     make_pdf_file(
         readme_content_HTML, os.path.join(doi_path, f"{long_dataset_name}_README.pdf")
     )
-
-
 
 
 # def make_pdf_file(ds_path: Path):
@@ -510,30 +655,26 @@ def make_pdf_file(html_content: str, output_filepath: str | Path):
     return not pisa_status.err  # True if conversion was successful
 
 
-
-
-
-
 ############
 
-def update_study_table(ds_path: str | Path, cde_ver: str = "v3.3"):
-    """ """
-    ds_path = Path(ds_path)
-    metadata_path = os.path.join(ds_path, f"metadata/cde/{cde_ver}")
-    STUDY = read_meta_table(os.path.join(metadata_path, "STUDY.csv"))
+# def update_study_table(ds_path: str | Path, cde_ver: str = "v3.3"):
+#     """ """
+#     ds_path = Path(ds_path)
+#     metadata_path = os.path.join(ds_path, f"metadata/cde/{cde_ver}")
+#     STUDY = read_meta_table(os.path.join(metadata_path, "STUDY.csv"))
 
-    # load jsons
-    doi_path = os.path.join(ds_path, "DOI")
-    with open(os.path.join(doi_path, f"project.json"), "r") as f:
-        data = json.load(f)
-    # data = clean_json_read(doi_path / f"project.json")
+#     # load jsons
+#     doi_path = os.path.join(ds_path, "DOI")
+#     with open(os.path.join(doi_path, f"project.json"), "r") as f:
+#         data = json.load(f)
+#     # data = clean_json_read(doi_path / f"project.json")
 
-    STUDY["project_name"] = data["project_name"]
-    STUDY["project_description"] = data["project_description"]
-    STUDY["dataset_title"] = data["dataset_title"]
-    STUDY["dataset_description"] = data["dataset_description"]
-    # export STUDY
-    STUDY.to_csv(os.path.join(metadata_path, "STUDY.csv"), index=False)
+#     STUDY["project_name"] = data["project_name"]
+#     STUDY["project_description"] = data["project_description"]
+#     STUDY["dataset_title"] = data["dataset_title"]
+#     STUDY["dataset_description"] = data["dataset_description"]
+#     # export STUDY
+#     STUDY.to_csv(os.path.join(metadata_path, "STUDY.csv"), index=False)
 
 
 def setup_zenodo(sandbox: bool = None):
@@ -575,15 +716,15 @@ def get_doi_from_dataset(ds_path: Path, version: bool = True):
     Returns:
         str: DOI
     """
-    doi_path = os.path.join(ds_path, "DOI")
-    doi_file = "version.doi" if version else "dataset.doi"
+    doi_path = ds_path / "DOI"
+    doi_file = doi_path / "version.doi" if version else doi_path / "dataset.doi"
 
     # fall back to doi if version does not exist
-    if not os.path.exists(os.path.join(doi_path, doi_file)):
-        doi_file = "doi"
+    if not doi_path.exists():
         print(f"Warning: {doi_file} does not exist. Falling back to old format 'doi' ")
+        return None
 
-    with open(os.path.join(doi_path, doi_file), "r") as f:
+    with open(doi_file, "r") as f:
         doi_id = f.read().strip()
     doi_id = doi_id.split(".")[-1]
     return doi_id
@@ -821,7 +962,7 @@ def finalize_DOI(ds_path: Path, deposition: dict, prerelease: bool = False):
     if "conceptdoi" in deposition:
         conceptdoi = deposition["conceptdoi"]
     else:
-        conceptdoi = f"10.5281/zenodo.{deposition["conceptrecid"]}"
+        conceptdoi = f"10.5281/zenodo.{deposition['conceptrecid']}"
     conceptdoi_url = doi_url.replace(doi, conceptdoi)
 
     doi_path = os.path.join(ds_path, "DOI")
@@ -848,26 +989,26 @@ def archive_deposition_local(ds_path: Path, arch_name: str, deposition: dict):
         json.dump(deposition, f, indent=2)
 
 
-def update_study_table_with_doi(study_df: pd.DataFrame, ds_path: str | Path):
-    """ """
-    ds_path = Path(ds_path)
-    metadata_path = os.path.join(ds_path, "metadata")
-    STUDY = read_meta_table(os.path.join(metadata_path, "STUDY.csv"))
+# def update_study_table_with_doi(study_df: pd.DataFrame, ds_path: str | Path):
+#     """ """
+#     ds_path = Path(ds_path)
+#     metadata_path = os.path.join(ds_path, "metadata")
+#     STUDY = read_meta_table(os.path.join(metadata_path, "STUDY.csv"))
 
-    # load jsons
-    doi_path = os.path.join(ds_path, "DOI")
+#     # load jsons
+#     doi_path = os.path.join(ds_path, "DOI")
 
-    with open(os.path.join(doi_path, "dataset.doi"), "r") as f:
-        ds_doi = f.read().strip()
-    study_df["dataset_DOI"] = ds_doi
-    study_df["dataset_DOI_url"] = f"https://doi.org/{ds_doi}"
+#     with open(os.path.join(doi_path, "dataset.doi"), "r") as f:
+#         ds_doi = f.read().strip()
+#     study_df["dataset_DOI"] = ds_doi
+#     study_df["dataset_DOI_url"] = f"https://doi.org/{ds_doi}"
 
-    # get dataset version from version file
-    with open(os.path.join(ds_path, "version"), "r") as f:
-        ds_ver = f.read().strip()
-    study_df["dataset_version"] = ds_ver
+#     # get dataset version from version file
+#     with open(os.path.join(ds_path, "version"), "r") as f:
+#         ds_ver = f.read().strip()
+#     study_df["dataset_version"] = ds_ver
 
-    return study_df
+#     return study_df
 
 
 # def clean_json_read(file_path):

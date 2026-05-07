@@ -1,0 +1,22 @@
+# mamba env create -f orchestrator.yml 
+# versions wrong...
+name: orchestrator
+channels:
+- conda-forge
+dependencies:
+- python=3.13
+- ipykernel
+- ipywidgets
+- notebook
+- pandas
+- pip
+- pip:
+  - google-cloud-storage
+    - requests
+    - click
+    - python-dotenv
+    - xhtml2pdf
+    - python-docx 
+    - markdown
+
+  # pip install -e . in the root of this repo to install asap_orchestrator in editable mode

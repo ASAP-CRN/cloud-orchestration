@@ -14,7 +14,8 @@ dependencies = [
     "PyGitHub",
     "zenodo-client",
     "click",
-    "python-dotenv"
+    "python-dotenv",
+    "pydantic>=2.0"
 ]
 requires-python = ">=3.8"
 readme = "README.md"

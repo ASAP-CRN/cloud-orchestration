@@ -46,19 +46,22 @@ datasets_path = root_path / "datasets"
 # v1.0 datasets, v4.3 cde
 datasets = [
     'lee-mouse-ms-p-lung-g2019s-hf-diet',
-    'lee-mouse-ms-mb-plasma-2019s-hf-diet',
+    'lee-mouse-ms-mb-plasma-g2019s-hf-diet', #    'lee-mouse-ms-mb-plasma-2019s-hf-diet',
     'lee-mouse-ms-mb-liver-g2019s-hf-diet',
     'lee-mouse-ms-mb-striatum-g2019s-hf-diet',
     'lee-mouse-ms-mb-lung-g2019s-hf-diet',
     'lee-mouse-ms-mb-kidney-g2019s-hf-diet',
+    
+    'lee-mouse-ms-mb-plasma-g2019s-nuc-quant',
+    'lee-mouse-ms-mb-striatum-g2019s-nuc-quant',
+    'lee-mouse-ms-mb-midbrain-g2019s-nuc-quant',
+
     'lee-mouse-ms-l-plasma-g2019s-hf-diet',
     'lee-mouse-ms-l-liver-g2019s-hf-diet',
     'lee-mouse-ms-l-striatum-g2019s-hf-diet',
     'lee-mouse-ms-l-lung-g2019s-hf-diet',
     'lee-mouse-ms-l-kidney-g2019s-hf-diet',
-    'lee-mouse-ms-mb-plasma-g2019s-nuc-quant',
-    'lee-mouse-ms-mb-striatum-g2019s-nuc-quant',
-    'lee-mouse-ms-mb-midbrain-g2019s-nuc-quant',
+
     'alessi-mouse-ms-p-lung-vps35-d620n-wt',
     'alessi-mouse-ms-p-brain-vps35-d620n-wt',
     'alessi-mouse-ms-p-brain-vps35-d620n-dmso-mli2',
@@ -67,8 +70,8 @@ datasets = [
 
 # cde v3.3
 bump_datasets = [
-'cohort-pmdbs-bulk-rnaseq',# v1.3
-'cohort-pmdbs-sc-rnaseq', # v3.2.0
+'cohort-pmdbs-bulk-rnaseq',# v1.2.1
+'cohort-pmdbs-sc-rnaseq', # v3.1.1
 'team-hafler-pmdbs-sn-rnaseq-pfc',# v1.1
 'team-hardy-pmdbs-bulk-rnaseq', # v1.1
 'team-hardy-pmdbs-sn-rnaseq',# v1.1
@@ -84,49 +87,36 @@ bump_datasets = [
 ]
 
 
-
-datasets = [
-'vangheluwe-ipsc-bulk-atacseq-astro-atp13a2lof',
-'vangheluwe-ipsc-bulk-rnaseq-astro-atp13a2lof',
-'vangheluwe-ipsc-bisulfseq-astro-atp13a2lof',
-
-
-    ]
-
-
-datasets = [
-'lee-mouse-bulk-rnaseq-striatum-g2019s-hf-diet',
-'lee-mouse-sn-rnaseq-midbrain-g2019s-hf-diet',
-'lee-mouse-liver-bulk-rnaseq-g2019s',
-'lee-mouse-ms-p-lung-g2019s-hf-diet',
-'lee-mouse-ms-mb-plasma-2019s-hf-diet',
-'lee-mouse-ms-mb-liver-g2019s-hf-diet',
-'lee-mouse-ms-mb-striatum-g2019s-hf-diet',
-'lee-mouse-ms-mb-lung-g2019s-hf-diet',
-'lee-mouse-ms-mb-kidney-g2019s-hf-diet',
-'lee-mouse-ms-l-plasma-g2019s-hf-diet',
-'lee-mouse-ms-l-liver-g2019s-hf-diet',
-'lee-mouse-ms-l-striatum-g2019s-hf-diet',
-'lee-mouse-ms-l-lung-g2019s-hf-diet',
-'lee-mouse-ms-l-kidney-g2019s-hf-diet',
-'lee-mouse-ms-mb-plasma-g2019s-nuc-quant',
-'lee-mouse-ms-mb-striatum-g2019s-nuc-quant',
-'lee-mouse-ms-mb-midbrain-g2019s-nuc-quant',
-    ]
-
-'scherzer-pmdbs-sn-rnaseq-midbrain-hybsel',
-'scherzer-pmdbs-lr-wgs',
-'scherzer-pmdbs-sn-multiome-midbrain',
-'decamilli-invitro-ms-p-hek293-apex-atg2-silac',
-
-
-datasets = [
-"indipd-ipsc-bulk-rnaseq-kolf21j-wt",
-"indipd-ipsc-cageseq-kolf21j-wt",
-"indipd-ipsc-hicseq-kolf21j-wt",
-"indipd-ipsc-lr-wgs-kolf21j-wt",
-    ]
+# first  we need to create the v1.0 Datasets
 # %%
+
+
+for dataset in datasets:
+    # find the ref name for ingest
+    print(f"Processing {dataset}")
+    ds_path = datasets_path / dataset
+    intake_doc = ds_path / "refs/APEX-ATG2A MS Data Set.docx"
+
+    # write version = 0.1
+    write_version("0.1", ds_path / "version")
+    # refs_path = ds_path / "refs"
+    # ref_files = list(refs_path.glob("*.docx"))
+
+    # if len(ref_files) == 1:
+    #     intake_doc = ref_files[0]
+    # else:
+    #     print("Multiple ref files found.  Please select the correct one.")
+    #     break
+
+    print(intake_doc)
+
+    # INGEST DOI DOCS
+    setup_DOI_info(ds_path, intake_doc, publication_date="2026-04-15")
+
+# %%
+
+
+
 
 for dataset in datasets:
     print(f"Processing {dataset}")

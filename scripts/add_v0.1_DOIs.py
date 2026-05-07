@@ -50,7 +50,7 @@ v01_datasets = [
     'lee-mouse-bulk-rnaseq-striatum-g2019s-hf-diet',
     'lee-mouse-sn-rnaseq-midbrain-g2019s-hf-diet',
     'lee-mouse-liver-bulk-rnaseq-g2019s',
-    'lee-mouse-ms-mb-plasma-2019s-hf-diet',
+    'lee-mouse-ms-mb-plasma-g2019s-hf-diet',
     'lee-mouse-ms-mb-liver-g2019s-hf-diet',
     'lee-mouse-ms-mb-striatum-g2019s-hf-diet',
     'lee-mouse-ms-mb-lung-g2019s-hf-diet',
