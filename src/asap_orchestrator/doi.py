@@ -875,16 +875,10 @@ def bump_doi_version(zenodo: ZenodoClient, old_doi_id: str | int) -> dict:
         old_doi_id = str(old_doi_id)
 
     zenodo.deposition_id = old_doi_id
-    # deposition = zenodo.all_depositions[doi_id] #get_published_deposition(zenodo,doi_id)
-    # zenodo.set_deposition_iddoi_id)
     deposition = zenodo.make_new_version()
     return deposition
 
-    # metadata = deposition["metadata"]
-    # metadata["version"] = new_version
-    # return zenodo.change_metadata(metadata)
 
-    # return zenodo.deposition
 
 
 def update_doi_metadata(

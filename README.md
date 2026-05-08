@@ -1,6 +1,6 @@
 # cloud-orchestration
 
-Central management system for the ASAP CRN Cloud data infrastructure.  Initially this will use python scripts maintain the source-of-truth archives for ASAP CRN Cloud entities: _Datasets_, _Collections_, _Releases_, and _Common Data Elements (CDE)_.  In the future we would like to use configuration files and GitHub Actions to perform the maintainebce.
+Central management system for the ASAP CRN Cloud data infrastructure. Python scripts maintain the source-of-truth archives for ASAP CRN Cloud entities: _Datasets_, _Collections_, _Releases_, and _Common Data Elements (CDE)_.
 
 ## Managed Repositories
 
@@ -13,102 +13,101 @@ Central management system for the ASAP CRN Cloud data infrastructure.  Initially
 
 ## Functionality
 
-Functionality involves several steps which create effects in _Datasets_, _Collections_, _Releases_, _CDE_ repos.  
+### Dataset lifecycle
 
-### Dataset DOI creation and version maintanence
-As contributions to the ASAP CRN Cloud are _Accepted_ one of the first steps is to create a zenodo Dataset DOI.  Datasets are _accepted_ as "v0.1".  When Datasets are first released, the Datasets are version bumped to "v1.0".   Any additional changes to Datasets can result in major or minor version bumps (depending on the revisions being made.) A Dataset's _all versions_ reference is contained in the "dataset.doi" file. Individual release version references are kept in "version.doi" files organized by version.
+Datasets follow a versioned lifecycle tied to Zenodo DOIs:
 
-functions:
-- `create_dataset`
-    - `make_wip_dataset`
-    - `create_dataset_doi`:  
-- `publish_dataset`:  
-    - `publish_dataset_doi`:  
-- `update_dataset`:  
-    - `update_dataset_doi`:  
-    - `update_dataset_version`:
-
-Scripts named by tranches of datasets will use these functions to compose configurations for each dataset (new_dataset.json), and then either update or create and then publish those datasets.
-
+1. **WIP** — new dataset is staged in `WIP/` with a `version` file and optional stub `dataset.json`
+2. **Acceptance** — `dataset.json` is created with a concept DOI (`v0.1`), buckets, and metadata
+3. **First release** — dataset version bumped to `v1.0`, DOI files written, archive snapshot created
+4. **Updates** — major/minor version bumps produce new archive snapshots and updated DOI files
 
 ### Releases
-Regular _"Urgent" Releases_ to ASAP CRN Cloud are made for newly _Accepted_ but uncurated Datasets.    Less regular "Major" or "Minor" Releases are made to release new or updated _Curated_ Datasets.  _Curated_ Datasets are organized into Collections which share common Curation workflows/pipelines.   
 
-#### functions:
-- `define_release`:  Enumerates the release number, what type of release (Urgent, Minor, Major), and which individual Datasets and Colections belong to the Release.
-- `perform_release`: Create `release.json`, and manage the release archive, and produce the releases.json
+Regular releases publish newly accepted or updated datasets:
 
-Scripts named by versions will use these functions to compose configurations for each release update (new_release.json), and then create those releases.  Note that new_collections.json may be defined using the functions detailed below.
+- **Urgent releases** — newly accepted, uncurated datasets
+- **Minor/Major releases** — updated or newly curated datasets, typically organized into Collections
 
+Each release record enumerates which datasets (and dataset versions) and collections belong to it, along with the CDE version in effect.
 
-### Collection
-"Major" or "Minor" Releases are made to release new or updated _Curated_ Datasets.  _Curated_ Datasets are organized into Collections which share common Curation workflows/pipelines.   
+### Scripts
 
+Release and dataset management scripts live in `scripts/`. Key scripts:
 
-#### functions:
-- `define_collection`:  Reads the Collection update from the `define_release` described above. 
-- `update_collection`:  Reads the Collection details created from `define_collection` described above and updates the details. 
-
-
-
+| Script | Purpose |
+|---|---|
+| `sync_cloud_datasets.py` | Validate/repair version files, ensure archive completeness, rebuild `datasets.json` |
+| `make_v<X>_release.py` | Compose and write release artifacts for a given release version |
+| `add_v<X>_release_DOIs.py` | Attach Zenodo DOIs after deposition for a given release |
 
 
 ## Architecture
 
-The `asap_orchestrator` Python package coordinates operations across all managed repositories.
+The `asap_orchestrator` Python package (`src/asap_orchestrator/`) provides:
+
+- **`models.py`** — Pydantic models (`Dataset`, `DatasetBuckets`, `Creator`, `ReleaseRecord`) that define and validate `dataset.json` artifacts
+- **`release.py`** — release composition helpers
+- **`util.py`** — shared utilities
 
 ``` python3
-import asap_orchestrator as ao
+from asap_orchestrator.models import Dataset
 
+ds = Dataset.load("datasets/hafler-pmdbs-sn-rnaseq-pfc")
+ds.save("datasets/hafler-pmdbs-sn-rnaseq-pfc")
 ```
-
-##  api spec
-
-TBC 
-
 
 ## Repository Structure Overview
 
 ### cloud-datasets
 ```
-datasets.json                            # Master index of all datasets
-├── WIP/                                 # Triage area for WIP Datasets not yet released
-|    └──<dataset_name>/  
-|       ├── wip_files
-:       :
-└── <dataset_name>                           # format: <team>-<tissue>-<modality>_<unique_name>
-    ├── dataset.json                         # Metadata: DOI, GCS buckets, releases, CDE version
-    ├── DOI/                                 # Zenodo deposition files and DOI references
-    ├── refs/                                # Reference files for current version
-    └── archive/<version>/                   # Immutable snapshots of past versions
-        └── DOI/                             # Version-specific DOI files
+datasets.json                            # Master index of all datasets (rebuilt by sync_cloud_datasets.py)
+WIP/                                     # Staging area for in-progress datasets
+└── <dataset-name>/
+    ├── dataset.json                     # Stub metadata (optional)
+    └── version                          # Target version string
+datasets/
+└── <dataset-name>/                      # format: <team>-<tissue>-<modality>[-<qualifier>]
+    ├── dataset.json                     # Canonical metadata: DOI, GCS buckets, releases, CDE version
+    ├── version                          # Current version string (source of truth)
+    ├── DOI/                             # Zenodo deposition files for current version
+    │   ├── <dataset-name>.json
+    │   ├── dataset.doi                  # Concept DOI (all versions)
+    │   ├── version.doi                  # Version-specific DOI
+    │   └── deposition.json
+    ├── refs/                            # Reference files for current version
+    └── archive/                         # Immutable snapshots of past versions
+        └── <version>/
+            ├── dataset.json             # Version snapshot
+            ├── DOI/
+            └── refs/
 ```
 
 ### cloud-collections
 ```
 collections.json                         # Master index of all collections
 └── <collection-name>/
-    ├── collection.json                      # Metadata: DOI versions, datasets per release version
-    └── archive/<version>/                   # Immutable snapshots of past versions
-        └── collection.json                  # Version-specific metadata snapshot
+    ├── collection.json                  # Metadata: DOI versions, datasets per release version
+    └── archive/<version>/
+        └── collection.json              # Version-specific metadata snapshot
 ```
 
 ### cloud-releases
 ```
 releases.json                            # Master index of all releases
 └── <release-version>/
-    ├── release.json                         # Snapshot: all datasets, new_datasets, collections, CDE 
-    └── *README*.pdf                            # Release-specific README
+    ├── release.json                     # Snapshot: all datasets, new_datasets, collections, CDE version
+    └── *README*.pdf                     # Release-specific README
 ```
 
 ### cloud-cde
 ```
-cdes.json                                 # Index of all Common Data Elements with versions
+cdes.json                                # Index of all CDE versions
 └── <cde-version>/
-    ├── cde.json                         # CDE date, version, list of tables 
-    ├── cde.csv                          # Snapshot CDE schema table  
+    ├── cde.json                         # CDE date, version, list of tables
+    └── cde.csv                          # Snapshot CDE schema table
 ```
 
-## Bootstrap 
+## Bootstrap
 
-The `bootstrap/` directory contains scripts, tools, and templates used to create the historical (pre Release v4.0.1) archive of Datasets, Collections, and Releases.  An initial YOLO stab of Claude generated code for the `asap_orchestrator` is also here.
+The `bootstrap/` directory contains scripts, tools, and templates used to create the historical (pre v4.0.1) archive of Datasets, Collections, and Releases.
