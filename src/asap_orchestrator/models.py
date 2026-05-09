@@ -37,11 +37,11 @@ class ReleaseRecord(BaseModel):
     dataset_version: Optional[str] = None
 
 
-class VersionRecord(BaseModel):
-    """Per-version record stored under ``dataset.json["all_versions"]``."""
+# class VersionRecord(BaseModel):
+#     """Per-version record stored under ``dataset.json["all_versions"]``."""
 
-    doi: str = ""
-    releases: dict[str, Any] = Field(default_factory=dict)
+#     doi: str = ""
+#     releases: dict[str, Any] = Field(default_factory=dict)
 
 
 class Dataset(BaseModel):
@@ -73,6 +73,7 @@ class Dataset(BaseModel):
     title: str = ""
     description: str = ""
     version: str = "v0.1"
+    dataset_title:  str = ""
     doi: Optional[str] = None
     creators: list[Creator] = Field(default_factory=list)
     keywords: list[str] = Field(default_factory=list)
@@ -82,7 +83,8 @@ class Dataset(BaseModel):
     buckets: DatasetBuckets
     cde_version: Optional[str] = None
     releases: dict[str, ReleaseRecord] = Field(default_factory=dict)
-    all_versions: dict[str, VersionRecord] = Field(default_factory=dict)
+    all_versions: list[str] = Field(default_factory=list)
+    all_releases: list[str] = Field(default_factory=list)
 
     @field_validator("doi", "cde_version", mode="before")
     @classmethod
@@ -127,7 +129,7 @@ class Dataset(BaseModel):
         data = self.model_dump()
         if not data.get("all_versions"):
             del data["all_versions"]
-        (Path(ds_path) / "dataset.json").write_text(json.dumps(data, indent=2))
+        (Path(ds_path) / "dataset.json").write_text(json.dumps(data, indent=4))
 
     # ── Manifest helpers ───────────────────────────────────────────────────────
 

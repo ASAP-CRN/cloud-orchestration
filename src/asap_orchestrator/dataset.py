@@ -9,7 +9,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from .models import Creator, Dataset, DatasetBuckets, ReleaseRecord, VersionRecord
+from .models import Creator, Dataset, DatasetBuckets, ReleaseRecord #, VersionRecord
 from .zenodo_util import ZenodoClient
 
 __all__ = [

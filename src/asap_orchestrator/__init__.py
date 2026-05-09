@@ -62,7 +62,7 @@ from .models import (
     Creator,
     DatasetBuckets,
     ReleaseRecord,
-    VersionRecord,
+    # VersionRecord,
 )
 from .dataset import (
     DatasetDefinition,
