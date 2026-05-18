@@ -1,21 +1,13 @@
 
-# # ASAP CRN — New WIP Dataset Acceptance Template
+# # ASAP CRN — Sync release Dataset DOIs - v0.1, pre-publish v1.0, published v1.0
 #
-# Copy this file and rename it, e.g. `add_v4.1.0_dataset_release_DOIS.py`.
 # Fill in every section marked with TODO before running cell by cell.
 #
 # **Lifecycle covered here:**
-#.  assumes dataset v0.1 dataset DOIs are created:
-#   1. Define dataset metadata (name, collection, CDE version, buckets)
-#   2. Create `dataset.json` stubs in `cloud-datasets/WIP/`
-#   3. Ingest DOI reference `.docx` files to generate Zenodo metadata
-#   4. Create Zenodo draft DOIs at `v0.1`
-### STARTS Here
-#   5. define release paramaters and list of new datasets to release
-#   6a. confirm reference exists and v0.1 DOI available
-#   6b. create v1.0 DOI reference files, including additional annotation for .pdf (e.g. version bump copy)
-#   6c. create unpublished v1.0 zenodo reference
-#  7. publish DOI and copy WIP dataset tree to cloud-datasets root
+#.  assumes dataset v1.0 dataset DOIs are created:
+#   1. Copy version DOI back to asap-crn-cloud-dataset-metadata
+#   2. publish DOI and copy WIP dataset tree to cloud-datasets root
+#   3.  cloud-datasets root back to asap-crn-cloud-dataset-metadata
 
 
 #
@@ -32,57 +24,37 @@ import shutil, json
 %autoreload 2
 # 
 
+
 root_path = Path(__file__).resolve().parents[2]
 datasets_repo_path = root_path / "cloud-datasets"
-
-# %% [Step 5a] Release parameters
-# TODO: set the publication date and CDE version for this acceptance tranche
-PUBLICATION_DATE = "2026-05-31"   # e.g. "2026-05-01"
-CDE_VERSION = "v4.4"              # e.g. "v3.3"
-
-
-# %% [Step 5b].  Tranche of v1.0 datasets
-
-# v1.0 datasets, v4.3 cde
-datasets = [
-    "voet-pmdbs-sn-atacseq-scalebio-hydrop", # 20076952
-    "voet-pmdbs-sn-atacseq-10x", # 20077637
-    "voet-pmdbs-sn-atacseq-hydrop",
-    "voet-pmdbs-sn-atacseq-scalebio-10x",
-    "voet-pmdbs-sn-multimodal",
-    "voet-pmdbs-sn-rnaseq",
-    "voet-pmdbs-sn-rnaseq-parsebio",
-    "scherzer-pmdbs-sn-rnaseq-midbrain-hybsel",
-    "scherzer-pmdbs-lr-wgs"
-    ]
-
-# %% [Step 0] move datasets DOI, ref, version from metadata repo to WIP
+collections_repo_path = root_path / "cloud-collections"
+releases_repo_path = root_path / "cloud-releases"
 metadata_repo_path = root_path / "asap-crn-cloud-dataset-metadata"
-for ds in datasets:
 
-    if "voet" in ds:
-        # append "voet-pmdbs-sn-multiplex"
-        source_path = metadata_repo_path / "datasets/voet-pmdbs-sn-multiplex" / ds
-    else:
-        source_path = metadata_repo_path / "datasets/" / ds
+# %% 
+with open(datasets_repo_path / "datasets.json", "r") as f:
+    datasets = json.load(f)
 
-    ds_path = datasets_repo_path / "WIP" / ds
-    # now we need to copy things
-    if not ds_path.exists():
-        ds_path.mkdir(parents=True, exist_ok=True)
+dataset_names = list(datasets.keys())
 
-    for item in ["DOI", "refs", "version"]:
-        source_subdir = source_path / item
-        target_subdir = ds_path / item
+# %% [Step 0] copy datasets DOI, back to metadata repo to WIP
 
-        if source_subdir.is_dir():
-            shutil.copytree(source_subdir, target_subdir, dirs_exist_ok=True)
-        elif source_subdir.is_file():
-            shutil.copy2(source_subdir, target_subdir)
-        else:
-            print(f"Warning: {source_subdir} does not exist in source for {ds}")
+# make sure you have opened the right branch for this copy
 
+```
+# %% [Step 0] copy datasets DOI, back to metadata repo to WIP
 
+# make sure you have opened the right branch for this copy
+
+for ds in dataset_names:
+
+    source_path = datasets_repo_path / "datasets" / ds
+    dest_path = metadata_repo_path / "datasets" / ds
+
+    dest_path.mkdir(parents=True, exist_ok=True)
+
+    # copy doi, overwriting any existing files
+    shutil.copytree(source_path / "DOI", dest_path / "DOI", dirs_exist_ok=True)
 
 # %%
 

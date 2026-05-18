@@ -21,6 +21,10 @@ class Creator(BaseModel):
     orcid: Optional[str] = None
 
 
+PARTS1 = "gs://asap"
+PARTS2 = ["raw", "dev", "uat", "curated"]
+PARTS3 = "team"
+
 class DatasetBuckets(BaseModel):
     """GCS bucket URIs for each deployment environment."""
 
@@ -28,6 +32,26 @@ class DatasetBuckets(BaseModel):
     dev: str
     uat: str
     prod: str
+    # add checking to make sure that the buckets are valid
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    @field_validator("raw", "dev", "uat", "prod")
+    def check_bucket(cls, v):
+        if not v.startswith("gs://"):
+            raise ValueError("Bucket URIs must start with gs://")
+        
+        v_parts = v.split("-")
+        # check parts 1, 2, 3
+
+        if "cohort" not in v:
+            if v_parts[0] != PARTS1 or v_parts[1] not in PARTS2 or v_parts[2] != PARTS3:
+                raise ValueError("Invalid bucket URI")
+        else:
+            if v_parts[0] != PARTS1 or v_parts[1] != "cohort" or v_parts[2] != PARTS3:
+                raise ValueError("Invalid bucket URI")
+            
+        return v
 
 
 class ReleaseRecord(BaseModel):
@@ -37,11 +61,11 @@ class ReleaseRecord(BaseModel):
     dataset_version: Optional[str] = None
 
 
-class VersionRecord(BaseModel):
-    """Per-version record stored under ``dataset.json["all_versions"]``."""
+# class VersionRecord(BaseModel):
+#     """Per-version record stored under ``dataset.json["all_versions"]``."""
 
-    doi: str = ""
-    releases: dict[str, Any] = Field(default_factory=dict)
+#     doi: str = ""
+#     releases: dict[str, Any] = Field(default_factory=dict)
 
 
 class Dataset(BaseModel):
@@ -73,6 +97,7 @@ class Dataset(BaseModel):
     title: str = ""
     description: str = ""
     version: str = "v0.1"
+    dataset_title:  str = ""
     doi: Optional[str] = None
     creators: list[Creator] = Field(default_factory=list)
     keywords: list[str] = Field(default_factory=list)
@@ -82,7 +107,8 @@ class Dataset(BaseModel):
     buckets: DatasetBuckets
     cde_version: Optional[str] = None
     releases: dict[str, ReleaseRecord] = Field(default_factory=dict)
-    all_versions: dict[str, VersionRecord] = Field(default_factory=dict)
+    all_versions: list[str] = Field(default_factory=list)
+    all_releases: list[str] = Field(default_factory=list)
 
     @field_validator("doi", "cde_version", mode="before")
     @classmethod
@@ -127,7 +153,7 @@ class Dataset(BaseModel):
         data = self.model_dump()
         if not data.get("all_versions"):
             del data["all_versions"]
-        (Path(ds_path) / "dataset.json").write_text(json.dumps(data, indent=2))
+        (Path(ds_path) / "dataset.json").write_text(json.dumps(data, indent=4))
 
     # ── Manifest helpers ───────────────────────────────────────────────────────
 

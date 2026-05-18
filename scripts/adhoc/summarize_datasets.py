@@ -1,22 +1,13 @@
 
-# # ASAP CRN — New WIP Dataset Acceptance Template
+# # ASAP CRN — Summarize Datasets to create Collections and Releases
 #
-# Copy this file and rename it, e.g. `add_v4.1.0_dataset_release_DOIS.py`.
-# Fill in every section marked with TODO before running cell by cell.
-#
-# **Lifecycle covered here:**
-#.  assumes dataset v0.1 dataset DOIs are created:
-#   1. Define dataset metadata (name, collection, CDE version, buckets)
-#   2. Create `dataset.json` stubs in `cloud-datasets/WIP/`
-#   3. Ingest DOI reference `.docx` files to generate Zenodo metadata
-#   4. Create Zenodo draft DOIs at `v0.1`
-### STARTS Here
-#   5. define release paramaters and list of new datasets to release
-#   6a. confirm reference exists and v0.1 DOI available
-#   6b. create v1.0 DOI reference files, including additional annotation for .pdf (e.g. version bump copy)
-#   6c. create unpublished v1.0 zenodo reference
-#  7. publish DOI and copy WIP dataset tree to cloud-datasets root
 
+# **Lifecycle covered here:**
+#   1a. read datasets.json to get the list of all datasets and their metadata
+#   1b. remake datasets.json if needed to ensure it reflects the actual dataset directories and metadata on disk (DOI, version, ref file presence) 
+#   2. Summarize all releases from datasets 
+#   3. collate all collections from releases
+#   4. identify missing DOIs, reference files, etc
 
 #
 # %%
@@ -34,15 +25,159 @@ import shutil, json
 
 root_path = Path(__file__).resolve().parents[2]
 datasets_repo_path = root_path / "cloud-datasets"
+releases_repo_path = root_path / "cloud-releases"
+collections_repo_path = root_path / "cloud-collections"
 
 # %% [Step 5a] Release parameters
 # TODO: set the publication date and CDE version for this acceptance tranche
-PUBLICATION_DATE = "2026-05-31"   # e.g. "2026-05-01"
-CDE_VERSION = "v4.4"              # e.g. "v3.3"
+CURRENT_RELEASE = "v4.1.0"   
 
 
-# %% [Step 5b].  Tranche of v1.0 datasets
+# %% [Step 1].  get all datasets
+datasets_json_path = datasets_repo_path / "datasets.json"
+with open(datasets_json_path, "r") as f:
+    datasets = json.load(f)
 
+all_datasets = list(datasets.keys())
+print(f"Found {len(all_datasets)} datasets in {datasets_json_path}")
+
+#%%
+# make sure we have the expected directory structure for each dataset, and if not, create it.  This is a pre-requisite for the next steps where we will read from these directories.
+dataset_dirs = [ds.name for ds in (datasets_repo_path / "datasets").glob("*")]
+
+extra_json_dsets = set(all_datasets) - set(dataset_dirs)
+extra_dir_dsets = set(dataset_dirs) - set(all_datasets)
+if extra_json_dsets:
+    print(f"WARNING: the following datasets are listed in {datasets_json_path} but do not have a corresponding directory in cloud-datasets/datasets/: {extra_json_dsets}")
+if extra_dir_dsets:    
+    print(f"WARNING: the following datasets have a directory in cloud-datasets/datasets/ but are not listed in {datasets_json_path}: {extra_dir_dsets}")
+
+
+#%% [Step 2] Summarize all releases from datasets
+# For each dataset, read the version file to determine which release it belongs to.  Then
+# collate all datasets by release, and print a summary of which datasets belong to which releases, along with their DOI and reference file status.
+# e.g.
+    # "alessi-invitro-ms-p-hek293-gtip": {
+    #     "name": "alessi-invitro-ms-p-hek293-gtip",
+    #     "title": "team-alessi-invitro-ms-p-hek293-gtip",
+    #     "description": "proteomics dataset from team-alessi",
+    #     "version": "v1.1",
+    #     "doi": "10.5281/zenodo.17355407",
+    #     "releases": ["v4.0.2"],
+    #     "current_release": "v4.0.2"
+    #     "creators": ["alessi"],
+    #     "releases": ["v4.0.2"]
+    # }
+
+fix_authors = True
+fix_lists = True
+datasets_dict = {}
+for dataset, ds_info in datasets.items():
+    if "cohort" not in dataset:
+        continue
+    else:
+        print(f"Processing {dataset}")
+    # load dataset.json into Dataset model
+    ds_path = datasets_repo_path / "datasets" / dataset
+    
+    dataset_json_path = ds_path / "dataset.json"
+    if dataset_json_path.exists():
+        with open(dataset_json_path, "r") as f:
+            dataset_json = json.load(f)
+    else:
+        print(f"WARNING: dataset.json not found for dataset {dataset} at expected path: {dataset_json_path}")
+        dataset_json = {}
+
+    # load project.json to get authors
+    project_json_path = ds_path / "DOI" / "project.json"
+    if project_json_path.exists():
+        with open(project_json_path, "r") as f:
+            project_info = json.load(f)
+        authors = project_info.get("creators", [])
+        dataset_title = project_info.get("title", "")
+    else:
+        print(f"WARNING: project.json not found for dataset {dataset} at expected path: {project_json_path}")
+        authors = []
+        dataset_title = ""
+    
+    # if fix creators
+    # load dataset.json for update
+    if fix_authors: 
+        dataset_json["creators"] = authors if authors else dataset_json.get("creators", [])
+        dataset_json["dataset_title"] = dataset_title if dataset_title else dataset_json.get("title", "")
+
+        with open(dataset_json_path, "w") as f:
+            json.dump(dataset_json, f, indent=4)
+
+
+    # fix the all_versions while we are here
+    all_versions = dataset_json.get("releases", {})
+    ds_vers = []
+    releases = []
+    for rel_ver, rel_info in all_versions.items():
+        releases.append(rel_ver)
+    ds_vers.append(rel_info["dataset_version"])
+
+    dataset_model = ao.Dataset.load(ds_path)
+    export_to_datasets = dataset_model.model_dump()
+    export_to_datasets["all_versions"] = list(set(ds_vers))
+    export_to_datasets["all_releases"] = releases
+    
+    datasets_dict[dataset] = export_to_datasets
+
+#%% write back to datasets.json
+datasets_json_path = datasets_repo_path / "datasets.json"
+with open(datasets_json_path, "w") as f:
+    json.dump(datasets_dict, f, indent=4)
+
+
+
+#%% [Step 2] Summarize all releases from datasets
+# For each dataset, read the version file to determine which release it belongs to.  Then
+# collate all datasets by release, and print a summary of which datasets belong to which releases, along with their DOI and reference file status.
+# e.g.
+    # "alessi-invitro-ms-p-hek293-gtip": {
+    #     "name": "alessi-invitro-ms-p-hek293-gtip",
+    #     "title": "team-alessi-invitro-ms-p-hek293-gtip",
+    #     "description": "proteomics dataset from team-alessi",
+    #     "version": "v1.1",
+    #     "doi": "10.5281/zenodo.17355407",
+    #     "releases": ["v4.0.2"],
+    #     "current_release": "v4.0.2"
+    #     "authors": ["alessi"],
+    # }
+
+releases = {}
+for dataset, ds_info in datasets.items():
+    # load dataset.json into Dataset model
+    ds_path = datasets_repo_path / "datasets" / dataset
+    dataset_model = ao.Dataset.load(ds_path)
+    release = ds_info.get("release", [])
+    if not release:
+        print(f"WARNING: no release information found for dataset {dataset} in {datasets_json_path}")
+    for release_ver in release:
+
+
+
+        if release_ver not in releases:
+            releases[release_ver] = {}
+        releases[release_ver].append(dataset)
+
+
+
+
+
+
+for dataset in all_datasets:
+    # find the ref name for ingest
+    # print(f"Processing {dataset}")
+    ds_path = datasets_repo_path / "datasets" / dataset
+    if not ds_path.exists():
+        # dataset is missing
+        print(f"missing dataset: {dataset} at expected path: {ds_path}")
+ 
+
+# %%
 # v1.0 datasets, v4.3 cde
 datasets = [
     "voet-pmdbs-sn-atacseq-scalebio-hydrop", # 20076952

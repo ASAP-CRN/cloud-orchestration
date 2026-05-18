@@ -221,6 +221,7 @@ class ZenodoClient(object):
             )
 
         self.deposition_id = dep_id
+        self.bucket = self._get_bucket_by_id(dep_id)
         # get request, returns our response
         r = requests.get(
             f"{self._endpoint}/deposit/depositions/{dep_id}",
@@ -388,6 +389,12 @@ class ZenodoClient(object):
     @property
     def token(self):
         return self._token
+
+    # @property
+    # def bucket(self):
+    #     if self.bucket is None and self.deposition_id is not None:
+    #         self.bucket = self._get_bucket_by_id(self.deposition_id)
+    #     return self._bucket
 
     @property
     def all_depositions(self):
@@ -663,12 +670,13 @@ class ZenodoClient(object):
     def make_new_version(self) -> dict:
         """update an existing record for a new version"""
         url_action = self._get_deposition_by_id()["links"]["newversion"]
-        print(url_action)
+        # print(url_action)
+        print(f"making new version of deposition id: {self.deposition_id}")
+        time.sleep(2)
         r = requests.post(url_action, params={"access_token": self.token})
         r.raise_for_status()
 
         # adding this to let new id propagate in the backend
-        time.sleep(2)
         time.sleep(5)
         return r.json()
 

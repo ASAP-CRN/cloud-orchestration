@@ -35,27 +35,30 @@ import shutil, json
 root_path = Path(__file__).resolve().parents[2]
 datasets_repo_path = root_path / "cloud-datasets"
 
-# %% [Step 5a] Release parameters
-# TODO: set the publication date and CDE version for this acceptance tranche
-PUBLICATION_DATE = "2026-05-31"   # e.g. "2026-05-01"
-CDE_VERSION = "v4.4"              # e.g. "v3.3"
-
-
-# %% [Step 5b].  Tranche of v1.0 datasets
-
+# %% [Step 1] Release parameters
+# TODO: fill in release version, type, CDE version, and optional release DOI
+RELEASE_VERSION = "v5.0.0"    # e.g. "v4.1.0"
+RELEASE_TYPE = "Major"        # "Urgent" | "Minor" | "Major"
+CDE_VERSION = "v4.4"          # e.g. "v3.3"
+RELEASE_DOI = "10.5281/zenodo."              # Zenodo concept DOI for the release itself, or ""
+RELEASE_DATE = "2026-06-10"
+# %% [Step 2] Define datasets NEW or VERSION-BUMPED in this release
+# Each entry needs a published (or pre-reserved) Zenodo DOI.
+# Use version="v1.0" for datasets being released for the first time (promoted
+# from WIP v0.1).  Use the new bumped version for datasets being re-released.
 # v1.0 datasets, v4.3 cde
-datasets = [
-    "voet-pmdbs-sn-atacseq-scalebio-hydrop", # 20076952
-    "voet-pmdbs-sn-atacseq-10x", # 20077637
-    "voet-pmdbs-sn-atacseq-hydrop",
-    "voet-pmdbs-sn-atacseq-scalebio-10x",
-    "voet-pmdbs-sn-multimodal",
-    "voet-pmdbs-sn-rnaseq",
-    "voet-pmdbs-sn-rnaseq-parsebio",
-    "scherzer-pmdbs-sn-rnaseq-midbrain-hybsel",
-    "scherzer-pmdbs-lr-wgs"
-    ]
+new_datasets = [
+    "team-jakobsson-invitro-bulk-rnaseq-microglia",
+    "team-jakobsson-invitro-bulk-rnaseq-dopaminergic",
+    "team-voet-pmdbs-sn-atacseq-10x",
+]
 
+
+new_collections = [
+    "invitro-bulk-rnaseq",
+    "pmdbs-sc-atacseq",
+
+]
 # %% [Step 0] move datasets DOI, ref, version from metadata repo to WIP
 metadata_repo_path = root_path / "asap-crn-cloud-dataset-metadata"
 for ds in datasets:

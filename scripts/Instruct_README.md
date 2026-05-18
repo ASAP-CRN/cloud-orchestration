@@ -1,9 +1,8 @@
-# cloud-orchestration
 
-Central management system for the ASAP CRN Cloud data infrastructure. Python scripts maintain the source-of-truth archives for ASAP CRN Cloud entities: _Datasets_, _Collections_, _Releases_, and _Common Data Elements (CDE)_.
+# cloud-orchestration
+Central management system for the ASAP CRN Cloud data infrastructure. Python scripts maintain the source-of-truth archives for ASAP CRN Cloud entities: _Datasets_, _Collections_, _Releases_, and IN THE FUTURE _Common Data Elements (CDE)_.  Ignore cloud-cde for now.
 
 ## Managed Repositories
-
 | Repository | Purpose |
 |---|---|
 | [ASAP-CRN/cloud-datasets](https://github.com/ASAP-CRN/cloud-datasets) | Source-of-truth archive for all team-contributed datasets |
@@ -12,7 +11,6 @@ Central management system for the ASAP CRN Cloud data infrastructure. Python scr
 | [ASAP-CRN/cloud-cde](https://github.com/ASAP-CRN/cloud-cde) | Common Data Element definitions and versioning |
 
 ## Functionality
-
 ### Dataset lifecycle
 
 Datasets follow a versioned lifecycle tied to Zenodo DOIs:
@@ -25,7 +23,6 @@ Datasets follow a versioned lifecycle tied to Zenodo DOIs:
 ### Releases
 
 Regular releases publish newly accepted or updated datasets:
-
 - **Urgent releases** — newly accepted, uncurated datasets
 - **Minor/Major releases** — updated or newly curated datasets, typically organized into Collections
 
@@ -33,28 +30,13 @@ Each release record enumerates which datasets (and dataset versions) and collect
 
 ### Scripts
 
-Release and dataset management scripts live in `scripts/`. Key scripts:
-
-| Script | Purpose |
-|---|---|
-| `sync_cloud_datasets.py` | Validate/repair version files, ensure archive completeness, rebuild `datasets.json` |
-| `make_v<X>_release.py` | Compose and write release artifacts for a given release version |
-| `add_v<X>_release_DOIs.py` | Attach Zenodo DOIs after deposition for a given release |
-
-
 ## Architecture
-
 The `asap_orchestrator` Python package (`src/asap_orchestrator/`) provides:
-
-- **`models.py`** — Pydantic models (`Dataset`, `DatasetBuckets`, `Creator`, `ReleaseRecord`) that define and validate `dataset.json` artifacts
-- **`release.py`** — release composition helpers
-- **`util.py`** — shared utilities
+provides a bunch of helper tools.  Read `scripts/define_v4.1.1_release.py` for some context.
 
 ``` python3
-from asap_orchestrator.models import Dataset
+import asap_orchestrator as ao
 
-ds = Dataset.load("datasets/hafler-pmdbs-sn-rnaseq-pfc")
-ds.save("datasets/hafler-pmdbs-sn-rnaseq-pfc")
 ```
 
 ## Repository Structure Overview
@@ -100,6 +82,13 @@ releases.json                            # Master index of all releases
     └── *README*.pdf                     # Release-specific README
 ```
 
+
+## TASK
+The pydantic models supporting the Dataset structuring and modifications are working well.  Make pydantic models for Releases and Collections.  The individual collection `collection.json` seem to be accurate through the v4.1.1 "release".  Please make the `collections.json` reflect that data.  (And test for self-consistency between the Dataset and Release references.)
+
+
+
+IGNORE BELOW:
 ### cloud-cde
 ```
 cdes.json                                # Index of all CDE versions
@@ -109,5 +98,4 @@ cdes.json                                # Index of all CDE versions
 ```
 
 ## Bootstrap
-
-The `bootstrap/` directory contains scripts, tools, and templates used to create the historical (pre v4.0.1) archive of Datasets, Collections, and Releases.
+The `bootstrap/` directory contains scripts, tools, and templates used to create the historical (pre v4.0.1) archive of Datasets, Collections, and Releases. 
