@@ -21,6 +21,10 @@ class Creator(BaseModel):
     orcid: Optional[str] = None
 
 
+PARTS1 = "gs://asap"
+PARTS2 = ["raw", "dev", "uat", "curated"]
+PARTS3 = "team"
+
 class DatasetBuckets(BaseModel):
     """GCS bucket URIs for each deployment environment."""
 
@@ -28,6 +32,26 @@ class DatasetBuckets(BaseModel):
     dev: str
     uat: str
     prod: str
+    # add checking to make sure that the buckets are valid
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    @field_validator("raw", "dev", "uat", "prod")
+    def check_bucket(cls, v):
+        if not v.startswith("gs://"):
+            raise ValueError("Bucket URIs must start with gs://")
+        
+        v_parts = v.split("-")
+        # check parts 1, 2, 3
+
+        if "cohort" not in v:
+            if v_parts[0] != PARTS1 or v_parts[1] not in PARTS2 or v_parts[2] != PARTS3:
+                raise ValueError("Invalid bucket URI")
+        else:
+            if v_parts[0] != PARTS1 or v_parts[1] != "cohort" or v_parts[2] != PARTS3:
+                raise ValueError("Invalid bucket URI")
+            
+        return v
 
 
 class ReleaseRecord(BaseModel):

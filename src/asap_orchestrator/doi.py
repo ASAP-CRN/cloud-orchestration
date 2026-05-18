@@ -224,6 +224,8 @@ def ingest_DOI_doc(
     with open(os.path.join(ds_path, "version"), "r") as f:
         ds_ver = f.read().strip()
 
+    doi_path = ds_path / "DOI"
+
     if not force:
         # doi_json_path = ds_path / "DOI" / f"{long_dataset_name}.json"
         doi_json_path = ds_path / "DOI" / f"project.json"
@@ -247,8 +249,7 @@ def ingest_DOI_doc(
             metadata = _make_metadata_from_project(existing_data)
             export_data = {"metadata": metadata}
 
-            # dump json
-            doi_path = ds_path / "DOI"
+
 
             with open(doi_path / f"{long_dataset_name}.json", "w") as f:
                 json.dump(export_data, f, indent=4)

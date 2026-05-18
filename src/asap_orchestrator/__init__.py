@@ -106,6 +106,7 @@ from .doi import (
 )
 
 from .util import *
+from .bucket_util import *
 
 __all__ = [
     # models
@@ -154,4 +155,13 @@ __all__ = [
     "get_cde_version",
     "write_version",
     "archive_CDE",
+    # bucket_util
+    "gcloud_ls",
+    "gcloud_rsync",
+    "gcloud_mv",
+    "gcloud_rm",
+    "gcloud_cp",
+    "authenticate_with_service_account",
+    "create_collection_bucket",
+    "describe_bucket"
 ]
