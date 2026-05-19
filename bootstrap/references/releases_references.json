@@ -1720,7 +1720,7 @@
           }
         ],
         "keywords": [
-          "pmdbs-spatial",
+          "pmdbs-spatial-rnaseq",
           "pmdbs-other",
           "edwards"
         ],
@@ -1806,7 +1806,7 @@
           }
         ],
         "keywords": [
-          "pmdbs-spatial",
+          "pmdbs-spatial-rnaseq",
           "pmdbs-other",
           "edwards"
         ],
@@ -2244,7 +2244,7 @@
           }
         ],
         "keywords": [
-          "pmdbs-spatial",
+          "pmdbs-spatial-rnaseq",
           "pmdbs-other",
           "edwards"
         ],
@@ -2272,7 +2272,7 @@
           }
         ],
         "keywords": [
-          "mouse-spatial",
+          "mouse-spatial-rnaseq",
           "mouse-other",
           "cragg"
         ],
@@ -2302,7 +2302,7 @@
           }
         ],
         "keywords": [
-          "mouse-spatial",
+          "mouse-spatial-rnaseq",
           "mouse-other",
           "cragg"
         ],
@@ -2712,13 +2712,13 @@
           }
         ],
         "keywords": [
-          "pmdbs-spatial",
-          "pmdbs-spatial",
+          "pmdbs-spatial-rnaseq",
+          "pmdbs-spatial-rnaseq",
           "edwards"
         ],
         "license": "CC-BY-4.0",
         "references": [],
-        "collection": "pmdbs-spatial",
+        "collection": "pmdbs-spatial-rnaseq",
         "buckets": {
           "raw": "gs://asap-raw-team-edwards-pmdbs-spatial-geomx-th",
           "dev": "gs://asap-dev-team-edwards-pmdbs-spatial-geomx-th",
@@ -2740,13 +2740,13 @@
           }
         ],
         "keywords": [
-          "mouse-spatial",
-          "mouse-spatial",
+          "mouse-spatial-rnaseq",
+          "mouse-spatial-rnaseq",
           "cragg"
         ],
         "license": "CC-BY-4.0",
         "references": [],
-        "collection": "mouse-spatial",
+        "collection": "mouse-spatial-rnaseq",
         "buckets": {
           "raw": "gs://asap-raw-team-cragg-mouse-spatial-visium-striatum",
           "dev": "gs://asap-dev-team-cragg-mouse-spatial-visium-striatum",
@@ -3162,13 +3162,13 @@
           }
         ],
         "keywords": [
-          "pmdbs-spatial",
-          "pmdbs-spatial",
+          "pmdbs-spatial-rnaseq",
+          "pmdbs-spatial-rnaseq",
           "edwards"
         ],
         "license": "CC-BY-4.0",
         "references": [],
-        "collection": "pmdbs-spatial",
+        "collection": "pmdbs-spatial-rnaseq",
         "buckets": {
           "raw": "gs://asap-raw-team-edwards-pmdbs-spatial-geomx-th",
           "dev": "gs://asap-dev-team-edwards-pmdbs-spatial-geomx-th",
@@ -3190,13 +3190,13 @@
           }
         ],
         "keywords": [
-          "mouse-spatial",
-          "mouse-spatial",
+          "mouse-spatial-rnaseq",
+          "mouse-spatial-rnaseq",
           "cragg"
         ],
         "license": "CC-BY-4.0",
         "references": [],
-        "collection": "mouse-spatial",
+        "collection": "mouse-spatial-rnaseq",
         "buckets": {
           "raw": "gs://asap-raw-team-cragg-mouse-spatial-visium-striatum",
           "dev": "gs://asap-dev-team-cragg-mouse-spatial-visium-striatum",
@@ -3248,13 +3248,13 @@
         "cde_version": "v3.2"
       },
       {
-        "name": "pmdbs-spatial",
+        "name": "pmdbs-spatial-rnaseq",
         "version": "v1.0.0",
         "doi": null,
         "cde_version": "v3.2"
       },
       {
-        "name": "mouse-spatial",
+        "name": "mouse-spatial-rnaseq",
         "version": "v1.0.0",
         "doi": null,
         "cde_version": "v3.2"
@@ -3640,13 +3640,13 @@
           }
         ],
         "keywords": [
-          "pmdbs-spatial",
-          "pmdbs-spatial",
+          "pmdbs-spatial-rnaseq",
+          "pmdbs-spatial-rnaseq",
           "edwards"
         ],
         "license": "CC-BY-4.0",
         "references": [],
-        "collection": "pmdbs-spatial",
+        "collection": "pmdbs-spatial-rnaseq",
         "buckets": {
           "raw": "gs://asap-raw-team-edwards-pmdbs-spatial-geomx-th",
           "dev": "gs://asap-dev-team-edwards-pmdbs-spatial-geomx-th",
@@ -3668,13 +3668,13 @@
           }
         ],
         "keywords": [
-          "mouse-spatial",
-          "mouse-spatial",
+          "mouse-spatial-rnaseq",
+          "mouse-spatial-rnaseq",
           "cragg"
         ],
         "license": "CC-BY-4.0",
         "references": [],
-        "collection": "mouse-spatial",
+        "collection": "mouse-spatial-rnaseq",
         "buckets": {
           "raw": "gs://asap-raw-team-cragg-mouse-spatial-visium-striatum",
           "dev": "gs://asap-dev-team-cragg-mouse-spatial-visium-striatum",
@@ -3780,7 +3780,7 @@
           }
         ],
         "keywords": [
-          "pmdbs-spatial",
+          "pmdbs-spatial-rnaseq",
           "other-pmdbs",
           "scherzer"
         ],
@@ -3978,7 +3978,7 @@
           }
         ],
         "keywords": [
-          "pmdbs-spatial",
+          "pmdbs-spatial-rnaseq",
           "other-pmdbs",
           "scherzer"
         ],
@@ -4064,13 +4064,13 @@
         "cde_version": "v3.2"
       },
       {
-        "name": "pmdbs-spatial",
+        "name": "pmdbs-spatial-rnaseq",
         "version": "v1.0.0",
         "doi": null,
         "cde_version": "v3.2"
       },
       {
-        "name": "mouse-spatial",
+        "name": "mouse-spatial-rnaseq",
         "version": "v1.0.0",
         "doi": null,
         "cde_version": "v3.2"
@@ -4456,13 +4456,13 @@
           }
         ],
         "keywords": [
-          "pmdbs-spatial",
-          "pmdbs-spatial",
+          "pmdbs-spatial-rnaseq",
+          "pmdbs-spatial-rnaseq",
           "edwards"
         ],
         "license": "CC-BY-4.0",
         "references": [],
-        "collection": "pmdbs-spatial",
+        "collection": "pmdbs-spatial-rnaseq",
         "buckets": {
           "raw": "gs://asap-raw-team-edwards-pmdbs-spatial-geomx-th",
           "dev": "gs://asap-dev-team-edwards-pmdbs-spatial-geomx-th",
@@ -4484,13 +4484,13 @@
           }
         ],
         "keywords": [
-          "mouse-spatial",
-          "mouse-spatial",
+          "mouse-spatial-rnaseq",
+          "mouse-spatial-rnaseq",
           "cragg"
         ],
         "license": "CC-BY-4.0",
         "references": [],
-        "collection": "mouse-spatial",
+        "collection": "mouse-spatial-rnaseq",
         "buckets": {
           "raw": "gs://asap-raw-team-cragg-mouse-spatial-visium-striatum",
           "dev": "gs://asap-dev-team-cragg-mouse-spatial-visium-striatum",
@@ -4596,7 +4596,7 @@
           }
         ],
         "keywords": [
-          "pmdbs-spatial",
+          "pmdbs-spatial-rnaseq",
           "other-pmdbs",
           "scherzer"
         ],
@@ -4796,13 +4796,13 @@
         "cde_version": "v3.2"
       },
       {
-        "name": "pmdbs-spatial",
+        "name": "pmdbs-spatial-rnaseq",
         "version": "v1.0.0",
         "doi": null,
         "cde_version": "v3.2"
       },
       {
-        "name": "mouse-spatial",
+        "name": "mouse-spatial-rnaseq",
         "version": "v1.0.0",
         "doi": null,
         "cde_version": "v3.2"
@@ -5188,13 +5188,13 @@
           }
         ],
         "keywords": [
-          "pmdbs-spatial",
-          "pmdbs-spatial",
+          "pmdbs-spatial-rnaseq",
+          "pmdbs-spatial-rnaseq",
           "edwards"
         ],
         "license": "CC-BY-4.0",
         "references": [],
-        "collection": "pmdbs-spatial",
+        "collection": "pmdbs-spatial-rnaseq",
         "buckets": {
           "raw": "gs://asap-raw-team-edwards-pmdbs-spatial-geomx-th",
           "dev": "gs://asap-dev-team-edwards-pmdbs-spatial-geomx-th",
@@ -5216,13 +5216,13 @@
           }
         ],
         "keywords": [
-          "mouse-spatial",
-          "mouse-spatial",
+          "mouse-spatial-rnaseq",
+          "mouse-spatial-rnaseq",
           "cragg"
         ],
         "license": "CC-BY-4.0",
         "references": [],
-        "collection": "mouse-spatial",
+        "collection": "mouse-spatial-rnaseq",
         "buckets": {
           "raw": "gs://asap-raw-team-cragg-mouse-spatial-visium-striatum",
           "dev": "gs://asap-dev-team-cragg-mouse-spatial-visium-striatum",
@@ -5328,13 +5328,13 @@
           }
         ],
         "keywords": [
-          "pmdbs-spatial",
+          "pmdbs-spatial-rnaseq",
           "other-pmdbs",
           "scherzer"
         ],
         "license": "CC-BY-4.0",
         "references": [],
-        "collection": "pmdbs-spatial",
+        "collection": "pmdbs-spatial-rnaseq",
         "buckets": {
           "raw": "gs://asap-raw-team-scherzer-pmdbs-spatial-visium-mtg",
           "dev": "gs://asap-dev-team-scherzer-pmdbs-spatial-visium-mtg",
@@ -5890,13 +5890,13 @@
           }
         ],
         "keywords": [
-          "pmdbs-spatial",
-          "pmdbs-spatial",
+          "pmdbs-spatial-rnaseq",
+          "pmdbs-spatial-rnaseq",
           "edwards"
         ],
         "license": "CC-BY-4.0",
         "references": [],
-        "collection": "pmdbs-spatial",
+        "collection": "pmdbs-spatial-rnaseq",
         "buckets": {
           "raw": "gs://asap-raw-team-edwards-pmdbs-spatial-geomx-th",
           "dev": "gs://asap-dev-team-edwards-pmdbs-spatial-geomx-th",
@@ -5918,13 +5918,13 @@
           }
         ],
         "keywords": [
-          "mouse-spatial",
-          "mouse-spatial",
+          "mouse-spatial-rnaseq",
+          "mouse-spatial-rnaseq",
           "cragg"
         ],
         "license": "CC-BY-4.0",
         "references": [],
-        "collection": "mouse-spatial",
+        "collection": "mouse-spatial-rnaseq",
         "buckets": {
           "raw": "gs://asap-raw-team-cragg-mouse-spatial-visium-striatum",
           "dev": "gs://asap-dev-team-cragg-mouse-spatial-visium-striatum",
@@ -6030,13 +6030,13 @@
           }
         ],
         "keywords": [
-          "pmdbs-spatial",
+          "pmdbs-spatial-rnaseq",
           "other-pmdbs",
           "scherzer"
         ],
         "license": "CC-BY-4.0",
         "references": [],
-        "collection": "pmdbs-spatial",
+        "collection": "pmdbs-spatial-rnaseq",
         "buckets": {
           "raw": "gs://asap-raw-team-scherzer-pmdbs-spatial-visium-mtg",
           "dev": "gs://asap-dev-team-scherzer-pmdbs-spatial-visium-mtg",
@@ -6234,13 +6234,13 @@
         "cde_version": "v3.3"
       },
       {
-        "name": "pmdbs-spatial",
+        "name": "pmdbs-spatial-rnaseq",
         "version": "v1.1.0",
         "doi": null,
         "cde_version": "v3.3"
       },
       {
-        "name": "mouse-spatial",
+        "name": "mouse-spatial-rnaseq",
         "version": "v1.0.0",
         "doi": null,
         "cde_version": "v3.3"
