@@ -890,7 +890,7 @@
           }
         ],
         "keywords": [
-          "pmdbs-spatial",
+          "pmdbs-spatial-rnaseq",
           "pmdbs-other",
           "edwards"
         ],
@@ -937,7 +937,7 @@
           }
         ],
         "keywords": [
-          "mouse-spatial",
+          "mouse-spatial-rnaseq",
           "mouse-other",
           "cragg"
         ],
@@ -1113,7 +1113,7 @@
           }
         ],
         "keywords": [
-          "pmdbs-spatial",
+          "pmdbs-spatial-rnaseq",
           "other-pmdbs",
           "scherzer"
         ],
