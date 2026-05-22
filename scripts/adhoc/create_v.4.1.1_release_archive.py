@@ -88,18 +88,18 @@ for dataset, dataset_info in datasets.items():
     #. - datasets's refs/archive/<dataset_version>/DOI/
     #. - datasets's refs/archive/<dataset_version>/refs/
 
-    # copy the ds_path/ to the archive
-    shutil.copytree(
-        ds_path,
-        f"{dataset_archive}/{dataset}"
-    )
+    # # copy the ds_path/ to the archive
+    # shutil.copytree(
+    #     ds_path,
+    #     f"{dataset_archive}/{dataset}"
+    # )
     
     # make an archive of datasets from the curated bucket
     #  - dataset's metadata/release/
     #  - dataset's metadata/original/ 
     #  - datasets's file_metadata/                                        
-    ao.gcloud_rsync(f"{ds_bucket}/metadata/release/", f"{dataset_archive}/{dataset}/metadata/release/",directory=True)
-    ao.gcloud_rsync(f"{ds_bucket}/file_metadata/", f"{dataset_archive}/{dataset}/file_metadata/",directory=True)
+    ao.gcloud_rsync(f"{ds_bucket}/metadata/release/", f"{dataset_archive}/{dataset}/metadata/release/",directory=True,clobber=True)
+    ao.gcloud_rsync(f"{ds_bucket}/file_metadata/", f"{dataset_archive}/{dataset}/file_metadata/",directory=True,clobber=True)
 
 
 # NOW SYNC THE COLLECTIONS TO THE ARCHIVE
@@ -137,6 +137,8 @@ for collection, collection_info in collections.items():
     )
 
 
+
+
 # %% NOW loop through all releases and copy the releases to the archive
 releases = ["v1.0.0","v2.0.0","v2.0.1","v2.0.2","v2.0.3","v3.0.0","v3.0.1","v3.0.2","v4.0.0","v4.0.1","v4.0.2","v4.1.0"]
 
@@ -170,10 +172,10 @@ release_resources_bucket = f"gs://asap-crn-cloud-release-resources"
 for directory in archive_path.iterdir():
     if directory.is_dir():
         print(f"  [{directory}] rsync with bucket")
-        ao.gcloud_rsync(str(directory), f"{release_resources_bucket}/{directory.name}", directory=True)
+        ao.gcloud_rsync(str(directory), f"{release_resources_bucket}/{directory.name}", directory=True, clobber=True)
 
 
-# %%
+ew3# %%
 
 
 

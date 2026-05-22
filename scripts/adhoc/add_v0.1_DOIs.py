@@ -3,7 +3,7 @@
 
 # %% [markdown]
 # ASAP CRN Metadata validation
-#
+#. - this is an "old style" script
 # adding WIP
 # Andy Henrie
 # DO NOT EXECUTE

@@ -74,7 +74,7 @@ def define_dataset(
     """
     team = name.split("-")[0]
 
-    bucket_name = name if "cohort-" not in name else name
+    bucket_name = f"team-{team}" if "cohort-" not in name else name
     if buckets is None:
         resolved_buckets = DatasetBuckets(
             raw=f"gs://asap-raw-{bucket_name}",
@@ -139,7 +139,7 @@ def create_dataset_stub(
     (ds_path / "refs").mkdir(exist_ok=True)
 
     # write the v0.1 version file
-    (ds_path / "version").write_text("v0.1")
+    (ds_path / "version").write_text("0.1")
     
     dataset_def.save(ds_path)
     return ds_path

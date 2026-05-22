@@ -280,6 +280,7 @@ for ds_def in new_dataset_defs:
     ds_path = datasets_repo_path / "WIP" / ds_def.name
     readme_pdf = ds_path / "DOI" / f"{ds_def.name}_README.pdf"
     doi_id = ao.get_doi_from_dataset(ds_path, version=True)
+
     if readme_pdf.exists():
         ao.add_anchor_file_to_doi(zenodo, readme_pdf, doi_id)
         print(f"Uploaded README: {ds_def.name}")
@@ -315,6 +316,64 @@ for ds_def in new_dataset_defs:
 
         archive_deposition_local(ds_path, "pre-release-deposition", deposition)
         finalize_DOI(ds_path, deposition)
+
+
+
+
+
+
+# %%
+# update the READMEs
+
+
+for ds in datasets:
+
+    ds_model = ao.define_dataset(
+        name=ds,           # TODO: replace
+        collection=None,           # TODO: replace, or None
+        cde_version=CDE_VERSION,
+        title="",  # TODO: replace
+        description="",  # TODO: replace
+    )
+    ds_path = datasets_repo_path / "WIP" / ds
+    ds_model.save(ds_path)
+
+
+
+# %%
+new_dataset_defs = []
+for ds_def in datasets:
+    ds_path = datasets_repo_path / "WIP" / ds_def
+
+    ds_def = ao.Dataset.load(ds_path)
+    new_dataset_defs.append(ds_def)
+
+
+# %%    
+# %%
+zenodo = ao.setup_zenodo()
+
+for ds_def in new_dataset_defs:
+    ds_path = datasets_repo_path / "WIP" / ds_def.name
+    readme_pdf = ds_path / "DOI" / f"{ds_def.name}_README.pdf"
+    doi_id = ao.get_doi_from_dataset(ds_path, version=True)
+
+    print(f"NEW:  {ds_def.name}: {ds_def.doi} ||| {doi_id}")
+    readme_pdf = ds_path / "DOI" / f"{ds_def.name}_README.pdf"
+
+    if readme_pdf.exists():
+        # not sure why this fails... seems that the REST API has changed behavior
+        deposition = ao.replace_anchor_file_in_doi(zenodo, ds_path, doi_id, readme_pdf)
+        print(f"Uploaded README: {ds_def.name}")
+
+        ao.finalize_DOI(ds_path, deposition, prerelease=True)
+        # archive deposition
+        ao.archive_deposition_local(ds_path, "pre-release-deposition", deposition)
+
+    else:
+        print(f"WARNING: README PDF not found for {ds_def.name}")
+
+
 
 
 

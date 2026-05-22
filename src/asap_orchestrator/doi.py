@@ -645,15 +645,84 @@ def make_readme_file(ds_path: Path):
 def make_pdf_file(html_content: str, output_filepath: str | Path):
     # Open a file to write the PDF to
     output_filepath = Path(output_filepath)
+
+    font_path = f"/System/Library/Fonts/Supplemental/Arial Unicode.ttf"
+
+    # Construct a properly structured HTML document string
+    full_html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        @font-face {{
+            font-family: 'ArialUnicode';
+            src: url('{font_path}');
+        }}
+
+        body {{
+            font-family: 'ArialUnicode', sans-serif;        
+        }}
+    </style>
+</head>
+<body>
+    {html_content}
+</body>
+</html>
+"""
+    # print(full_html)
     # Convert HTML to PDF
     # The `io.BytesIO` is crucial for handling the content in memory before writing to file
     with open(output_filepath, "w+b") as result_file:
         pisa_status = pisa.CreatePDF(
-            io.BytesIO(html_content.encode("utf-8")),  # HTML needs to be bytes
+            io.BytesIO(full_html.encode("utf-8")),  # HTML needs to be bytes
             dest=result_file,
+            encoding="utf-8"  # <-- CRITICAL: Tell pisa how to decode the bytes
         )
 
     return not pisa_status.err  # True if conversion was successful
+
+
+
+# def make_pdf_file(html_content: str, output_filepath: str | Path):
+#     # Open a file to write the PDF to
+#     output_filepath = Path(output_filepath)
+
+#     font_path = f"/System/Library/Fonts/Supplemental/Arial Unicode.ttf"
+
+#     # Construct a properly structured HTML document string
+#     full_html = f"""
+# <!DOCTYPE html>
+# <html>
+# <head>
+#     <meta charset="utf-8">
+#     <style>
+#         @font-face {{
+#             font-family: 'ArialUnicode';
+#             src: url('{font_path}');
+#         }}
+        
+#         body {{
+#             font-family: 'ArialUnicode', sans-serif;        
+#         }}
+#     </style>
+# </head>
+# <body>
+#     {html_content}
+# </body>
+# </html>
+# """
+#     print(full_html)
+#     # Convert HTML to PDF
+#     # The `io.BytesIO` is crucial for handling the content in memory before writing to file
+#     with open(output_filepath, "w+b") as result_file:
+#         pisa_status = pisa.CreatePDF(
+#             io.BytesIO(full_html.encode("utf-8")),  # HTML needs to be bytes
+#             dest=result_file,
+#             encoding="utf-8"  # <-- CRITICAL: Tell pisa how to decode the bytes
+#         )
+
+#     return not pisa_status.err  # True if conversion was successful
 
 
 ############
@@ -834,28 +903,33 @@ def replace_anchor_file_in_doi(
 
     # add new file first
     if new_file is None:
+        # assert default name
         new_file = f"{ds_path.name}_README.pdf"
+    
     new_file_path = os.path.join(ds_path, "DOI", new_file)
 
+    file_ids = zenodo.get_file_ids(doi_id)
+
+    # check for a naming collision
+    # delete_file_id = [file_id["id"] for file_id in file_ids if file_id["filename"] == new_file]
+    delete_file_id = [file_id for file_name,file_id in file_ids.items() if file_name == new_file]
+    if len(delete_file_id) > 0:
+        print(f"Deleting file {delete_file_id[0]}")
+        zenodo.delete_file(delete_file_id[0])
+        print(f"Deleting old file {delete_file_id[0]}")
+
+    if old_file is not None:
+        # delete_file_id = [file_id["id"] for file_id in file_ids if file_id["filename"] == old_file]
+        delete_file_id = [file_id for file_name,file_id in file_ids.items() if file_name == new_file]
+
+        if len(delete_file_id) > 0:
+            print(f"Deleting file {delete_file_id[0]}")
+            zenodo.delete_file(delete_file_id[0])
+            print(f"Deleting old file {delete_file_id[0]}")
+
+    zenodo.upload_file(new_file_path)
     # add anchor file
     deposition = add_anchor_file_to_doi(zenodo, new_file_path, doi_id=doi_id)
-
-    # else use current deposition
-    if old_file is None:
-        old_file = f"{ds_path.name}.pdf"
-    # find file_id
-    file_ids = zenodo.get_file_ids(doi_id)
-    file_id = file_ids.get(old_file, "")
-    if file_id == "":
-        print(f"Could not find file {old_file} in deposition {doi_id}")
-
-    if file_id != "":
-        # delete old file
-        msg = zenodo.delete_file(file_id)
-        print(msg)
-    else:
-        # no file to delete...
-        print(f"no file to delete...")
 
     return zenodo.deposition
 
