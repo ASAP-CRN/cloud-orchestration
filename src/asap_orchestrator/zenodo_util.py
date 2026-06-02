@@ -221,7 +221,7 @@ class ZenodoClient(object):
             )
 
         self.deposition_id = dep_id
-        self.bucket = self._get_bucket_by_id(dep_id)
+
         # get request, returns our response
         r = requests.get(
             f"{self._endpoint}/deposit/depositions/{dep_id}",
@@ -231,7 +231,12 @@ class ZenodoClient(object):
         # print(r.url)
 
         r.raise_for_status()
-        return r.json()
+        dep_output = r.json()
+
+        self.title = dep_output["title"]
+        self.bucket = dep_output["links"]["bucket"]
+
+        return dep_output
 
     def _get_deposition_files(self):
         """gets the file deposition
@@ -280,33 +285,33 @@ class ZenodoClient(object):
         else:
             return r.raise_for_status()
 
-    def _get_bucket_by_id(self, dep_id=None):
-        """gets the bucket URL by project deposition ID
+    # def _get_bucket_by_id(self, dep_id=None):
+    #     """gets the bucket URL by project deposition ID
 
-        This URL is what you upload files to
+    #     This URL is what you upload files to
 
-        Args:
-            dep_id (str): project deposition ID
+    #     Args:
+    #         dep_id (str): project deposition ID
 
-        Returns:
-            str: the bucket URL to upload files to
-        """
-        # get request, returns our response
-        if dep_id is not None:
-            r = requests.get(
-                f"{self._endpoint}/deposit/depositions/{dep_id}",
-                params={"access_token": self.token},
-            )
-        else:
-            r = requests.get(
-                f"{self._endpoint}/deposit/depositions/{self.deposition_id}",
-                params={"access_token": self.token},
-            )
+    #     Returns:
+    #         str: the bucket URL to upload files to
+    #     """
+    #     # get request, returns our response
+    #     if dep_id is not None:
+    #         r = requests.get(
+    #             f"{self._endpoint}/deposit/depositions/{dep_id}",
+    #             params={"access_token": self.token},
+    #         )
+    #     else:
+    #         r = requests.get(
+    #             f"{self._endpoint}/deposit/depositions/{self.deposition_id}",
+    #             params={"access_token": self.token},
+    #         )
 
-        if r.ok:
-            return r.json()["links"]["bucket"]
-        else:
-            return r.raise_for_status()
+    #     if r.ok:
+    #         return r.json()["links"]["bucket"]
+    #     else:
+    #         return r.raise_for_status()
 
     def _is_doi(self, string=None):
         """test if string is of the form of a zenodo doi
@@ -446,7 +451,7 @@ class ZenodoClient(object):
             # except UserWarning:
             # warnings.warn("The object is not pointing to a project. Either create a project or explicity set the project'", UserWarning)
 
-    def get_files(self, dep_id: str | None = None):
+    def get_files(self, dep_id: str | None = None) -> list[dict]:
         """get files in current deposition
 
         Args:
@@ -454,16 +459,13 @@ class ZenodoClient(object):
 
         returns list of filenames
         """
-        dep = self._get_deposition_by_id(dep_id)
-
-        if dep is not None:
-
-            return [file["filename"] for file in dep["files"]]
+        if dep_id is not None:
+            self.deposition_id = dep_id
         else:
-            print(
-                " ** the object is not pointing to a project. Use either .set_deposition_id() or .create_deposition() before listing files ** "
-            )
-            return []
+            print(" * careful... you might not have set the deposition id")
+        dep = self.deposition
+        files = dep["files"]
+        return files
 
     def get_file_ids(self, dep_id: str | None = None):
         """get file:id in current deposition
@@ -473,9 +475,10 @@ class ZenodoClient(object):
 
         returns dict of filenames:id
         """
-        dep = self._get_deposition_by_id(dep_id)
-
-        if dep is not None:
+        files = self.get_files(dep_id)
+        dep = self.deposition
+        
+        if files is not None:
 
             return {file["filename"]: file["id"] for file in dep["files"]}
         else:
@@ -518,7 +521,12 @@ class ZenodoClient(object):
         """set the project by id"""
 
         self.deposition_id = dep_id
-        # depositions = self._get_depositions()
+        dep = self.deposition
+
+        if dep is not None:
+            self.title = dep["title"]
+            self.bucket = dep["links"]["bucket"]
+            
 
         # if depositions is not None:
         #     for d in depositions:
@@ -544,7 +552,7 @@ class ZenodoClient(object):
             ]
             if len(project_list) > 0:
                 self.title = project_list[0]["title"]
-                self.bucket = self._get_bucket_by_id(project_list[0]["id"])
+                self.bucket = project_list[0]["links"]["bucket"]
                 self.deposition_id = project_list[0]["id"]
 
         else:

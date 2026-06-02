@@ -5,45 +5,18 @@ Provides operations for creating and managing ASAP CRN Cloud releases.
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Optional
+
+from .models import CollectionEntry, DatasetEntry, ReleaseDefinition, ReleaseType  # noqa: F401 – re-exported
 
 __all__ = [
     "ReleaseDefinition",
+    "ReleaseType",
     "define_release",
     "perform_release",
 ]
-
-ReleaseType = Literal["Urgent", "Minor", "Major"]
-
-
-@dataclass
-class ReleaseDefinition:
-    """Describes a pending release before it is written to disk.
-
-    Produced by :func:`define_release` and consumed by :func:`perform_release`
-    and :func:`~asap_orchestrator.collection.update_collection`.
-
-    Attributes:
-        release_version: Version string, e.g. ``"v4.1.0"``.
-        release_type: ``"Urgent"`` (new uncurated datasets), ``"Minor"``
-            (new/updated curated datasets), or ``"Major"`` (new tissue/modality
-            scope).
-        cde_version: CDE schema version applied across all datasets.
-        datasets: All datasets in the release as ``{"name", "doi", "version"}``
-            dicts.
-        new_datasets: Subset of *datasets* that are newly added or updated.
-        collections: All collections as ``{"name", "doi", "version"}`` dicts.
-    """
-
-    release_version: str
-    release_type: ReleaseType
-    cde_version: str
-    datasets: list[dict] = field(default_factory=list)
-    new_datasets: list[dict] = field(default_factory=list)
-    collections: list[dict] = field(default_factory=list)
 
 
 def define_release(
@@ -76,9 +49,9 @@ def define_release(
         release_version=release_version,
         release_type=release_type,
         cde_version=cde_version,
-        datasets=list(datasets),
-        new_datasets=list(new_datasets),
-        collections=list(collections),
+        datasets=[DatasetEntry.model_validate(d) for d in datasets],
+        new_datasets=[DatasetEntry.model_validate(d) for d in new_datasets],
+        collections=[CollectionEntry.model_validate(d) for d in collections],
     )
 
 
@@ -110,18 +83,22 @@ def perform_release(
 
     created = datetime.now().isoformat()
 
+    datasets_list = [e.model_dump() for e in release_def.datasets]
+    new_datasets_list = [e.model_dump() for e in release_def.new_datasets]
+    collections_list = [e.model_dump() for e in release_def.collections]
+
     release_manifest = {
         "release_version": version,
         "release_type": release_def.release_type,
         "cde_version": release_def.cde_version,
         "release_doi": release_doi or "",
-        "datasets": release_def.datasets,
-        "new_datasets": release_def.new_datasets,
-        "collections": release_def.collections,
+        "datasets": datasets_list,
+        "new_datasets": new_datasets_list,
+        "collections": collections_list,
         "created": created,
         "metadata": {
-            "total_datasets": len(release_def.datasets),
-            "total_collections": len(release_def.collections),
+            "total_datasets": len(datasets_list),
+            "total_collections": len(collections_list),
         },
     }
 
@@ -136,9 +113,9 @@ def perform_release(
             releases_index = json.load(f)
 
     releases_index[version] = {
-        "all_datasets": release_def.datasets,
-        "new_datasets": release_def.new_datasets,
-        "all_collections": release_def.collections,
+        "all_datasets": datasets_list,
+        "new_datasets": new_datasets_list,
+        "all_collections": collections_list,
     }
 
     with open(index_path, "w") as f:

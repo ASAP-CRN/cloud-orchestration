@@ -32,7 +32,7 @@ releases_repo_path = root_path / "cloud-releases"
 RELEASE_VERSION = "v4.1.1"    # e.g. "v4.1.0"
 RELEASE_TYPE = "Minor"        # "Urgent" | "Minor" | "Major"
 CDE_VERSION = "v4.4"          # e.g. "v3.3"
-RELEASE_DOI = "10.5281/zenodo."              # Zenodo concept DOI for the release itself, or ""
+RELEASE_DOI = "10.5281/zenodo.20185963"              # Zenodo concept DOI for the release itself, or ""
 RELEASE_DATE = "2026-05-30"
 # %% [Step 2] Define datasets NEW or VERSION-BUMPED in this release
 # Each entry needs a published (or pre-reserved) Zenodo DOI.
@@ -49,7 +49,11 @@ new_datasets = [
     "voet-pmdbs-sn-rnaseq",
     "scherzer-pmdbs-sn-rnaseq-midbrain-hybsel",
     "scherzer-pmdbs-lr-wgs"
-# ]
+ ]
+
+
+for ds in new_datasets:
+    print(f"gsutil -u dnastack-asap-parkinsons ls gs://asap-curated-team-{ds}")
 
 # %%
 new_dataset_defs = []
@@ -58,8 +62,21 @@ for ds in new_datasets:
     ds_path = datasets_repo_path / "datasets" / ds
     with open(ds_path / "dataset.json", "r") as f:
         ds_info = json.load(f)
+    # fix missing releases, all_releases, and all_versions entries in dataset.json for these datasets, which were added late in the release process and missed the final update step.  This is needed to successfully archive the previous versions in the next step.
+    releases = {f"{RELEASE_VERSION}": {"cde_version": CDE_VERSION, "dataset_version": "v1.0"}}
+    all_releases = [f"{RELEASE_VERSION}"]
+    all_versions = [ "v1.0"]
+
+    ds_info["releases"] = releases
+    ds_info["all_releases"] = all_releases
+    ds_info["all_versions"] = all_versions
+
+    with open(ds_path / "dataset.json", "w") as f:
+        json.dump(ds_info, f, indent=2)
 
     dataset_model = ao.Dataset.load(ds_path)
+
+
 
     new_dataset_defs.append(dataset_model)
     # ao.define_dataset(
@@ -116,8 +133,9 @@ if len(re_released)>0:
 
 all_datasets = prev_dataset_defs + new_dataset_defs
 
-all_datasets_list = [ dict( name = data.name, doi=data.doi, version=data.version) for data in all_datasets]
-new_datasets_list = [ dict( name = data.name, doi=data.doi, version=data.version) for data in new_dataset_defs]
+all_datasets_list = [ dict( name = data.name, doi=data.doi, dataset_version=data.version) for data in all_datasets]
+new_datasets_list = [ dict( name = data.name, doi=data.doi, dataset_version=data.version) for data in new_dataset_defs]
+
 
 # get collections
 # none new in this release
@@ -125,15 +143,20 @@ collections={}
 for ds in all_datasets:
     collection = ds.collection
     if collection is not None:
+        print(f"dataset {ds.name} belongs to collection {collection}")
+
+        # need to get the collection + version...
         collection_path = collections_repo_path / collection / "collection.json"
         with open(collection_path, "r") as f:
             collection_info = json.load(f)
         # find highest version
-        collection_vers = {ver : x["release"]["version"] for ver,x in collection_info["versions"].items() }
+        collection_vers = {ver : x["release"]["version"] for ver,x in collection_info["versions"].items() if x["release"]["version"]<=RELEASE_VERSION }
         # check release.versiopn is NOT > current
         cver = max(collection_vers.keys())
         if collection_vers[cver]<RELEASE_VERSION:
             collections[collection] = dict(name=collection,doi=collection_info["collection_doi"],version=cver)
+        else:
+            print(f"WARNING: collection {collection} already has version {collection_vers[cver]} >= release version {RELEASE_VERSION}")
 
 # build metadata
 metadata = dict(
@@ -159,8 +182,6 @@ release_dict = dict(
 # %% 
 # write release.json
 release_path = releases_repo_path / RELEASE_VERSION 
-if not release_path.exists():
-    release_path.mkdir()
 
 with open(release_path / "release.json", "w") as f:
     json.dump(release_dict, f, indent=4)

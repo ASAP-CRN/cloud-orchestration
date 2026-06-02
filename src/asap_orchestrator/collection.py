@@ -5,11 +5,10 @@ Provides operations for updating versioned dataset collections.
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
-from .release import ReleaseDefinition
+from .models import CollectionDefinition, ReleaseDefinition  # noqa: F401 – re-exported
 
 __all__ = [
     "CollectionDefinition",
@@ -17,30 +16,6 @@ __all__ = [
     "update_collection",
     "update_collections_index",
 ]
-
-
-@dataclass
-class CollectionDefinition:
-    """Describes a pending collection version update.
-
-    Produced by :func:`define_collection` and consumed by
-    :func:`update_collection`.
-
-    Attributes:
-        collection_name: Name of the collection, e.g. ``"pmdbs-sc-rnaseq"``.
-        new_version: New collection version string, e.g. ``"v3.2.0"``.
-        new_datasets: Dataset names that are new or updated in this version.
-        release_version: Release version this collection update belongs to.
-        cde_version: CDE schema version applied across datasets in this version.
-        version_doi: Zenodo DOI for this specific collection version.
-    """
-
-    collection_name: str
-    new_version: str
-    new_datasets: list[str] = field(default_factory=list)
-    release_version: str = ""
-    cde_version: str = ""
-    version_doi: str = ""
 
 
 def define_collection(
@@ -70,8 +45,8 @@ def define_collection(
     """
     if version_doi is None:
         for col_entry in release_def.collections:
-            if col_entry.get("name") == collection_name:
-                version_doi = col_entry.get("doi", "")
+            if col_entry.name == collection_name:
+                version_doi = col_entry.doi or ""
                 break
 
     return CollectionDefinition(

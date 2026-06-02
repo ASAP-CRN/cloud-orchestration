@@ -15,9 +15,13 @@
 # %% Setup
 from pathlib import Path
 import asap_orchestrator as ao
+import json
+
+%load_ext autoreload
+%autoreload 2
 
 # TODO: confirm the root path resolves correctly for your environment
-root_path = Path(__file__).resolve().parents[2]
+root_path = Path(__file__).resolve().parents[3]
 datasets_repo_path = root_path / "cloud-datasets"
 
 # %% [Step 1] Release parameters
@@ -47,7 +51,7 @@ add_dataset_defs = [
     "desjardins-mouse-bulk-rnaseq-nigra-pink1",
     "desjardins-human-pbmc-multimodal-sc-rna-tcr",
     "desjardins-mouse-sc-rnaseq-colon-immune-pink1",    
-
+]
 
 # %%
 
@@ -93,7 +97,8 @@ for ds_def in add_dataset_defs:
 
     # this should get made automatically by create_dataset_stub
     # # write the v0.1 version file
-    # (ds_path / "version").write_text("v0.1")
+    # (ds_path / "version").write_text("0.1")
+    ao.write_version("0.1", ds_path / "version")
 
     if ref_doc.exists():
         ao.setup_DOI_info(ds_path, ref_doc, publication_date=PUBLICATION_DATE)
@@ -103,6 +108,7 @@ for ds_def in add_dataset_defs:
 
     ds_def = ao.Dataset.load(ds_path)
     new_dataset_defs.append(ds_def)
+
 
 # %% [Step 5] Create Zenodo draft DOIs (v0.1)
 # Requires ZENODO_TOKEN (or ZENODO_SANDBOX_TOKEN) set in your environment.
@@ -147,22 +153,137 @@ for ds_def in new_dataset_defs:
         print(f"WARNING: README PDF not found for {ds_def.name}")
 
 
-# # %%
-# # publish 0.1 and initialize the v1.0 DOI
-# for ds_def in new_dataset_defs:
-#     ds_path = datasets_repo_path / "WIP" / ds_def.name
-#     readme_pdf = ds_path / "DOI" / f"{ds_def.name}_README.pdf"
-#     doi_id = ao.get_doi_from_dataset(ds_path, version=True)
+# %%
+new_dataset_defs = []
+for ds_def in add_dataset_defs:
+    ds_path = datasets_repo_path / "WIP" / ds_def
 
-#     print(f"{ds_def.name}: {ds_def.doi} ||| {doi_id}")
+    ds_def = ao.Dataset.load(ds_path)
+    new_dataset_defs.append(ds_def)
 
-#     if readme_pdf.exists():
-#         deposition = ao.add_anchor_file_to_doi(zenodo, readme_pdf, doi_id)
-#         print(f"Uploaded README: {ds_def.name}")
-#         ao.finalize_DOI(ds_path, deposition, prerelease=True)
 
-#     else:
-#         print(f"WARNING: README PDF not found for {ds_def.name}")
+# %% 
+# publish 0.1 and initialize the v1.0 DOI
+    
+# %%
+zenodo = ao.setup_zenodo()
+
+# %%
+
+for ds_def in new_dataset_defs:
+
+    ds_path = datasets_repo_path / "WIP" / ds_def.name
+    readme_pdf = ds_path / "DOI" / f"{ds_def.name}_README.pdf"
+    beta_doi_id = ao.get_doi_from_dataset(ds_path, version=True)
+
+    # if ds_def.name in [
+    #     'desjardins-mouse-sc-rnaseq-colon-immune-lrrk2',
+    #     'desjardins-mouse-sc-rnaseq-colon-immune-pink1'
+    #     ]: 
+    #     print(f"Skipping {ds_def.name}")
+    #     continue
+        
+    print(f"BETA: {ds_def.name}: {ds_def.doi} ||| {beta_doi_id}")
+    docs = ds_path / "refs"
+    for doc in docs.iterdir():
+        if doc.suffix == ".docx":
+            ref_doc = doc
+            break
+    else:
+        print(f"WARNING: no .docx file found in {docs}")
+        continue
+
+
+    # bump to v1.0
+    ao.write_version("1.0", ds_path / "version")
+    ao.setup_DOI_info(ds_path, ref_doc, publication_date=PUBLICATION_DATE)
+
+    zenodo.set_deposition_id(beta_doi_id)
+    deposition = zenodo.deposition
+    deposition = ao.publish_doi(zenodo, beta_doi_id)
+    
+# %%
+zenodo = ao.setup_zenodo()
+
+# %%
+for ds_def in new_dataset_defs:
+
+    # if ds_def.name in [
+    #     'desjardins-mouse-sc-rnaseq-colon-immune-lrrk2',
+    #     ]: 
+    #     print(f"Skipping {ds_def.name}")
+    #     continue
+    ds_path = datasets_repo_path / "WIP" / ds_def.name
+    readme_pdf = ds_path / "DOI" / f"{ds_def.name}_README.pdf"
+    beta_doi_id = ao.get_doi_from_dataset(ds_path, version=True)
+
+    zenodo.set_deposition_id(beta_doi_id)
+
+
+    deposition = ao.bump_doi_version(zenodo, beta_doi_id)
+    metadata = deposition.get("metadata")
+    new_doi_id = f"{deposition['id']}"
+
+
+    print(f"NEW:  {ds_def.name}: {ds_def.doi} ||| {new_doi_id}")
+    readme_pdf = ds_path / "DOI" / f"{ds_def.name}_README.pdf"
+
+    if readme_pdf.exists():
+        # not sure why this fails... seems that the REST API has changed behavior
+        deposition = ao.replace_anchor_file_in_doi(zenodo, ds_path, new_doi_id, readme_pdf)
+        print(f"Uploaded README: {ds_def.name}")
+
+    else:
+        print(f"WARNING: README PDF not found for {ds_def.name}")
+
+    ao.finalize_DOI(ds_path, deposition, prerelease=True)
+    # archive deposition
+    ao.archive_deposition_local(ds_path, "pre-release-deposition", deposition)
 
 
 # %%
+# %%
+for ds_def in new_dataset_defs:
+
+    # if ds_def.name in [
+    #     'desjardins-mouse-sc-rnaseq-colon-immune-lrrk2',
+    #     ]: 
+    #     print(f"Skipping {ds_def.name}")
+    #     continue
+    ds_path = datasets_repo_path / "WIP" / ds_def.name
+    readme_pdf = ds_path / "DOI" / f"{ds_def.name}_README.pdf"
+    doi_id = ao.get_doi_from_dataset(ds_path, version=True)
+
+    zenodo.set_deposition_id(doi_id)
+    deposition = zenodo.deposition
+    metadata = deposition.get("metadata")
+
+    # update v1.0
+    metadata['version'] = '1.0'
+    deposition = ao.update_doi_metadata(zenodo, doi_id, metadata)
+
+
+
+    ao.finalize_DOI(ds_path, deposition, prerelease=True)
+    # archive deposition
+    ao.archive_deposition_local(ds_path, "pre-release-deposition", deposition)
+
+
+# %%
+
+#######################
+# %%
+new_dataset_defs = []
+for ds in add_dataset_defs:
+    ds_path = datasets_repo_path / "WIP" / ds
+
+    ds_in = ao.Dataset.load(ds_path)
+    ds_def = ao.fill_dataset_stub(ds_in,ds_path)
+
+    ds_def.save(ds_path)
+
+    new_dataset_defs.append(ds_def)
+    
+# %%    
+
+

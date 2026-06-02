@@ -1,16 +1,18 @@
 """Pydantic models for ASAP CRN cloud artifact JSON schemas.
 
 These models define and validate the on-disk JSON artifacts managed by the
-orchestrator: dataset.json (Dataset), and in future passes collection.json and
-release.json.
+orchestrator: dataset.json (Dataset), release.json (ReleaseDefinition), and
+collection.json (Collection / CollectionDefinition).
 """
 from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+ReleaseType = Literal["Urgent", "Minor", "Major"]
 
 
 class Creator(BaseModel):
@@ -19,6 +21,7 @@ class Creator(BaseModel):
     name: str
     affiliation: Optional[str] = None
     orcid: Optional[str] = None
+
 
 
 PARTS1 = "gs://asap"
@@ -48,7 +51,7 @@ class DatasetBuckets(BaseModel):
             if v_parts[0] != PARTS1 or v_parts[1] not in PARTS2 or v_parts[2] != PARTS3:
                 raise ValueError("Invalid bucket URI")
         else:
-            if v_parts[0] != PARTS1 or v_parts[1] != "cohort" or v_parts[2] != PARTS3:
+            if v_parts[0] != PARTS1 or v_parts[1] not in PARTS2 or v_parts[2] != "cohort":
                 raise ValueError("Invalid bucket URI")
             
         return v
@@ -83,7 +86,7 @@ class Dataset(BaseModel):
         creators: Zenodo creator list.
         keywords: Discovery keywords.
         license: SPDX license identifier.
-        references: Zenodo reference strings.
+        # references: Zenodo reference strings.
         collection: Collection slug this dataset belongs to, or ``None``.
         buckets: GCS bucket URIs per environment.
         cde_version: CDE schema version applied to this dataset.
@@ -97,19 +100,21 @@ class Dataset(BaseModel):
     title: str = ""
     description: str = ""
     version: str = "v0.1"
-    dataset_title:  str = ""
     doi: Optional[str] = None
     creators: list[Creator] = Field(default_factory=list)
     keywords: list[str] = Field(default_factory=list)
     license: str = "CC-BY-4.0"
-    references: list[str] = Field(default_factory=list)
+    # references: list[str] = Field(default_factory=list)
     collection: Optional[str] = None
     buckets: DatasetBuckets
     cde_version: Optional[str] = None
     releases: dict[str, ReleaseRecord] = Field(default_factory=dict)
-    all_versions: list[str] = Field(default_factory=list)
+    dataset_title:  str = ""
+    curation: dict[str, Any] = Field(default_factory=dict)
     all_releases: list[str] = Field(default_factory=list)
-
+    all_versions: list[str] = Field(default_factory=list)
+    short_description: str = ""
+    
     @field_validator("doi", "cde_version", mode="before")
     @classmethod
     def _empty_str_to_none(cls, v: object) -> object:
@@ -164,3 +169,201 @@ class Dataset(BaseModel):
 
 # Backward-compatible alias — existing callers of DatasetDefinition continue to work.
 DatasetDefinition = Dataset
+
+
+# ── Release models ─────────────────────────────────────────────────────────────
+
+class DatasetEntry(BaseModel):
+    """A ``{"name", "doi", "version"}`` reference used in release/collection manifests."""
+
+    name: str
+    doi: Optional[str] = None
+    version: str = ""
+
+    @field_validator("doi", mode="before")
+    @classmethod
+    def _empty_str_to_none(cls, v: object) -> object:
+        return None if v == "" else v
+
+
+class CollectionEntry(BaseModel):
+    """A ``{"name", "doi", "version"}`` collection reference in release manifests."""
+
+    name: str
+    doi: Optional[str] = None
+    version: str = ""
+
+    @field_validator("doi", mode="before")
+    @classmethod
+    def _empty_str_to_none(cls, v: object) -> object:
+        return None if v == "" else v
+
+
+class ReleaseMetadata(BaseModel):
+    """Metadata block embedded in ``release.json``."""
+
+    total_datasets: int = 0
+    total_collections: int = 0
+    source: Optional[str] = None
+
+    model_config = ConfigDict(extra="allow")
+
+
+class ReleaseDefinition(BaseModel):
+    """Schema and I/O model for ``release.json`` artifacts.
+
+    Attributes:
+        release_version: Release version string, e.g. ``"v4.1.0"``.
+        release_type: One of ``"Urgent"``, ``"Minor"``, or ``"Major"``.  ``None``
+            when loading legacy files that predate this field.
+        cde_version: CDE schema version applied across all datasets.
+        datasets: All datasets included in the release.
+        new_datasets: Subset of *datasets* that are new or updated.
+        collections: All collections included in the release.
+        release_doi: Zenodo concept DOI for the release record.
+        created: ISO timestamp when the release was created.
+        metadata: Summary counters and optional source annotation.
+    """
+
+    model_config = ConfigDict(extra="ignore")
+
+    release_version: str
+    release_type: Optional[ReleaseType] = None
+    cde_version: str
+    datasets: list[DatasetEntry] = Field(default_factory=list)
+    new_datasets: list[DatasetEntry] = Field(default_factory=list)
+    collections: list[CollectionEntry] = Field(default_factory=list)
+    release_doi: Optional[str] = None
+    created: Optional[str] = None
+    metadata: ReleaseMetadata = Field(default_factory=ReleaseMetadata)
+
+    @field_validator("release_doi", mode="before")
+    @classmethod
+    def _empty_str_to_none(cls, v: object) -> object:
+        return None if v == "" else v
+
+    @classmethod
+    def load(cls, release_path: Path | str) -> "ReleaseDefinition":
+        """Read and validate ``release.json`` from *release_path*.
+
+        Args:
+            release_path: Release directory containing ``release.json``.
+
+        Raises:
+            FileNotFoundError: When ``release.json`` is absent.
+            pydantic.ValidationError: When the JSON does not conform to this schema.
+        """
+        p = Path(release_path) / "release.json"
+        if not p.exists():
+            raise FileNotFoundError(f"release.json not found: {p}")
+        return cls.model_validate_json(p.read_text())
+
+    def save(self, release_path: Path | str) -> None:
+        """Write this release to ``release.json`` inside *release_path*.
+
+        Args:
+            release_path: Release directory to write into (must already exist).
+        """
+        (Path(release_path) / "release.json").write_text(
+            json.dumps(self.model_dump(), indent=2)
+        )
+
+
+# ── Collection models ──────────────────────────────────────────────────────────
+
+class CollectionReleaseRef(BaseModel):
+    """Release reference embedded in a :class:`CollectionVersion`."""
+
+    version: str = ""
+    cde_version: str = ""
+    date: Optional[str] = None
+
+
+class CollectionVersion(BaseModel):
+    """A single version entry within ``collection.json["versions"]``."""
+
+    version: str
+    date: Optional[str] = None
+    doi: Optional[str] = None
+    datasets: list[str] = Field(default_factory=list)
+    teams: list[str] = Field(default_factory=list)
+    types: list[str] = Field(default_factory=list)
+    release: CollectionReleaseRef = Field(default_factory=CollectionReleaseRef)
+    curated: Optional[str] = None
+
+    @field_validator("doi", mode="before")
+    @classmethod
+    def _empty_str_to_none(cls, v: object) -> object:
+        return None if v == "" else v
+
+
+class Collection(BaseModel):
+    """Schema and I/O model for ``collection.json`` artifacts.
+
+    Attributes:
+        name: Collection slug, e.g. ``"pmdbs-sc-rnaseq"``.
+        title: Human-readable title.
+        collection_doi: Zenodo concept DOI for the collection.
+        types: Collection type tags.
+        versions: Map of version string → version snapshot.
+    """
+
+    model_config = ConfigDict(extra="ignore")
+
+    name: str
+    title: str = ""
+    collection_doi: Optional[str] = None
+    types: list[str] = Field(default_factory=list)
+    versions: dict[str, CollectionVersion] = Field(default_factory=dict)
+
+    @field_validator("collection_doi", mode="before")
+    @classmethod
+    def _empty_str_to_none(cls, v: object) -> object:
+        return None if v == "" else v
+
+    @classmethod
+    def load(cls, collection_path: Path | str) -> "Collection":
+        """Read and validate ``collection.json`` from *collection_path*.
+
+        Returns an empty :class:`Collection` when ``collection.json`` is absent.
+
+        Args:
+            collection_path: Collection directory containing ``collection.json``.
+        """
+        p = Path(collection_path) / "collection.json"
+        if not p.exists():
+            return cls(name=Path(collection_path).name)
+        return cls.model_validate_json(p.read_text())
+
+    def save(self, collection_path: Path | str) -> None:
+        """Write this collection to ``collection.json`` inside *collection_path*.
+
+        Args:
+            collection_path: Collection directory to write into.
+        """
+        (Path(collection_path) / "collection.json").write_text(
+            json.dumps(self.model_dump(), indent=2)
+        )
+
+
+class CollectionDefinition(BaseModel):
+    """Describes a pending collection version update.
+
+    Produced by :func:`~asap_orchestrator.collection.define_collection` and
+    consumed by :func:`~asap_orchestrator.collection.update_collection`.
+
+    Attributes:
+        collection_name: Name of the collection, e.g. ``"pmdbs-sc-rnaseq"``.
+        new_version: New collection version string, e.g. ``"v3.2.0"``.
+        new_datasets: Dataset names that are new or updated in this version.
+        release_version: Release version this collection update belongs to.
+        cde_version: CDE schema version applied across datasets in this version.
+        version_doi: Zenodo DOI for this specific collection version.
+    """
+
+    collection_name: str
+    new_version: str
+    new_datasets: list[str] = Field(default_factory=list)
+    release_version: str = ""
+    cde_version: str = ""
+    version_doi: str = ""

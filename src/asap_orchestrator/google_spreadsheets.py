@@ -10,6 +10,8 @@ import pandas as pd
 from urllib.parse import quote
 from io import StringIO
 
+GOOGLE_SHEET_ID = "1c0z5KvRELdT2AtQAH2Dus8kwAyyLrR0CROhKOjpU4Vc"
+
 def read_google_sheet(spreadsheet_id: str, tab_name: str) -> pd.DataFrame:
     """
     Checks if Google Spreadsheet and tab are available, then reads the tab into a Pandas DataFrame.
@@ -38,6 +40,7 @@ def read_google_sheet(spreadsheet_id: str, tab_name: str) -> pd.DataFrame:
 
 
 def check_spreadsheet_available(spreadsheet_id: str, timeout: int = 10) -> None:
+    
     spreadsheet_url = f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}"
     print( f"Checking spreadsheet URL" )
     response = requests.get(spreadsheet_url, timeout=timeout)

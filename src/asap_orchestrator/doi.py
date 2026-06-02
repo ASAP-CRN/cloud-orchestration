@@ -1,3 +1,4 @@
+from importlib import metadata
 import json
 import io
 
@@ -205,6 +206,303 @@ def setup_DOI_info(
     )
     make_readme_file(ds_path)
 
+def setup_DOI_info_v1(
+    ds_path: str | Path,
+    doi_doc_path: str | Path,
+    publication_date: None | str = None,
+    version: None | str = None,
+    force: bool = False,
+):
+    ds_path = Path(ds_path)
+
+    ingest_DOI_doc_v1(
+        ds_path,
+        doi_doc_path,
+        publication_date=publication_date,
+        version=version,
+        force=force,
+    )
+    make_readme_file(ds_path)
+
+def ingest_DOI_doc_v1(
+    ds_path: str | Path,
+    doi_doc_path: str | Path,
+    publication_date: None | str = None,
+    version: None | str = None,
+    force: bool = False,
+):
+    """
+    read docx, extract the information, and save in os.path.join(dataset, DOI) subdirectory
+    """
+    ds_path = Path(ds_path)
+    doi_doc_path = Path(doi_doc_path)
+    long_dataset_name = ds_path.name
+
+    # just read in as text
+    with open(os.path.join(ds_path, "version"), "r") as f:
+        ds_ver = f.read().strip()
+
+    doi_path = ds_path / "DOI"
+
+
+    # doi_json_path = ds_path / "DOI" / f"{long_dataset_name}.json"
+    doi_json_path = ds_path / "DOI" / f"project.json"
+    print(
+        f"DOI info already exists for {ds_path}, doing partial ingestion for hack."
+    )
+    # overwrite publication_date and version in the existing json if they exist, but leave the rest of the info alone
+    with open(doi_json_path, "r") as f:
+        existing_data = json.load(f)
+    if publication_date is not None:
+        existing_data["publication_date"] = publication_date
+
+    # FORCE BASED ON VERSION FILE
+    existing_data["version"] = ds_ver
+
+    metadata = _make_metadata_from_project(existing_data)
+    export_data = {"metadata": metadata}
+
+    # read the docx
+
+    # this is hacked for old versions...
+    # need to get title and descriptions only
+
+    # Load the document
+    document = docx.Document(doi_doc_path)
+
+    table_names = ["affiliations", "datasets", "projects", "extra1", "extra2"]
+    for name, table in zip(table_names, document.tables):
+        table_data = []
+        for row in table.rows:
+            row_data = [cell.text for cell in row.cells]
+            table_data.append(row_data)
+        # Assuming the first row is the header
+        if name == "affiliations":
+            fields = table_data[0]
+            data = table_data[1:]
+            # affiliations = pd.DataFrame(table_data[1:], columns=table_data[0])
+            # if affiliations.shape[0] == 1:
+            #     affiliations = affiliations.iloc[0, 0]
+
+            print("made affiliation table")
+        elif name == "datasets":
+            dataset_title = (
+                table_data[0][1].strip().replace("\n", " ").replace("\u2019", "'")
+            )
+            dataset_description = (
+                table_data[1][1].strip().replace("\n", " ").replace("\u2019", "'")
+            )
+            print("got dataset title/description")
+        elif name == "projects":
+            project_title = (
+                table_data[0][1].strip().replace("\n", " ").replace("\u2019", "'")
+            )
+            project_description = (
+                table_data[1][1].strip().replace("\n", " ").replace("\u2019", "'")
+            )
+            if len(table_data) > 2:
+                ASAP_team_name = table_data[2][1].strip()
+            else:
+                ASAP_team_name = None
+            if len(table_data) > 3:
+                grant_ids = table_data[3][1].strip()
+            else:
+                grant_ids = None
+
+            print("got project title/description")
+
+        else:
+            continue
+            # # test if its the "Project Team" table
+            # if (
+            #     table_data[0][1] == "First name"
+            #     and table_data[0][2] == "Last name"
+            #     and table_data[0][3] == "Email"
+            # ):
+            #     pj_team_table = table_data
+            # else:
+            #     print(f"what is this extra thing?: {name}")
+            #     print(table_data)
+
+    # title
+    # string	Title of deposition (automatically set from metadata). Defaults to empty string.
+    title = dataset_title.strip().replace("Singel", "Single")
+
+    # upload_type  string	Yes	Controlled vocabulary:
+    upload_type = "dataset"
+
+    # creators
+    creators = []
+    for indiv in data:
+        name = f"{indiv[0].strip()}, {indiv[1].strip()}"  # , ".join(indiv[:2])
+        # hack
+        name = name.replace("* Corresponding author", "")
+        affiliation = indiv[2].strip()
+        oricid = indiv[3].strip()
+
+        if name == ", ":  # this should block empty names
+            continue
+
+        to_append = {"name": name}
+
+        # hacks
+        affiliation = affiliation.replace(", United States.", ".")
+
+        if affiliation == "":
+            affiliation = None
+        else:
+            # if there are carriage split into a lis
+            if "\n" in affiliation:
+                affiliation = [
+                    x.strip() for x in affiliation.split("\n") if x.strip() != ""
+                ]
+                if len(affiliation) == 1:
+                    affiliation = affiliation[0]
+                else:
+                    affiliation = ",& ".join(affiliation)  # this is a hack"
+
+            to_append["affiliation"] = affiliation
+
+        if oricid == "":
+            oricid = None
+        else:
+            to_append["orcid"] = oricid.lstrip("https://orcid.org/")
+        creators.append(to_append)
+
+        # creators.append({"name": name, "affiliation": affiliation, "orcid": oricid})
+
+    # description
+    dataset_description = dataset_description.strip()
+    project_description = project_description.strip()
+    # fix description to enable the numbered and bulletted lists...
+    for i in range(10):
+        rep_from = f" {i}. "
+        rep_to = f"\n\n{i}. "
+        project_description = project_description.strip().replace(rep_from, rep_to)
+        dataset_description = dataset_description.strip().replace(rep_from, rep_to)
+    project_description = project_description.strip().replace("* ", "\n\t* ")
+    dataset_description = dataset_description.strip().replace("* ", "\n\t* ")
+
+    description = f"""This Zenodo deposit contains a publicly available description of the Dataset:
+
+**Title:** "{title}".
+
+**Description:** {dataset_description}
+
+--------------------------
+
+> This dataset is made available to researchers via the ASAP CRN Cloud: [cloud.parkinsonsroadmap.org](https://cloud.parkinsonsroadmap.org). Instructions for how to request access can be found in the [User Manual](https://storage.googleapis.com/asap-public-assets/wayfinding/ASAP-CRN-Cloud-User-Manual.pdf).
+
+> This research was funded by the Aligning Science Across Parkinson's Collaborative Research Network (ASAP CRN), through the Michael J. Fox Foundation for Parkinson's Research (MJFF).
+
+> This Zenodo deposit was created by the ASAP CRN Cloud staff on behalf of the dataset authors. It provides a citable reference for a CRN Cloud Dataset
+
+"""
+
+    # fill details
+
+    ASAP_lab_name = ""
+
+    # get details from the pj_team_table
+    # field_name = [tb[0] for tb in pj_team_table]
+
+    PI_full_name = existing_data.get("PI_full_name", "")
+    PI_email = existing_data.get("PI_email", "")
+    submitter_name = existing_data.get("submitter_name", "")
+    submitter_email = existing_data.get("submitter_email", "")
+    cPI_full_name = existing_data.get("cPI_full_name", "")
+    cPI_email = existing_data.get("cPI_email", "")
+    # for name, row in zip(field_name, pj_team_table):
+    #     # skip if blank
+    #     if len(row[1]) < 1:
+    #         continue
+
+    #     if name == "Principal Investigator":
+    #         PI_full_name = f"{row[1]} {row[2]}"
+    #         PI_email = f"{row[3]}"
+    #     elif name == "Co-Principal Investigator":
+    #         cPI_full_name.append(f"{row[1]} {row[2]}")
+    #         cPI_email.append(f"{row[3]}")
+    #     elif name == "Data Submitter":
+    #         submitter_name = f"{row[1]} {row[2]}"
+    #         submitter_email = f"{row[3]}"
+
+    publication_DOI = existing_data.get("publication_DOI", "")
+    grant_ids = existing_data.get("grant_ids", "")
+
+    print(grant_ids)
+    team_name = ds_path.name.split("-")[0].capitalize()
+
+    # Convert to html for good formatting
+    description = markdown(description)
+
+    # ASAP
+    communities = [{"identifier": "asaphub"}]
+    # version
+    version = ds_ver  # "2.0"?  also do "v1.0"
+    # license
+    license = {"id": "cc-by-4.0"}
+    refrences = [
+        "Aligning Science Across Parkinson's Collaborative Research Network Cloud, https://cloud.parkinsonsroadmap.org/collections, RRID:SCR_023923",
+        f"Team {team_name}",
+    ]
+
+    # publication_date
+    if publication_date is None:
+        publication_date = pd.Timestamp.now().strftime(
+            "%Y-%m-%d"
+        )  # "2.0"?  also do "v1.0"
+
+    if not pd.isna(grant_ids):
+        if "," in grant_ids:
+            grant_ids = grant_ids.split(",")
+        elif ";" in grant_ids:
+            grant_ids = grant_ids.split(";")
+        else:
+            grant_ids = [grant_ids]
+
+    else:
+        grant_ids = None
+        print("Warning: No grant ids found")
+
+    # also dump the table to make the documents and
+    # ## save a simple table to update STUDY table
+    project_dict = {
+        "project_name": f"{project_title.strip()}",  # protect the parkionson's apostrophe
+        "project_description": f"{project_description.strip()}",
+        "dataset_title": f"{dataset_title.strip()}",
+        "dataset_description": f"{dataset_description}",
+        "creators": creators,
+        "publication_date": publication_date,
+        "version": version,
+        "title": title,
+        ### add the additional stuff from the study df
+        "ASAP_lab_name": ASAP_lab_name,
+        "PI_full_name": PI_full_name,
+        "PI_email": PI_email,
+        "coPI_full_name": cPI_full_name,
+        "coPI_email": cPI_email,
+        "submitter_name": submitter_name,
+        "submitter_email": submitter_email,
+        "publication_DOI": publication_DOI,
+        "grant_ids": grant_ids,
+        "team_name": team_name,
+    }
+
+    print(f"overwriteing project.json with {project_dict['dataset_title']}")
+    with open(doi_path / f"project.json", "w") as f:
+        json.dump(project_dict, f, indent=4)
+
+    metadata = _make_metadata_from_project(project_dict)
+    export_data = {"metadata": metadata}
+
+    print(f"overwriting {long_dataset_name}.json with {export_data['metadata']['title']}")
+    with open(doi_path / f"{long_dataset_name}.json", "w") as f:
+        json.dump(export_data, f, indent=4)
+
+    # df = pd.DataFrame(project_dict, index=[0])
+    # df.to_csv(doi_path / f"{long_dataset_name}.csv", index=False)
+    # write the files.
 
 def ingest_DOI_doc(
     ds_path: str | Path,
@@ -645,15 +943,84 @@ def make_readme_file(ds_path: Path):
 def make_pdf_file(html_content: str, output_filepath: str | Path):
     # Open a file to write the PDF to
     output_filepath = Path(output_filepath)
+
+    font_path = f"/System/Library/Fonts/Supplemental/Arial Unicode.ttf"
+
+    # Construct a properly structured HTML document string
+    full_html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        @font-face {{
+            font-family: 'ArialUnicode';
+            src: url('{font_path}');
+        }}
+
+        body {{
+            font-family: 'ArialUnicode', sans-serif;        
+        }}
+    </style>
+</head>
+<body>
+    {html_content}
+</body>
+</html>
+"""
+    # print(full_html)
     # Convert HTML to PDF
     # The `io.BytesIO` is crucial for handling the content in memory before writing to file
     with open(output_filepath, "w+b") as result_file:
         pisa_status = pisa.CreatePDF(
-            io.BytesIO(html_content.encode("utf-8")),  # HTML needs to be bytes
+            io.BytesIO(full_html.encode("utf-8")),  # HTML needs to be bytes
             dest=result_file,
+            encoding="utf-8"  # <-- CRITICAL: Tell pisa how to decode the bytes
         )
 
     return not pisa_status.err  # True if conversion was successful
+
+
+
+# def make_pdf_file(html_content: str, output_filepath: str | Path):
+#     # Open a file to write the PDF to
+#     output_filepath = Path(output_filepath)
+
+#     font_path = f"/System/Library/Fonts/Supplemental/Arial Unicode.ttf"
+
+#     # Construct a properly structured HTML document string
+#     full_html = f"""
+# <!DOCTYPE html>
+# <html>
+# <head>
+#     <meta charset="utf-8">
+#     <style>
+#         @font-face {{
+#             font-family: 'ArialUnicode';
+#             src: url('{font_path}');
+#         }}
+        
+#         body {{
+#             font-family: 'ArialUnicode', sans-serif;        
+#         }}
+#     </style>
+# </head>
+# <body>
+#     {html_content}
+# </body>
+# </html>
+# """
+#     print(full_html)
+#     # Convert HTML to PDF
+#     # The `io.BytesIO` is crucial for handling the content in memory before writing to file
+#     with open(output_filepath, "w+b") as result_file:
+#         pisa_status = pisa.CreatePDF(
+#             io.BytesIO(full_html.encode("utf-8")),  # HTML needs to be bytes
+#             dest=result_file,
+#             encoding="utf-8"  # <-- CRITICAL: Tell pisa how to decode the bytes
+#         )
+
+#     return not pisa_status.err  # True if conversion was successful
 
 
 ############
@@ -751,7 +1118,7 @@ def create_draft_metadata(ds_path: Path, version: str = "0.1") -> dict:
         metadata["version"] = "0.1"
     # metadata["license"] = {"id": "cc-by-4.0"}
     # metadata["communities"] = [{"id": "asaphub"}]
-
+    metadata["communities"] = [{'identifier': 'crn-cloud'}, {'identifier': 'asaphub'}]
     return metadata
 
 
@@ -834,28 +1201,33 @@ def replace_anchor_file_in_doi(
 
     # add new file first
     if new_file is None:
+        # assert default name
         new_file = f"{ds_path.name}_README.pdf"
+    
     new_file_path = os.path.join(ds_path, "DOI", new_file)
 
+    file_ids = zenodo.get_file_ids(doi_id)
+
+    # check for a naming collision
+    # delete_file_id = [file_id["id"] for file_id in file_ids if file_id["filename"] == new_file]
+    delete_file_id = [file_id for file_name,file_id in file_ids.items() if file_name == new_file]
+    if len(delete_file_id) > 0:
+        print(f"Deleting file {delete_file_id[0]}")
+        zenodo.delete_file(delete_file_id[0])
+        print(f"Deleting old file {delete_file_id[0]}")
+
+    if old_file is not None:
+        # delete_file_id = [file_id["id"] for file_id in file_ids if file_id["filename"] == old_file]
+        delete_file_id = [file_id for file_name,file_id in file_ids.items() if file_name == new_file]
+
+        if len(delete_file_id) > 0:
+            print(f"Deleting file {delete_file_id[0]}")
+            zenodo.delete_file(delete_file_id[0])
+            print(f"Deleting old file {delete_file_id[0]}")
+
+    zenodo.upload_file(new_file_path)
     # add anchor file
     deposition = add_anchor_file_to_doi(zenodo, new_file_path, doi_id=doi_id)
-
-    # else use current deposition
-    if old_file is None:
-        old_file = f"{ds_path.name}.pdf"
-    # find file_id
-    file_ids = zenodo.get_file_ids(doi_id)
-    file_id = file_ids.get(old_file, "")
-    if file_id == "":
-        print(f"Could not find file {old_file} in deposition {doi_id}")
-
-    if file_id != "":
-        # delete old file
-        msg = zenodo.delete_file(file_id)
-        print(msg)
-    else:
-        # no file to delete...
-        print(f"no file to delete...")
 
     return zenodo.deposition
 

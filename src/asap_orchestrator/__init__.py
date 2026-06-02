@@ -62,7 +62,13 @@ from .models import (
     Creator,
     DatasetBuckets,
     ReleaseRecord,
-    # VersionRecord,
+    ReleaseType,
+    DatasetEntry,
+    CollectionEntry,
+    ReleaseMetadata,
+    CollectionReleaseRef,
+    CollectionVersion,
+    Collection,
 )
 from .dataset import (
     DatasetDefinition,
@@ -75,6 +81,7 @@ from .dataset import (
     publish_dataset_doi,
     update_dataset_version,
     update_datasets_index,
+    fill_dataset_stub,
 )
 from .release import (
     ReleaseDefinition,
@@ -108,13 +115,21 @@ from .doi import (
 from .util import *
 from .bucket_util import *
 
+from .google_spreadsheets import read_google_sheet, GOOGLE_SHEET_ID
+
 __all__ = [
     # models
     "Dataset",
     "Creator",
     "DatasetBuckets",
     "ReleaseRecord",
-    "VersionRecord",
+    "ReleaseType",
+    "DatasetEntry",
+    "CollectionEntry",
+    "ReleaseMetadata",
+    "CollectionReleaseRef",
+    "CollectionVersion",
+    "Collection",
     # dataset
     "DatasetDefinition",
     "define_dataset",
@@ -125,6 +140,7 @@ __all__ = [
     "publish_dataset_doi",
     "update_dataset_version",
     "update_datasets_index",
+    "fill_dataset_stub",
     # release
     "ReleaseDefinition",
     "define_release",
@@ -163,5 +179,8 @@ __all__ = [
     "gcloud_cp",
     "authenticate_with_service_account",
     "create_collection_bucket",
-    "describe_bucket"
+    "describe_bucket",
+    # google_spreadsheets
+    "read_google_sheet",
+    "GOOGLE_SHEET_ID",
 ]

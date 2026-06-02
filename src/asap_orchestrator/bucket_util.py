@@ -110,10 +110,10 @@ def gcloud_ls(bucket_name: str, prefix: str, project: str | None = None, dirs_on
     if dirs_only:
         cmd += ["--depth=1", "|", "grep", "'/$'"]
 
-    print(f"IN: {' '.join(cmd)}")
+    # print(f"IN: {' '.join(cmd)}")
 
     result = subprocess.run(cmd, capture_output=True, text=True)
-    print(f"OUT: {result.stdout}")
+    # print(f"OUT: {result.stdout}")
     if result.returncode == 0:
         pass
     else:

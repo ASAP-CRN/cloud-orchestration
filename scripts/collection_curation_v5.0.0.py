@@ -24,21 +24,19 @@ collections_repo_path = root_path / "cloud-collections"
 releases_repo_path = root_path / "cloud-releases"
 
 import os
-
 os.environ["CLOUDSDK_PYTHON"] = "/opt/homebrew/opt/python@3.13/bin/python3.13"
 
 %load_ext autoreload
 %autoreload 2
 
 
-
 # %% [Step 1] Release parameters
 # TODO: fill in release version, type, CDE version, and optional release DOI
-RELEASE_VERSION = "v4.1.0"    # e.g. "v4.1.0"
-RELEASE_TYPE = "Minor"        # "Urgent" | "Minor" | "Major"
+RELEASE_VERSION = "v5.0.0"    # e.g. "v4.1.0"
+RELEASE_TYPE = "Major"        # "Urgent" | "Minor" | "Major"
 CDE_VERSION = "v4.3"          # e.g. "v3.3"
-RELEASE_DOI = "10.5281/zenodo.19740716"              # Zenodo concept DOI for the release itself, or ""
-RELEASE_DATE = "2026-04-30"
+RELEASE_DOI = "10.5281/zenodo.20186059"      
+RELEASE_DATE = "2026-06-15"
 # %% [Step 1] 
 #. get collections
 

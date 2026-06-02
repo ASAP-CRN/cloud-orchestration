@@ -58,10 +58,10 @@ new_datasets = [
     'alessi-mouse-ms-p-brain-vps35-d620n-wt',
     'alessi-mouse-ms-p-brain-vps35-d620n-dmso-mli2',
     'alessi-mouse-ms-p-lung-vps35-d620n-dmso-mli2',
-# ]
+]
 
 # # cde v3.3
-# bump_datasets = [
+bump_datasets = [
     'cohort-pmdbs-bulk-rnaseq',# v1.2.1
     'cohort-pmdbs-sc-rnaseq', # v3.1.1
     'hafler-pmdbs-sn-rnaseq-pfc',# v1.1
@@ -78,12 +78,13 @@ new_datasets = [
     'wood-pmdbs-bulk-rnaseq', # v1.1 
 ]
 PUBLICATION_DATE = "2026-04-30"   # e.g. "2026-05-01"
-CDE_VERSION = "v3.3"              # e.g. "v3.3"
+BUMP_CDE_VERSION = "v3.3"              # e.g. "v3.3"
 
 # %%
 new_dataset_defs = []
 
-for ds in new_datasets:
+new_datasets_all = new_datasets + bump_datasets
+for ds in new_datasets_all:
     ds_path = datasets_repo_path / "datasets" / ds
     with open(ds_path / "dataset.json", "r") as f:
         ds_info = json.load(f)
@@ -109,7 +110,7 @@ for ds in new_datasets:
 # Read existing dataset entries directly from their dataset.json files so DOIs
 # and versions stay in sync with the source of truth.
 
-previous_release = "v4.0.1"
+previous_release = "v4.0.2"
 # load dataset.json
 prev_release_path = releases_repo_path / previous_release
 
@@ -137,16 +138,21 @@ for ds in previously_released_names:
 # convert to release entries...
 
 # check for overlap
-re_released = set(previously_released_names) & set(new_datasets)
+re_released = set(previously_released_names) & set(new_datasets_all)
 if len(re_released)>0:
     print(f"careful!  we have some re-releasaed datasets: {re_released}")
 
 # %%
 
-all_datasets = prev_dataset_defs + new_dataset_defs
+# all_datasets = prev_dataset_defs + new_dataset_defs
+all_datasets_dict = { data.name :  dict( name = data.name, doi=data.doi, dataset_version=data.version) for data in prev_dataset_defs}
 
-all_datasets_list = [ dict( name = data.name, doi=data.doi, version=data.version) for data in all_datasets]
-new_datasets_list = [ dict( name = data.name, doi=data.doi, version=data.version) for data in new_dataset_defs]
+# update with new datasets
+for data in new_dataset_defs:
+    all_datasets_dict[data.name] = dict( name = data.name, doi=data.doi, dataset_version=data.version)
+
+all_datasets_list = list(all_datasets_dict.values())
+new_datasets_list = [ dict( name = data.name, doi=data.doi, dataset_version=data.version) for data in new_dataset_defs]
 
 # get collections
 # none new in this release
@@ -154,15 +160,20 @@ collections={}
 for ds in all_datasets:
     collection = ds.collection
     if collection is not None:
+        print(f"dataset {ds.name} belongs to collection {collection}")
+
+        # need to get the collection + version...
         collection_path = collections_repo_path / collection / "collection.json"
         with open(collection_path, "r") as f:
             collection_info = json.load(f)
         # find highest version
-        collection_vers = {ver : x["release"]["version"] for ver,x in collection_info["versions"].items() }
+        collection_vers = {ver : x["release"]["version"] for ver,x in collection_info["versions"].items() if x["release"]["version"]<=RELEASE_VERSION }
         # check release.versiopn is NOT > current
         cver = max(collection_vers.keys())
         if collection_vers[cver]<RELEASE_VERSION:
             collections[collection] = dict(name=collection,doi=collection_info["collection_doi"],version=cver)
+        else:
+            print(f"WARNING: collection {collection} already has version {collection_vers[cver]} >= release version {RELEASE_VERSION}")
 
 # build metadata
 metadata = dict(
@@ -170,7 +181,6 @@ metadata = dict(
     total_collections = len(collections),
     source=Path(__file__).name
 )
-
 
 
 
@@ -184,6 +194,7 @@ release_dict = dict(
     created=RELEASE_DATE,
     metadata=metadata
     )
+
 
 # %% 
 # write release.json

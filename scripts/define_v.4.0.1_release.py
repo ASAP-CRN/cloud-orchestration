@@ -111,8 +111,8 @@ if len(re_released)>0:
 
 all_datasets = prev_dataset_defs + new_dataset_defs
 
-all_datasets_list = [ dict( name = data.name, doi=data.doi, version=data.version) for data in all_datasets]
-new_datasets_list = [ dict( name = data.name, doi=data.doi, version=data.version) for data in new_dataset_defs]
+all_datasets_list = [ dict( name = data.name, doi=data.doi, dataset_version=data.version) for data in all_datasets]
+new_datasets_list = [ dict( name = data.name, doi=data.doi, dataset_version=data.version) for data in new_dataset_defs]
 
 # get collections
 # none new in this release
@@ -120,15 +120,20 @@ collections={}
 for ds in all_datasets:
     collection = ds.collection
     if collection is not None:
+        print(f"dataset {ds.name} belongs to collection {collection}")
+
+        # need to get the collection + version...
         collection_path = collections_repo_path / collection / "collection.json"
         with open(collection_path, "r") as f:
             collection_info = json.load(f)
         # find highest version
-        collection_vers = {ver : x["release"]["version"] for ver,x in collection_info["versions"].items() }
+        collection_vers = {ver : x["release"]["version"] for ver,x in collection_info["versions"].items() if x["release"]["version"]<=RELEASE_VERSION }
         # check release.versiopn is NOT > current
         cver = max(collection_vers.keys())
         if collection_vers[cver]<RELEASE_VERSION:
             collections[collection] = dict(name=collection,doi=collection_info["collection_doi"],version=cver)
+        else:
+            print(f"WARNING: collection {collection} already has version {collection_vers[cver]} >= release version {RELEASE_VERSION}")
 
 # build metadata
 metadata = dict(
@@ -158,6 +163,13 @@ release_path = releases_repo_path / RELEASE_VERSION
 with open(release_path / "release.json", "w") as f:
     json.dump(release_dict, f, indent=4)
 
+
+
+
+
+
+
+################################
 # %%
 all_dataset_entries = [
     ao.read_dataset_entry(datasets_repo_path / "datasets" / name)
