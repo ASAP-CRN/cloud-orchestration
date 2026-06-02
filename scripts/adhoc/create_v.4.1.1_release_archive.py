@@ -17,6 +17,7 @@
 
 # %% Setup
 from pathlib import Path
+from xml.etree.ElementPath import find
 import asap_orchestrator as ao
 import json
 import shutil
@@ -24,9 +25,12 @@ import shutil
 # # Imports the Google Cloud client library
 # from google.cloud import storage
 
+%load_ext autoreload
+%autoreload 2
+
 
 # TODO: confirm the root path resolves correctly for your environment
-root_path = Path(__file__).resolve().parents[2]
+root_path = Path(__file__).resolve().parents[3]
 datasets_repo_path = root_path / "cloud-datasets"
 collections_repo_path = root_path / "cloud-collections"
 releases_repo_path = root_path / "cloud-releases"
@@ -70,17 +74,33 @@ if not dataset_archive.exists():
 
 
 # %%
-for dataset, dataset_info in datasets.items():
 
-    print(f"  [{dataset}] get dataset.json")
-    ds_path = datasets_repo_path / "datasets" / dataset
+new_datasets = [
+    "voet-pmdbs-sn-multimodal",
+    "voet-pmdbs-sn-atacseq-scalebio-hydrop",
+    "voet-pmdbs-sn-atacseq-scalebio-10x",
+    "voet-pmdbs-sn-atacseq-hydrop",
+    "voet-pmdbs-sn-atacseq-10x",
+    "voet-pmdbs-sn-rnaseq-parsebio",
+    "voet-pmdbs-sn-rnaseq",
+    "scherzer-pmdbs-sn-rnaseq-midbrain-hybsel",
+    "scherzer-pmdbs-lr-wgs"
+ ]
+for dataset_name, dataset_info in datasets.items():
+
+    print(f"  [{dataset_name}] get dataset.json")
+    ds_path = datasets_repo_path / "datasets" / dataset_name
     dataset_model = ao.Dataset.load(ds_path)
 
     # get the dataset bucket
     ds_ver = dataset_model.version
 
-    ds_bucket = dataset_model.buckets.prod
- 
+
+    if dataset_name not in new_datasets:
+        # continue
+        ds_bucket = dataset_model.buckets.prod
+    else:
+        ds_bucket = dataset_model.buckets.raw
 
     # make an archive of dataset from asap-crn-cloud-dataset-metadata repo based on teh dataset.json
     #  - dataset.json
@@ -89,6 +109,19 @@ for dataset, dataset_info in datasets.items():
     #. - datasets's refs/archive/<dataset_version>/refs/
 
     # # copy the ds_path/ to the archive
+    # folders_to_copy = ["archive", "DOI", "refs"]
+    # for folder in folders_to_copy:
+    #     src_folder = ds_path / folder
+    #     if src_folder.exists() and src_folder.is_dir():
+    #         dest_folder = dataset_archive / dataset_name / folder
+    #         print(f"  [{dataset_name}] copying {src_folder} to {dest_folder}")
+    #         shutil.copytree(
+    #             src_folder,
+    #             dest_folder
+    #         )
+    #     else:
+    #         print(f"  [{dataset_name}] source folder {src_folder} does not exist, skipping copy")
+
     # shutil.copytree(
     #     ds_path,
     #     f"{dataset_archive}/{dataset}"
@@ -97,16 +130,106 @@ for dataset, dataset_info in datasets.items():
     # make an archive of datasets from the curated bucket
     #  - dataset's metadata/release/
     #  - dataset's metadata/original/ 
-    #  - datasets's file_metadata/                                        
-    ao.gcloud_rsync(f"{ds_bucket}/metadata/release/", f"{dataset_archive}/{dataset}/metadata/release/",directory=True,clobber=True)
-    ao.gcloud_rsync(f"{ds_bucket}/file_metadata/", f"{dataset_archive}/{dataset}/file_metadata/",directory=True,clobber=True)
+    #  - datasets's file_metadata/    
+    local_metadata_path = dataset_archive / dataset_name / "metadata" 
 
+    if not (local_metadata_path).exists():
+        print(f"  [{dataset_name}] create dataset archive directory")
+        local_metadata_path.mkdir(parents=True, exist_ok=True)
+
+    local_fmetadata_path = dataset_archive / dataset_name / "file_metadata" 
+    if not local_fmetadata_path.exists():
+        print(f"  [{dataset_name}] create dataset file_metadata directory")
+        local_fmetadata_path.mkdir(parents=True, exist_ok=True)
+
+    ao.gcloud_rsync(f"{ds_bucket}/metadata/", f"{local_metadata_path}/",directory=True,clobber=True)
+    ao.gcloud_rsync(f"{ds_bucket}/file_metadata/", f"{local_fmetadata_path}/",directory=True,clobber=True)
+
+
+    
+    # make a copy of the release metadata in the dest metadata/
+    # find out which 
+    # ao.gcloud_rsync(f"{ds_bucket}/metadata/release/", f"{dataset_archive}/{dataset}/metadata/",directory=True,clobber=False)
 
 # NOW SYNC THE COLLECTIONS TO THE ARCHIVE
+
+# %%
+# now clean up archive and remove all folders from metadata/ that are not named "release"
+for dataset_name, dataset_info in datasets.items():
+
+    # if dataset_name  in new_datasets:
+    #     print(f"  [{dataset_name}] skipping dataset")
+    #     continue
+
+
+    dataset_path = archive_path / dataset_name
+    metadata_path = dataset_path / "metadata"
+    # for item in metadata_path.iterdir():
+    #     if item.is_dir() and item.name != "release":
+    #         print(f"  [{dataset_name}] removing non-metadata directory: {item.name}")
+    #         shutil.move(item, item.parent / f"release" / item.name)
+    #         # shutil.rmtree(item)
+
+
+    # # copy the dataset.json from the cloud-datasets repo to the archive dataset
+    # # shutil.copy2(
+    # #     datasets_repo_path / "datasets" / dataset_name / "dataset.json",
+    # #     dataset_path / "dataset.json"
+    # # )
+    # # load the json
+    # ds_path = datasets_repo_path / "datasets" / dataset_name
+
+    # with open(ds_path / "dataset.json", "r") as f:
+    #     dataset_json = json.load(f)
+    # # get the max release
+    # with open(dataset_path / "dataset.json", "w") as f:
+    #     json.dump(dataset_json, f, indent=2)
+
+    with open(dataset_path / "dataset.json", "r") as f:
+        dataset_json = json.load(f)
+
+    releases = sorted(dataset_json["releases"].keys(), reverse=True) 
+
+    print(f"  [{dataset_name}] dataset releases: {releases}")
+
+    for release in releases:
+        # check if exists... if so copy it
+        check_path = dataset_path / "metadata" / "release" / release
+        if check_path.exists():
+            print(f"  []found release metadata, copying {check_path.name} to {dataset_path / 'metadata'} ")
+            # now copy the release metadata to the archive
+            for item in check_path.iterdir():
+                if item.is_file():
+                    dest_path = dataset_path / "metadata" / item.name
+                    shutil.copy2(f"{item}", f"{dest_path}")
+                    print(f"    copying {item} -> {dest_path} ")
+                
+            break
+        # results = ao.gcloud_ls(f"{ds_bucket}/metadata/release",prefix=f"{release}")
+ 
+    # check if a file_metadata/release/ exists
+    check_path1 = dataset_path / "file_metadata" / "release"
+    if check_path1.exists():
+       for release in releases:
+            check_path = dataset_path / "file_metadata" / "release" / release
+            if check_path.exists():
+                print(f"  []found release file_metadata, copying {check_path.name} to {dataset_path / 'file_metadata'} ")
+                # now copy the release file_metadata to the archive
+                for item in check_path.iterdir():
+                    if item.is_file():
+                        dest_path = dataset_path / "file_metadata" / item.name
+                        shutil.copy2(f"{item}", f"{dest_path}")
+                        print(f"    copying {item} -> {dest_path} ")
+                break
+
+
+
+# now sync the release resources bucket with the archive
 
 
 # %%    
 # now loop through all collections and begin to build the archive
+# TODO: NEED TO ALSO UPDATE THE COHORT DATASET COLLECTIONS.
 
 collections_archive = archive_path / "collections"
 
@@ -158,10 +281,54 @@ for release in releases:
     # copy the release path to the archive
     shutil.copytree(
         releases_repo_path / release,
-        f"{releases_archive}/releases/{release}"
+        f"{releases_archive}/{release}"
     )
 
 
+
+
+# %%
+spreadsheet_id = ao.GOOGLE_SHEET_ID
+
+# load releases.json
+with(releases_repo_path /f"releases.json").open("r") as f:
+    releases_info = json.load(f)
+
+cdes = []
+for _, release_info in releases_info.items():
+    release_version = release_info["release_version"]
+    cdes.append(release_info["cde_version"])
+
+cde_vers = list(set(cdes))
+cde_vers.sort()
+# make cde archive
+cde_repo_path = root_path / "cloud-cde"
+
+for cde_ver in cde_vers:
+    print(f"  [{cde_ver}] read google sheet")
+
+    CDE = ao.read_google_sheet(spreadsheet_id, tab_name=cde_ver)
+
+    cde_path = cde_repo_path / f"ASAP_CDE_{cde_ver}.csv" 
+    CDE.to_csv(cde_path, index=False)
+
+
+# downoad
+# copy all ASAP_CDE_*.csv to the archive
+archive_cde_path = archive_path / "CDE"
+if not archive_cde_path.exists():
+    print(f"  [{archive_cde_path}] create CDE archive directory")
+    archive_cde_path.mkdir(parents=True, exist_ok=True)
+
+for cde_ver in cde_vers:
+    cde_path = cde_repo_path / f"ASAP_CDE_{cde_ver}.csv" 
+    shutil.copy2(
+        cde_path,
+        archive_cde_path / f"ASAP_CDE_{cde_ver}.csv"
+    )
+
+# %%
+# consider adding all the DOI stuff..?
 
 #############################
 # %%
@@ -171,14 +338,8 @@ release_resources_bucket = f"gs://asap-crn-cloud-release-resources"
 
 for directory in archive_path.iterdir():
     if directory.is_dir():
-        print(f"  [{directory}] rsync with bucket")
+        print(f"  [{directory}] rsync with bucket -> {release_resources_bucket}/{directory.name}")
         ao.gcloud_rsync(str(directory), f"{release_resources_bucket}/{directory.name}", directory=True, clobber=True)
 
 
-ew3# %%
-
-
-
-
 # %%
-

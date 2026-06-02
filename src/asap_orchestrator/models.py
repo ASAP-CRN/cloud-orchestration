@@ -51,7 +51,7 @@ class DatasetBuckets(BaseModel):
             if v_parts[0] != PARTS1 or v_parts[1] not in PARTS2 or v_parts[2] != PARTS3:
                 raise ValueError("Invalid bucket URI")
         else:
-            if v_parts[0] != PARTS1 or v_parts[1] != "cohort" or v_parts[2] != PARTS3:
+            if v_parts[0] != PARTS1 or v_parts[1] not in PARTS2 or v_parts[2] != "cohort":
                 raise ValueError("Invalid bucket URI")
             
         return v
@@ -86,7 +86,7 @@ class Dataset(BaseModel):
         creators: Zenodo creator list.
         keywords: Discovery keywords.
         license: SPDX license identifier.
-        references: Zenodo reference strings.
+        # references: Zenodo reference strings.
         collection: Collection slug this dataset belongs to, or ``None``.
         buckets: GCS bucket URIs per environment.
         cde_version: CDE schema version applied to this dataset.
@@ -100,19 +100,21 @@ class Dataset(BaseModel):
     title: str = ""
     description: str = ""
     version: str = "v0.1"
-    dataset_title:  str = ""
     doi: Optional[str] = None
     creators: list[Creator] = Field(default_factory=list)
     keywords: list[str] = Field(default_factory=list)
     license: str = "CC-BY-4.0"
-    references: list[str] = Field(default_factory=list)
+    # references: list[str] = Field(default_factory=list)
     collection: Optional[str] = None
     buckets: DatasetBuckets
     cde_version: Optional[str] = None
     releases: dict[str, ReleaseRecord] = Field(default_factory=dict)
-    all_versions: list[str] = Field(default_factory=list)
+    dataset_title:  str = ""
+    curation: dict[str, Any] = Field(default_factory=dict)
     all_releases: list[str] = Field(default_factory=list)
-
+    all_versions: list[str] = Field(default_factory=list)
+    short_description: str = ""
+    
     @field_validator("doi", "cde_version", mode="before")
     @classmethod
     def _empty_str_to_none(cls, v: object) -> object:
@@ -287,6 +289,7 @@ class CollectionVersion(BaseModel):
     teams: list[str] = Field(default_factory=list)
     types: list[str] = Field(default_factory=list)
     release: CollectionReleaseRef = Field(default_factory=CollectionReleaseRef)
+    curated: Optional[str] = None
 
     @field_validator("doi", mode="before")
     @classmethod

@@ -208,11 +208,11 @@ zenodo = ao.setup_zenodo()
 # %%
 for ds_def in new_dataset_defs:
 
-    if ds_def.name in [
-        'desjardins-mouse-sc-rnaseq-colon-immune-lrrk2',
-        ]: 
-        print(f"Skipping {ds_def.name}")
-        continue
+    # if ds_def.name in [
+    #     'desjardins-mouse-sc-rnaseq-colon-immune-lrrk2',
+    #     ]: 
+    #     print(f"Skipping {ds_def.name}")
+    #     continue
     ds_path = datasets_repo_path / "WIP" / ds_def.name
     readme_pdf = ds_path / "DOI" / f"{ds_def.name}_README.pdf"
     beta_doi_id = ao.get_doi_from_dataset(ds_path, version=True)
@@ -242,3 +242,48 @@ for ds_def in new_dataset_defs:
 
 
 # %%
+# %%
+for ds_def in new_dataset_defs:
+
+    # if ds_def.name in [
+    #     'desjardins-mouse-sc-rnaseq-colon-immune-lrrk2',
+    #     ]: 
+    #     print(f"Skipping {ds_def.name}")
+    #     continue
+    ds_path = datasets_repo_path / "WIP" / ds_def.name
+    readme_pdf = ds_path / "DOI" / f"{ds_def.name}_README.pdf"
+    doi_id = ao.get_doi_from_dataset(ds_path, version=True)
+
+    zenodo.set_deposition_id(doi_id)
+    deposition = zenodo.deposition
+    metadata = deposition.get("metadata")
+
+    # update v1.0
+    metadata['version'] = '1.0'
+    deposition = ao.update_doi_metadata(zenodo, doi_id, metadata)
+
+
+
+    ao.finalize_DOI(ds_path, deposition, prerelease=True)
+    # archive deposition
+    ao.archive_deposition_local(ds_path, "pre-release-deposition", deposition)
+
+
+# %%
+
+#######################
+# %%
+new_dataset_defs = []
+for ds in add_dataset_defs:
+    ds_path = datasets_repo_path / "WIP" / ds
+
+    ds_in = ao.Dataset.load(ds_path)
+    ds_def = ao.fill_dataset_stub(ds_in,ds_path)
+
+    ds_def.save(ds_path)
+
+    new_dataset_defs.append(ds_def)
+    
+# %%    
+
+
