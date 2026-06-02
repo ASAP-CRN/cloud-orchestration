@@ -35,7 +35,7 @@ import shutil, json
 
 root_path = Path(__file__).resolve().parents[2]
 datasets_repo_path = root_path / "cloud-datasets"
-
+metadata_repo_path = root_path / "asap-crn-cloud-dataset-metadata"
 # %% [Step 5a] Release parameters
 # TODO: set the publication date and CDE version for this acceptance tranche
 PUBLICATION_DATE = "2026-05-31"   # e.g. "2026-05-01"
@@ -166,6 +166,30 @@ for ds in datasets:
 # doi_id = "20078073"
 # zenodo.set_deposition_id(doi_id)
 # deposition = zenodo.deposition
+
+
+
+
+# %%
+# copy DOI and refs back to metadata for release.json generation
+
+copy_paths = ["DOI", "refs"]
+cloud_metadata_path = datasets_repo_path / "datasets" / ds / "dataset.json"
+for ds in datasets:
+    ds_path = datasets_repo_path / "datasets" / ds
+    dest_path = metadata_repo_path / "datasets" / ds
+    # TODO: update the filename to match the actual reference document
+    for copy_path in copy_paths:
+        src = ds_path / copy_path
+        dst = dest_path / copy_path
+        if src.exists():
+            # copy2 preserves metadata (e.g. modified time), which is helpful for testing whether files were updated correctly
+            # overwrite existing files in place to preserve any existing metadata (e.g. modified time) that may be used for testing whether files were updated correctly
+            shutil.copytree(f"{src}", f"{dst}", dirs_exist_ok=True)
+            print(f"Copied {src} to {dst}")
+        else:
+            print(f"WARNING: expected file not found: {src}")
+
 
 
 
