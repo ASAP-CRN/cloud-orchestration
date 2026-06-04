@@ -1,7 +1,7 @@
-# %% [markdown]
+# %% 
 # # ASAP CRN — Release Template
 #
-# Copy this file and rename it, e.g. `make_v4.1.0_release.py`.
+# Copy this file and rename it, e.g. `define_v5.0.0_release.py`.
 # Fill in every section marked with TODO before running cell by cell.
 #
 # **Lifecycle covered here:**
@@ -32,8 +32,25 @@ releases_repo_path = root_path / "cloud-releases"
 RELEASE_VERSION = "v5.0.0"    # e.g. "v4.1.0"
 RELEASE_TYPE = "Major"        # "Urgent" | "Minor" | "Major"
 CDE_VERSION = "v4.4"          # e.g. "v3.3"
-RELEASE_DOI = "10.5281/zenodo."              # Zenodo concept DOI for the release itself, or ""
+RELEASE_DOI = "10.5281/zenodo.20186059"              # Zenodo concept DOI for the release itself, or ""
 RELEASE_DATE = "2026-06-10"
+
+PUBLICATION_DATE = "2026-05-31"   # e.g. "2026-05-01"
+
+# steps
+# 1 define which datasets are new or newly curated 
+# 2. define new collections
+# 3. do any dataset, collection version bumps
+# 4. build the release manifest with define_release()
+    
+
+
+
+# new datasets
+new_datasets = [
+    "asap-cohort-invitro-bulk-rnaseq"
+]
+
 # %% [Step 2] Define datasets NEW or VERSION-BUMPED in this release
 # Each entry needs a published (or pre-reserved) Zenodo DOI.
 # Use version="v1.0" for datasets being released for the first time (promoted
@@ -44,16 +61,17 @@ new_datasets = [
     "team-jakobsson-invitro-bulk-rnaseq-dopaminergic",
     "team-voet-pmdbs-sn-atacseq-10x",
 ]
+
 new_collections = [
     "invitro-bulk-rnaseq",
     "pmdbs-sc-atacseq",
-
 ]
 
 # define
 # %%
 new_dataset_defs = []
 
+# all of our datasets have previously been released.
 for ds in new_datasets:
     ds_path = datasets_repo_path / "datasets" / ds
     with open(ds_path / "dataset.json", "r") as f:
@@ -62,15 +80,6 @@ for ds in new_datasets:
     dataset_model = ao.Dataset.load(ds_path)
 
     new_dataset_defs.append(dataset_model)
-    # ao.define_dataset(
-    #     name="teamX-tissue-modality",             # TODO: replace
-    #     collection="tissue-modality",             # TODO: replace, or None
-    #     version="v1.0",                           # TODO: replace
-    #     doi="10.5281/zenodo.XXXXXXXX",            # TODO: replace with published DOI
-    #     cde_version=CDE_VERSION,
-    # ),
-    # Add more ao.define_dataset() entries for each new/bumped dataset...
-
 
 
 # %%
@@ -116,8 +125,152 @@ if len(re_released)>0:
 
 all_datasets = prev_dataset_defs + new_dataset_defs
 
-all_datasets_list = [ dict( name = data.name, doi=data.doi, version=data.version) for data in all_datasets]
-new_datasets_list = [ dict( name = data.name, doi=data.doi, version=data.version) for data in new_dataset_defs]
+all_datasets_list = [ dict( name = data.name, doi=data.doi, dataset_version=data.version) for data in all_datasets]
+new_datasets_list = [ dict( name = data.name, doi=data.doi, dataset_version=data.version) for data in new_dataset_defs]
+
+
+
+
+
+
+
+
+# get all the datasets and see if the jsons are up to spec
+all_datasets = [d.name for d in (datasets_repo_path / "datasets").glob("*")]
+
+# %%
+
+
+# for ds in all_datasets:
+#     ds_path = datasets_repo_path / "datasets" / ds
+#     with open(ds_path / "dataset.json", "r") as f:
+#         ds_info = json.load(f)
+
+#     # if len(ds_info["curation"]):
+#     #     curation_info = ds_info["curation"]
+
+#     #     print(f"dataset {ds} has curation info")
+#     #     release_version = ds_info["curation"]["release"]
+#     #     dataset_version =ds_info["releases"][release_version]["dataset_version"]
+#     #     collection_version = ds_info["curation"]["version"]
+#     #     new_curation_info = dict(
+#     #         name=curation_info["name"],
+#     #         dataset_version=dataset_version,
+#     #         release_version=release_version,
+#     #         collection_version=collection_version,
+#     #         collection=curation_info["collection"],
+#     #         releases=curation_info["releases"],
+#     #     )
+
+#     #     ds_info["curation"] = new_curation_info 
+
+#     # else:
+#     #     print(f"dataset {ds} has NO curation info, adding empty curation field")
+#     #     ds_info["curation"] = dict()
+
+
+#     # fix title and description from project.json
+#     project_json_path = ds_path / "DOI" / f"project.json"
+#     if project_json_path.exists():
+#         with open(project_json_path, "r") as f:
+#             project_json = json.load(f)
+#         short_desc = ds_info["description"]
+#         ds_info["title"] = project_json.get("dataset_title", ds_info["title"])
+#         ds_info["description"] = project_json.get("dataset_description", ds_info["description"])
+#         ds_info["short_description"] = short_desc
+
+#     with open(ds_path / "dataset.json", "w") as f:
+#         json.dump(ds_info, f, indent=4)
+
+# %%
+
+successfully_loaded = []
+unsuccessfully_loaded = []
+all_ds_model = {}
+for ds in all_datasets:
+    print(f"dataset: {ds}")
+
+    ds_path = datasets_repo_path / "datasets" / ds
+    with open(ds_path / "dataset.json", "r") as f:
+        ds_info = json.load(f)
+
+    # try to load with the model to confirm it works
+    try:
+        dataset_model = ao.Dataset.load(ds_path)
+        successfully_loaded.append(f"{ds}")
+    except Exception as e:
+        print(f"Error loading dataset: {ds_path}")
+        unsuccessfully_loaded.append(f"{ds}")
+        print(e)
+        continue
+    
+    curr_key = dataset_model.name
+    print(curr_key)
+    # print(f"Loaded dataset: {dataset_model.name} (version: {dataset_model.version}, doi: {dataset_model.doi})")
+    all_ds_model[ds] = dataset_model
+
+####################
+# update the dataset.json stubs for the new datasets being released in this tranche. This is necessary to ensure the release manifest is up to date with the correct DOIs and versions, which are used as the source of truth for this information.
+
+# %%
+# now lets loop through all datasets and update the dataset.json to include the curated_version
+
+is_major_release = lambda v: v.split(".")[1:] == ["0", "0"]
+
+
+
+# for ds in all_datasets:
+#     ds_path = datasets_repo_path / "datasets" / ds
+#     with open(ds_path / "dataset.json", "r") as f:
+#         ds_info = json.load(f)
+
+#     refs = ds_info.get("references", [])
+#     if len(refs)>0:
+#         print(f"dataset {ds} has {len(refs)} references")
+
+# # %%. now lets confirm we can load them all with the model
+# all_datasets = [d.name for d in (datasets_repo_path / "datasets").glob("*")]
+
+# successfully_loaded = []
+# unsuccessfully_loaded = []
+# all_ds_model = {}
+# for ds in all_datasets:
+#     print(f"dataset: {ds}")
+
+#     ds_path = datasets_repo_path / "datasets" / ds
+#     with open(ds_path / "dataset.json", "r") as f:
+#         ds_info = json.load(f)
+
+
+    
+#     # add all_releases
+#     all_releases = [r for r in ds_info["releases"].keys()]
+#     # add all_versions
+#     all_versions = [v["dataset_version"] for v in ds_info["releases"].values()]
+
+#     ds_info["all_releases"] = all_releases  
+#     ds_info["all_versions"] = list(set(all_versions))  # remove duplicates from all_versions
+
+#     with open(ds_path / "dataset.json", "w") as f:
+#         json.dump(ds_info, f, indent=4)
+
+#     # try to load with the model to confirm it works
+#     try:
+#         dataset_model = ao.Dataset.load(ds_path)
+#         successfully_loaded.append(f"{ds}")
+#     except Exception as e:
+#         print(f"Error loading dataset: {ds_path}")
+#         unsuccessfully_loaded.append(f"{ds}")
+#         print(e)
+#         continue
+
+#     all_ds_model[ds] = dataset_model
+
+
+
+
+
+
 
 # get collections
 # none new in this release
@@ -125,15 +278,20 @@ collections={}
 for ds in all_datasets:
     collection = ds.collection
     if collection is not None:
+        print(f"dataset {ds.name} belongs to collection {collection}")
+
+        # need to get the collection + version...
         collection_path = collections_repo_path / collection / "collection.json"
         with open(collection_path, "r") as f:
             collection_info = json.load(f)
         # find highest version
-        collection_vers = {ver : x["release"]["version"] for ver,x in collection_info["versions"].items() }
+        collection_vers = {ver : x["release"]["version"] for ver,x in collection_info["versions"].items() if x["release"]["version"]<=RELEASE_VERSION }
         # check release.versiopn is NOT > current
         cver = max(collection_vers.keys())
         if collection_vers[cver]<RELEASE_VERSION:
             collections[collection] = dict(name=collection,doi=collection_info["collection_doi"],version=cver)
+        else:
+            print(f"WARNING: collection {collection} already has version {collection_vers[cver]} >= release version {RELEASE_VERSION}")
 
 # build metadata
 metadata = dict(
@@ -159,8 +317,6 @@ release_dict = dict(
 # %% 
 # write release.json
 release_path = releases_repo_path / RELEASE_VERSION 
-if not release_path.exists():
-    release_path.mkdir()
 
 with open(release_path / "release.json", "w") as f:
     json.dump(release_dict, f, indent=4)
@@ -168,7 +324,6 @@ with open(release_path / "release.json", "w") as f:
 
 
 
-############################    for name in previously_released_names
 ############################    for name in previously_released_names
 ############################    for name in previously_released_names
 ############################    for name in previously_released_names

@@ -48,6 +48,8 @@ RELEASE_TYPE = "Minor"        # "Urgent" | "Minor" | "Major"
 CDE_VERSION = "v4.4"          # e.g. "v3.3"
 RELEASE_DOI = "10.5281/zenodo.20185963"              #10.5281/zenodo.20185963
 RELEASE_DATE = "2026-05-30"
+PUBLICATION_DATE = "2026-05-31"   # e.g. "2026-05-01"
+
 # %% [Step 2] Define datasets NEW or VERSION-BUMPED in this release
 # Each entry needs a published (or pre-reserved) Zenodo DOI.
 # Use version="v1.0" for datasets being released for the first time (promoted
