@@ -157,7 +157,8 @@ def _make_metadata_from_project(project_dict: dict) -> dict:
         # "access_right": "open",
         "creators": project_dict["creators"],
         "resource_type": "dataset",
-        "communities": [{"identifier": "asaphub"}],
+        # "communities": [{"identifier": "asaphub"}],
+        "communities": [{'identifier': 'crn-cloud'}, {'identifier': 'asaphub'}],
         "references": [
             "Aligning Science Across Parkinson's Collaborative Research Network Cloud, https://cloud.parkinsonsroadmap.org/collections, RRID:SCR_023923",
             f"Team {project_dict['team_name']}",
@@ -165,8 +166,11 @@ def _make_metadata_from_project(project_dict: dict) -> dict:
         "license": {"id": "cc-by-4.0"},
     }
 
-    if not pd.isna(project_dict.get("grant_ids")):
+    grant_ids = project_dict.get("grant_ids")
+
+    if grant_ids is not None:
         grant_ids = project_dict.get("grant_ids")
+        print(f"Grant ids: {grant_ids}")
         if isinstance(grant_ids, str):
             if "," in grant_ids:
                 grant_ids = grant_ids.split(",")
@@ -754,7 +758,7 @@ def ingest_DOI_doc(
     else:
         grant_ids = None
         print("Warning: No grant ids found")
-
+    print(grant_ids)
     # also dump the table to make the documents and
     # ## save a simple table to update STUDY table
     project_dict = {

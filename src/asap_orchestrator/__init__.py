@@ -117,6 +117,28 @@ from .bucket_util import *
 
 from .google_spreadsheets import read_google_sheet, GOOGLE_SHEET_ID
 
+from .validate import (
+    check_dataset_consistency,
+    check_release_consistency,
+    check_all_datasets,
+    check_collection_consistency,
+    check_all_collections,
+)
+from .archive import (
+    build_archive_dataset,
+    ensure_archive_entry,
+    repair_archive_entry,
+    validate_archive_entry,
+    validate_all_archives,
+    ensure_all_archives,
+    build_archive_collection,
+    ensure_collection_archive_entry,
+    repair_collection_archive_entry,
+    validate_collection_archive_entry,
+    validate_all_collection_archives,
+    ensure_all_collection_archives,
+)
+
 __all__ = [
     # models
     "Dataset",
@@ -183,4 +205,32 @@ __all__ = [
     # google_spreadsheets
     "read_google_sheet",
     "GOOGLE_SHEET_ID",
+    # validate
+    "check_dataset_consistency",
+    "check_release_consistency",
+    "check_all_datasets",
+    "check_collection_consistency",
+    "check_all_collections",
+    # archive — datasets
+    "build_archive_dataset",
+    "ensure_archive_entry",
+    "repair_archive_entry",
+    "validate_archive_entry",
+    "validate_all_archives",
+    "ensure_all_archives",
+    # archive — collections
+    "build_archive_collection",
+    "ensure_collection_archive_entry",
+    "repair_collection_archive_entry",
+    "validate_collection_archive_entry",
+    "validate_all_collection_archives",
+    "ensure_all_collection_archives",
 ]
+
+# Unused functions identified (not removed, just documented):
+# update_study_table_with_doi — in doi.__all__ but entirely commented out
+# setup_DOI_info_v1 / ingest_DOI_doc_v1 — not exported, superseded
+# create_draft_doi — not re-exported from package, superseded by create_dataset_doi
+# get_published_deposition / make_pdf_file — internal-only, not in package __init__
+# authenticate_with_service_account — marked deprecated in code
+# gcloud_ls_long — not in __all__, debug variant

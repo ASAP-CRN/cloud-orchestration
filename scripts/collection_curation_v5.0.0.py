@@ -30,6 +30,646 @@ os.environ["CLOUDSDK_PYTHON"] = "/opt/homebrew/opt/python@3.13/bin/python3.13"
 %autoreload 2
 
 
+# #NEW COLLECTION
+# # invitro-bulk-rnaseq
+# asap-crn-invitro-bulk-rnaseq-collection-v1
+
+# #DATASETS
+# team-jakobsson-invitro-bulk-rnaseq-dopaminergic DOI:10.5281/zenodo.17149266
+# team-jakobsson-invitro-bulk-rnaseq-microglia DOI: 10.5281/zenodo.17149290
+# asap-cohort-invitro-bulk-rnaseq
+
+
+invitro_bulk_rnaseq = {
+    "name": "invitro-bulk-rnaseq",
+    "title": "In Vitro Bulk RNAseq",
+    "collection_doi": "10.5281/zenodo.17149266",
+    "current_version": "v1.0.0",
+    "doi": "10.5281/zenodo.17149267",
+    "datasets": [
+      "jakobsson-invitro-bulk-rnaseq-dopaminergic",
+      "jakobsson-invitro-bulk-rnaseq-microglia",
+      "asap-cohort-invitro-bulk-rnaseq"
+    ],
+    "curation": {
+      "bucket": "gs://asap-crn-invitro-bulk-rnaseq-collection-v1",
+      "datasets": {
+        "jakobsson-invitro-bulk-rnaseq-dopaminergic" : "gs://asap-curated-team-jakobsson-invitro-bulk-rnaseq-dopaminergic/invitro_bulk_rnaseq/release/v5.0.0",
+        "jakobsson-invitro-bulk-rnaseq-microglia" : "gs://asap-curated-team-jakobsson-invitro-bulk-rnaseq-microglia/invitro_bulk_rnaseq/release/v5.0.0",
+        "asap-cohort-invitro-bulk-rnaseq" : "gs://asap-curated-cohort-invitro-bulk-rnaseq/invitro_bulk_rnaseq/release/v5.0.0"
+      },
+      "workflow" : {
+        "name": "bulk_rnaseq_analysis",
+        "version":"v2.0.0",
+        "github_url":"https://github.com/ASAP-CRN/bulk-rnaseq-wf/releases/tag/bulk_rnaseq_analysis-v2.0.0",
+      },
+    },
+    "release": {
+      "version": "v5.0.0",
+      "cde_version": "v4.4",
+      "date": "2026-06-15"
+    },
+    "versions": {
+      "v1.0.0": {
+        "version": "v1.0.0",
+        "date": "2025-12-15",
+        "doi": "10.5281/zenodo.17860975",
+        "datasets": [
+          "jakobsson-invitro-bulk-rnaseq-dopaminergic",
+          "jakobsson-invitro-bulk-rnaseq-microglia",
+          "asap-cohort-invitro-bulk-rnaseq"
+        ],
+        "teams": [
+          "jakobsson",
+          "cohort"
+        ],
+        "types": [
+          "invitro-bulk-rnaseq"
+        ],
+        "curation": {
+          "bucket": "gs://asap-crn-invitro-bulk-rnaseq-collection-v1",
+          "datasets": {
+              "jakobsson-invitro-bulk-rnaseq-dopaminergic" : "gs://asap-curated-team-jakobsson-invitro-bulk-rnaseq-dopaminergic/invitro_bulk_rnaseq/release/v5.0.0",
+              "jakobsson-invitro-bulk-rnaseq-microglia" : "gs://asap-curated-team-jakobsson-invitro-bulk-rnaseq-microglia/invitro_bulk_rnaseq/release/v5.0.0",
+              "asap-cohort-invitro-bulk-rnaseq" : "gs://asap-curated-cohort-invitro-bulk-rnaseq/invitro_bulk_rnaseq/release/v5.0.0"
+          },
+          "workflow" : {
+            "name": "bulk_rnaseq_analysis",
+            "version":"v2.0.0",
+            "github_url":"https://github.com/ASAP-CRN/bulk-rnaseq-wf/releases/tag/bulk_rnaseq_analysis-v2.0.0",
+          }
+        },  
+        "release": {
+          "version": "v5.0.0",
+          "cde_version": "v4.4",
+          "date": "2026-06-15"
+        }
+      }
+    }
+}
+
+
+
+# # pmdbs-sc-atac
+# asap-crn-pmdbs-sc-atacseq-collection-v1
+# team-voet-pmdbs-sn-atacseq-10x
+
+
+# mouse-spatial-rnaseq: release v4.0.0 has DOI ...16979297 but collection_doi is ...16979296 — consecutive Zenodo IDs, likely the version-specific DOI was stored in the release instead of the concept DOI
+# pmdbs-sc-rnaseq v3.1.1: the collection entry says release.version=v4.1.0 but v4.1.0's release.json doesn't include pmdbs-sc-rnaseq — it was actually released in v4.1.1 (data inconsistency in the collection.json)
+# All 5 collection archives: missing collection.json files (only DOI/ subdirs exist, backfill needed)
+
+
+
+pmdbs_sc_atacseq = {
+    "name": "pmdbs-sc-atacseq",
+    "title": "PMDBS single-cell ATACseq",
+    "collection_doi": "10.5281/zenodo.17149266",
+    "current_version": "v1.0.0",
+    "doi": "10.5281/zenodo.17149267",
+    "datasets": [
+      "voet-pmdbs-sc-atacseq-10x"
+    ],
+    "curation": {
+      "bucket": "gs://asap-crn-pmdbs-sc-atacseq-collection-v1",
+      "datasets": {
+          "voet-pmdbs-sc-atacseq-10x" : "gs://asap-curated-team-voet-pmdbs-sn-atacseq-10x/pmdbs_sc_atacseq/release/v5.0.0"
+      },
+      "workflow" : {
+        "name": "pmdbs_sc_atacseq",
+        "version":"v1.0.0",
+        "github_url":"https://github.com/ASAP-CRN/sc-atacseq-wf/releases/tag/sc_atacseq_analysis-v1.0.0",
+      }
+    },  
+    "release": {
+      "version": "v5.0.0",
+      "cde_version": "v4.4",
+      "date": "2026-06-15"
+    },
+    "versions": {
+      "v1.0.0": {
+        "version": "v1.0.0",
+        "date": "2025-12-15",
+        "doi": "10.5281/zenodo.17860975",
+        "datasets": [
+          "voet-pmdbs-sc-atacseq-10x"
+        ],
+        "teams": [
+          "voet",
+        ],
+        "types": [
+          "pmdbs-sc-atacseq"
+        ],
+        "curation": {
+          "bucket": "gs://asap-crn-pmdbs-sc-atacseq-collection-v1",
+          "datasets": {
+              "voet-pmdbs-sc-atacseq-10x" : "gs://asap-curated-team-voet-pmdbs-sn-atacseq-10x/pmdbs_sc_atacseq/release/v5.0.0"
+          },
+          "workflow" : {
+          "name": "sc-atacseq",
+          "version":"v1.0.0",
+          "github_url":"https://github.com/ASAP-CRN/sc-atacseq-wf/releases/tag/sc_atacseq_analysis-v1.0.0",
+          }
+        },
+        "release": {
+          "version": "v5.0.0",
+          "cde_version": "v4.4",
+          "date": "2026-06-15"
+        }
+      }
+    }
+}
+
+
+
+
+
+mouse_sc_rnaseq = {
+    "name": "mouse-sc-rnaseq",
+    "title": "Mouse scRNAseq",
+    "collection_doi": "10.5281/zenodo.17860974",
+    "current_version": "v1.0.1",
+    "doi": "10.5281/zenodo.17860975",
+    "datasets": [
+      "biederer-mouse-sc-rnaseq",
+      "cragg-mouse-sn-rnaseq-striatum",
+      "cohort-mouse-sc-rnaseq"
+    ],
+    "curation": {
+      "bucket": "gs://asap-crn-mouse-sc-rnaseq-collection-v1",
+      "datasets": {
+        "biederer-mouse-sc-rnaseq" : "gs://asap-curated-team-biederer-mouse-sc-rnaseq/mouse_sc_rnaseq/release/v4.0.0/",
+        "cragg-mouse-sn-rnaseq-striatum" : "gs://asap-curated-team-cragg-mouse-sn-rnaseq-striatum/mouse_sc_rnaseq/release/v4.0.0/",
+        "cohort-mouse-sc-rnaseq" : "gs://asap-curated-cohort-mouse-sc-rnaseq/mouse_sc_rnaseq/release/v4.0.0/"
+     },
+      "workflow" : {
+        "name": "sc-rnaseq-wf",
+        "version":"v1.0.0",
+        "github_url":"https://github.com/ASAP-CRN/sc-rnaseq-wf/releases/tag/sc_rnaseq_analysis-v4.0.0",
+      }
+    },    
+    "release": {
+      "version": "v4.0.0",
+      "cde_version": "v3.3",
+      "date": "2025-12-15"
+    },
+    "versions": {
+      "v1.0.0": {
+        "version": "v1.0.0",
+        "date": "2025-12-15",
+        "doi": "10.5281/zenodo.17860975",
+        "datasets": [
+          "biederer-mouse-sc-rnaseq",
+          "cragg-mouse-sn-rnaseq-striatum",
+          "cohort-mouse-sc-rnaseq"
+        ],
+        "teams": [
+          "biederer",
+          "cohort",
+          "cragg"
+        ],
+        "types": [
+          "mouse-sc-rnaseq"
+        ],
+        "curation": {
+          "bucket": "gs://asap-crn-mouse-sc-rnaseq-collection-v1",
+          "datasets": {
+              "biederer-mouse-sc-rnaseq" : "gs://asap-curated-team-biederer-mouse-sc-rnaseq/mouse_sc_rnaseq/release/v4.0.0/",
+              "cragg-mouse-sn-rnaseq-striatum" : "gs://asap-curated-team-cragg-mouse-sn-rnaseq-striatum/mouse_sc_rnaseq/release/v4.0.0/",
+              "cohort-mouse-sc-rnaseq" : "gs://asap-curated-cohort-mouse-sc-rnaseq/mouse_sc_rnaseq/release/v4.0.0/"
+          },
+            "workflow" : {
+            "name": "xxx",
+            "version":"v1.0.0",
+            "github_url":"",
+          }
+        },
+        "release": {
+          "version": "v4.0.0",
+          "cde_version": "v3.3",
+          "date": "2025-12-15"
+        }
+      },
+      "v1.0.1": {
+        "version": "v1.0.1",
+        "date": "2026-06-15",
+        "doi": "10.5281/zenodo.17860975",
+        "datasets": [
+          "biederer-mouse-sc-rnaseq",
+          "cragg-mouse-sn-rnaseq-striatum",
+          "cohort-mouse-sc-rnaseq"
+        ],
+        "teams": [
+          "biederer",
+          "cohort",
+          "cragg"
+        ],
+        "types": [
+          "mouse-sc-rnaseq"
+        ],
+        "curation": {
+          "bucket": "gs://asap-crn-mouse-sc-rnaseq-collection-v1",
+          "datasets": {
+              "biederer-mouse-sc-rnaseq" : "gs://asap-curated-team-biederer-mouse-sc-rnaseq/release/v1.0.0/",
+              "cragg-mouse-sn-rnaseq-striatum" : "gs://asap-curated-team-cragg-mouse-sn-rnaseq-striatum/mouse_sc_rnaseq/release/v4.0.0",
+              "cohort-mouse-sc-rnaseq" : "gs://asap-curated-cohort-mouse-sc-rnaseq/release/v1.0.0/"
+          },
+            "workflow" : {
+            "name": "xxx",
+            "version":"v1.0.0",
+            "github_url":"",
+          }
+        },
+        "release": {
+          "version": "v5.0.0",
+          "cde_version": "v4.5",
+          "date": "2026-06-15"
+        }
+      }
+    }
+}
+
+spatial_visium
+spatial_geomx
+
+mouse_spatial_rnaseq = {
+    "name": "mouse-spatial-rnaseq",
+    "title": "Mouse Spatial RNAseq",
+    "collection_doi": "10.5281/zenodo.16979296",
+    "current_version": "v1.0.0",
+    "doi": "10.5281/zenodo.16979297",
+    "datasets": [
+      "cragg-mouse-spatial-visium-striatum"
+    ],
+    "curation": {
+      "bucket": "gs://asap-crn-mouse-spatial-rnaseq-collection-v1",
+      "datasets": {
+          "cragg-mouse-spatial-visium-striatum" : "gs://asap-curated-team-voet-pmdbs-sn-atacseq-10x/pmdbs_sc_atacseq/release/v5.0.0"
+      },
+      "workflow" : {
+        "name": "xxx",
+        "version":"v1.0.0",
+        "github_url":"",
+      },
+    },
+    "release": {
+      "version": "v4.0.0",
+      "cde_version": "v3.3",
+      "date": "2025-09-30"
+    },  
+    "versions": {
+      "v1.0.0": {
+        "version": "v1.0.0",
+        "date": "2025-09-30",
+        "doi": "10.5281/zenodo.16979297",
+        "datasets": [
+          "cragg-mouse-spatial-visium-striatum"
+        ],
+        "teams": [
+          "cragg"
+        ],
+        "types": [
+          "mouse-spatial-rnaseq"
+        ],
+        "curation": {
+          "bucket": "gs://asap-crn-pmdbs-sc-atacseq-collection-v1",
+          "datasets": {
+              "voet-pmdbs-sc-atacseq-10x" : "gs://asap-curated-team-voet-pmdbs-sn-atacseq-10x/pmdbs_sc_atacseq/release/v5.0.0"
+          },
+          "workflow" : {
+            "name": "xxx",
+            "version":"v1.0.0",
+            "github_url":"",
+          },
+        },
+        "release": {
+          "version": "v4.0.0",
+          "cde_version": "v3.3",
+          "date": "2025-09-30"
+        },  
+      }
+    }
+}
+
+
+######### bulk 
+pmdbs_bulk_rnaseq = {
+    "name": "pmdbs-bulk-rnaseq",
+    "title": "PMDBS bulkRNAseq",
+    "collection_doi": "10.5281/zenodo.14373343",
+    "current_version": "v1.2.0",
+    "doi": "10.5281/zenodo.17860841",
+    "datasets": [
+      "hardy-pmdbs-bulk-rnaseq",
+      "lee-pmdbs-bulk-rnaseq-mfg",
+      "wood-pmdbs-bulk-rnaseq",
+      "cohort-pmdbs-bulk-rnaseq",
+      "jakobsson-pmdbs-bulk-rnaseq"
+    ],
+    "curation": {
+      "bucket": "gs://asap-crn-pmdbs-bulk-rnaseq-collection-v1",
+      "datasets": {
+        "hardy-pmdbs-bulk-rnaseq":"gs://asap-curated-team-hardy-pmdbs-bulk-rnaseq",
+        "lee-pmdbs-bulk-rnaseq-mfg":"gs://asap-curated-team-lee-pmdbs-bulk-rnaseq",
+        "wood-pmdbs-bulk-rnaseq":"gs://asap-curated-team-wood-pmdbs-bulk-rnaseq",
+        "cohort-pmdbs-bulk-rnaseq":"gs://asap-curated-cohort-pmdbs-bulk-rnaseq",
+        "jakobsson-pmdbs-bulk-rnaseq":"gs://asap-curated-team-jakobsson-pmdbs-bulk-rnaseq"
+      },
+      "workflow" : {
+        "name": "pmdbs_bulk_rnaseq",
+        "version":"v1.1.1",
+        "github_url":"https://github.com/ASAP-CRN/pmdbs-bulk-rnaseq-wf/releases/tag/pmdbs_bulk_rnaseq_analysis-v1.1.1",
+      },
+      "release": {
+        "version": "v4.0.0",
+        "cde_version": "v3.3",
+        "date": "2025-12-15"
+      },
+    "versions": {
+      "v1.0.0": {
+        "version": "v1.0.0",
+        "date": "2024-09-11",
+        "doi": "10.5281/zenodo.14373344",
+        "datasets": [
+          "hardy-pmdbs-bulk-rnaseq",
+          "lee-pmdbs-bulk-rnaseq-mfg",
+          "wood-pmdbs-bulk-rnaseq",
+          "cohort-pmdbs-bulk-rnaseq"
+        ],
+        "teams": [
+          "cohort",
+          "hardy",
+          "lee",
+          "wood"
+        ],
+        "types": [
+          "pmdbs-bulk-rnaseq"
+        ],
+        "release": {
+          "version": "v2.0.3",
+          "cde_version": "v3.0",
+          "date": "2024-09-11"
+        }
+      },
+      "v1.1.0": {
+        "version": "v1.1.0",
+        "date": "2025-09-30",
+        "doi": "10.5281/zenodo.16975686",
+        "datasets": [
+          "hardy-pmdbs-bulk-rnaseq",
+          "lee-pmdbs-bulk-rnaseq-mfg",
+          "wood-pmdbs-bulk-rnaseq",
+          "cohort-pmdbs-bulk-rnaseq"
+        ],
+        "teams": [
+          "cohort",
+          "hardy",
+          "lee",
+          "wood"
+        ],
+        "types": [
+          "pmdbs-bulk-rnaseq"
+        ],
+        "release": {
+          "version": "v3.0.2",
+          "cde_version": "v3.2",
+          "date": "2025-09-30"
+        }
+      },
+      "v1.2.0": {
+        "version": "v1.2.0",
+        "date": "2025-12-15",
+        "doi": "10.5281/zenodo.17860841",
+        "datasets": [
+          "hardy-pmdbs-bulk-rnaseq",
+          "lee-pmdbs-bulk-rnaseq-mfg",
+          "wood-pmdbs-bulk-rnaseq",
+          "cohort-pmdbs-bulk-rnaseq",
+          "jakobsson-pmdbs-bulk-rnaseq"
+        ],
+        "teams": [
+          "cohort",
+          "hardy",
+          "jakobsson",
+          "lee",
+          "wood"
+        ],
+        "types": [
+          "pmdbs-bulk-rnaseq"
+        ],
+        "release": {
+          "version": "v4.0.0",
+          "cde_version": "v3.3",
+          "date": "2025-12-15"
+        }
+      }
+    }
+}
+
+pmdbs_sc_rnaseq = {
+    "name": "pmdbs-sc-rnaseq",
+    "title": "PMDBS scRNAseq",
+    "collection_doi": "10.5281/zenodo.14373047",
+    "current_version": "v3.1.0",
+    "doi": "10.5281/zenodo.17860778",
+    "datasets": [
+      "hafler-pmdbs-sn-rnaseq-pfc",
+      "lee-pmdbs-sn-rnaseq",
+      "scherzer-pmdbs-sn-rnaseq-mtg",
+      "hardy-pmdbs-sn-rnaseq",
+      "cohort-pmdbs-sc-rnaseq",
+      "jakobsson-pmdbs-sn-rnaseq",
+      "sulzer-pmdbs-sn-rnaseq"
+    ],
+    "release": {
+      "version": "v4.0.0",
+      "cde_version": "v3.3",
+      "date": "2025-12-15"
+    },
+    "versions": {
+      "v1.0.0": {
+        "version": "v1.0.0",
+        "date": null,
+        "doi": null,
+        "datasets": [
+          "hafler-pmdbs-sn-rnaseq-pfc",
+          "lee-pmdbs-sn-rnaseq",
+          "jakobsson-pmdbs-sn-rnaseq",
+          "scherzer-pmdbs-sn-rnaseq-mtg",
+          "cohort-pmdbs-sc-rnaseq"
+        ],
+        "teams": [
+          "cohort",
+          "hafler",
+          "jakobsson",
+          "lee",
+          "scherzer"
+        ],
+        "types": [
+          "pmdbs-sc-rnaseq"
+        ],
+        "release": {
+          "version": "v1.0.0",
+          "cde_version": "v2.1",
+          "date": null
+        }
+      },
+      "v2.0.0": {
+        "version": "v2.0.0",
+        "date": "2024-09-11",
+        "doi": "10.5281/zenodo.14373048",
+        "datasets": [
+          "hafler-pmdbs-sn-rnaseq-pfc",
+          "lee-pmdbs-sn-rnaseq",
+          "jakobsson-pmdbs-sn-rnaseq",
+          "scherzer-pmdbs-sn-rnaseq-mtg",
+          "hardy-pmdbs-sn-rnaseq",
+          "cohort-pmdbs-sc-rnaseq"
+        ],
+        "teams": [
+          "cohort",
+          "hafler",
+          "hardy",
+          "jakobsson",
+          "lee",
+          "scherzer"
+        ],
+        "types": [
+          "pmdbs-sc-rnaseq"
+        ],
+        "release": {
+          "version": "v2.0.3",
+          "cde_version": "v3.0",
+          "date": "2024-09-11"
+        }
+      },
+      "v3.0.0": {
+        "version": "v3.0.0",
+        "date": "2025-09-30",
+        "doi": "10.5281/zenodo.16979638",
+        "datasets": [
+          "hafler-pmdbs-sn-rnaseq-pfc",
+          "lee-pmdbs-sn-rnaseq",
+          "scherzer-pmdbs-sn-rnaseq-mtg",
+          "hardy-pmdbs-sn-rnaseq",
+          "cohort-pmdbs-sc-rnaseq",
+          "jakobsson-pmdbs-sn-rnaseq"
+        ],
+        "teams": [
+          "cohort",
+          "hafler",
+          "hardy",
+          "jakobsson",
+          "lee",
+          "scherzer"
+        ],
+        "types": [
+          "pmdbs-sc-rnaseq"
+        ],
+        "release": {
+          "version": "v3.0.2",
+          "cde_version": "v3.2",
+          "date": "2025-09-30"
+        }
+      },
+      "v3.1.0": {
+        "version": "v3.1.0",
+        "date": "2025-12-15",
+        "doi": "10.5281/zenodo.17860778",
+        "datasets": [
+          "hafler-pmdbs-sn-rnaseq-pfc",
+          "lee-pmdbs-sn-rnaseq",
+          "scherzer-pmdbs-sn-rnaseq-mtg",
+          "hardy-pmdbs-sn-rnaseq",
+          "cohort-pmdbs-sc-rnaseq",
+          "jakobsson-pmdbs-sn-rnaseq",
+          "sulzer-pmdbs-sn-rnaseq"
+        ],
+        "teams": [
+          "cohort",
+          "hafler",
+          "hardy",
+          "jakobsson",
+          "lee",
+          "scherzer",
+          "sulzer"
+        ],
+        "types": [
+          "pmdbs-sc-rnaseq"
+        ],
+        "release": {
+          "version": "v4.0.0",
+          "cde_version": "v3.3",
+          "date": "2025-12-15"
+        }
+      }
+    }
+}
+
+# PMDBS Spatial
+pmdbs_spatial_rnaseq = {
+    "name": "pmdbs-spatial-rnaseq",
+    "title": "PMDBS Spatial RNAseq",
+    "collection_doi": "10.5281/zenodo.16979474",
+    "current_version": "v1.1.0",
+    "doi": "10.5281/zenodo.17860901",
+    "datasets": [
+      "edwards-pmdbs-spatial-geomx-th",
+      "scherzer-pmdbs-spatial-visium-mtg"
+    ],
+    "release": {
+      "version": "v4.0.0",
+      "cde_version": "v3.3",
+      "date": "2025-12-15"
+    },
+    "versions": {
+      "v1.0.0": {
+        "version": "v1.0.0",
+        "date": "2025-09-30",
+        "doi": "10.5281/zenodo.16979475",
+        "datasets": [
+          "edwards-pmdbs-spatial-geomx-th"
+        ],
+        "teams": [
+          "edwards"
+        ],
+        "types": [
+          "pmdbs-spatial-rnaseq"
+        ],
+        "release": {
+          "version": "v3.0.2",
+          "cde_version": "v3.2",
+          "date": "2025-09-30"
+        }
+      },
+      "v1.1.0": {
+        "version": "v1.1.0",
+        "date": "2025-12-15",
+        "doi": "10.5281/zenodo.17860901",
+        "datasets": [
+          "edwards-pmdbs-spatial-geomx-th",
+          "scherzer-pmdbs-spatial-visium-mtg"
+        ],
+        "teams": [
+          "edwards",
+          "scherzer"
+        ],
+        "types": [
+          "pmdbs-spatial-rnaseq"
+        ],
+        "release": {
+          "version": "v4.0.0",
+          "cde_version": "v3.3",
+          "date": "2025-12-15"
+        }
+      }
+    }
+  }
+
+
+
+
+
 # %% [Step 1] Release parameters
 # TODO: fill in release version, type, CDE version, and optional release DOI
 RELEASE_VERSION = "v5.0.0"    # e.g. "v4.1.0"
@@ -54,8 +694,8 @@ copy_dirs = ["artifacts","file_metadata","metadata"]
 outs = []
 col_manifests = {}
 for c_name, c_info in collections.items():
-    if c_name == "mouse-sc-rnaseq":
-        continue
+    # if c_name == "mouse-sc-rnaseq":
+    #     continue
 
     # define bucket by getting the base version.
     full_version = c_info["current_version"]
@@ -67,14 +707,21 @@ for c_name, c_info in collections.items():
     datasets = c_info["datasets"]
 
 
-    #  check if we already have a bucket?
-    # buk = ao.describe_bucket(collection_bucket)
-    # # if not make the bucket
-    # if len(buk)<1:
-    #     print(f"need to make collection bucket: {collection_bucket}")
-    #     ao.create_collection_bucket(collection_bucket)
-    # else:
-    #     print(f"we already have a collection bucket... just need to rsync data")
+    check if we already have a bucket?
+    buk = ao.describe_bucket(collection_bucket)
+    # if not make the bucket
+    if len(buk)<1:
+        print(f"need to make collection bucket: {collection_bucket}")
+        ao.create_collection_bucket(collection_bucket)
+    else:
+        print(f"we already have a collection bucket... just need to rsync data")
+
+
+
+
+
+
+
 
     print(f"DATASET: {c_name}::  source -> destination")
 
