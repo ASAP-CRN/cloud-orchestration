@@ -1,10 +1,4 @@
-
-
-
 # %% [markdown]
-# ASAP CRN Metadata validation
-#
-# adding WIP
 # Andy Henrie
 # DO NOT EXECUTE
 

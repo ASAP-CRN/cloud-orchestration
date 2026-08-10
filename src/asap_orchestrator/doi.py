@@ -508,7 +508,7 @@ def ingest_DOI_doc_v1(
     # df.to_csv(doi_path / f"{long_dataset_name}.csv", index=False)
     # write the files.
 
-def ingest_DOI_doc(
+def  ingest_DOI_doc(
     ds_path: str | Path,
     doi_doc_path: str | Path,
     publication_date: None | str = None,
@@ -550,8 +550,6 @@ def ingest_DOI_doc(
             print(f"Existing data: {existing_data.keys()=}")
             metadata = _make_metadata_from_project(existing_data)
             export_data = {"metadata": metadata}
-
-
 
             with open(doi_path / f"{long_dataset_name}.json", "w") as f:
                 json.dump(export_data, f, indent=4)
@@ -1189,7 +1187,52 @@ def add_anchor_file_to_doi(
     zenodo.upload_file(file_path)
     return zenodo.deposition
 
+def _write_doi_files(ds_path: Path, deposition: dict, *, prerelease: bool) -> None:
+    """Write version.doi, dataset.doi, anchor file, and deposition.json."""
+    import json
+    doi_dir = _doi_dir(ds_path)
+    doi_dir.mkdir(parents=True, exist_ok=True)
 
+    doi = deposition.get("doi", "")
+    doi_url = deposition.get("doi_url", "")
+
+    if not doi:
+        prereserve = deposition.get("metadata", {}).get("prereserve_doi", {})
+        doi = prereserve.get("doi", "")
+        doi_url = f"https://doi.org/{doi}"
+
+    if "conceptdoi" in deposition:
+        concept_doi = deposition["conceptdoi"]
+    else:
+        concept_doi = f"10.5281/zenodo.{deposition['conceptrecid']}"
+    concept_url = f"https://doi.org/{concept_doi}"
+
+    (doi_dir / "version.doi").write_text(doi)
+    (doi_dir / "dataset.doi").write_text(concept_doi)
+
+    anchor = concept_doi.replace("/", "_")
+    label = "CURRENT (prerelease)" if prerelease else "CURRENT            "
+    (doi_dir / anchor).write_text(
+        f"ALL_VERSIONS        : {concept_url}\n{label}: {doi_url}"
+    )
+
+    with open(doi_dir / "deposition.json", "w") as f:
+        json.dump(deposition, f, indent=2)
+
+def _doi_dir(ds_path: Path) -> Path:
+    return ds_path / "DOI"
+
+
+def _read_doi_metadata(ds_path: Path) -> dict:
+    """Read Zenodo metadata dict from DOI/<dataset-name>.json."""
+    meta_file = _doi_dir(ds_path) / f"{ds_path.name}.json"
+    if not meta_file.exists():
+        raise FileNotFoundError(f"DOI metadata not found: {meta_file}")
+    import json
+    with open(meta_file) as f:
+        data = json.load(f)
+    return data.get("metadata", data)
+    
 def replace_anchor_file_in_doi(
     zenodo: ZenodoClient,
     ds_path: Path,

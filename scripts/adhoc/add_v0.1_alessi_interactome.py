@@ -64,9 +64,6 @@ for ds in add_dataset_defs:
 
 
 
-# %%
-
-
 
 # %% [Step 4] Ingest DOI reference documents
 # Place the team-supplied .docx reference file in <name>/refs/ first, then
@@ -158,6 +155,10 @@ for ds_def in add_dataset_defs:
     new_dataset_defs.append(ds_def)
 
 
+###################################################
+# end here
+if False:
+    
 # %% 
 # publish 0.1 and initialize the v1.0 DOI
     

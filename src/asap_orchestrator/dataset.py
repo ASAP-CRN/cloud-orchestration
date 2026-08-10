@@ -12,6 +12,7 @@ import json
 
 from .models import Creator, Dataset, DatasetBuckets, ReleaseRecord #, VersionRecord
 from .zenodo_util import ZenodoClient
+from .doi import _write_doi_files, _doi_dir, _read_doi_metadata
 
 __all__ = [
     "DatasetDefinition",
@@ -229,52 +230,40 @@ def read_dataset_entry(ds_path: Path | str) -> dict:
 
 # ── helpers ────────────────────────────────────────────────────────────────────
 
-def _doi_dir(ds_path: Path) -> Path:
-    return ds_path / "DOI"
 
 
-def _read_doi_metadata(ds_path: Path) -> dict:
-    """Read Zenodo metadata dict from DOI/<dataset-name>.json."""
-    meta_file = _doi_dir(ds_path) / f"{ds_path.name}.json"
-    if not meta_file.exists():
-        raise FileNotFoundError(f"DOI metadata not found: {meta_file}")
-    import json
-    with open(meta_file) as f:
-        data = json.load(f)
-    return data.get("metadata", data)
 
+# def _write_doi_files(ds_path: Path, deposition: dict, *, prerelease: bool) -> None:
+#     """Write version.doi, dataset.doi, anchor file, and deposition.json."""
+#     import json
+#     doi_dir = _doi_dir(ds_path)
+#     doi_dir.mkdir(parents=True, exist_ok=True)
 
-def _write_doi_files(ds_path: Path, deposition: dict, *, prerelease: bool) -> None:
-    """Write version.doi, dataset.doi, anchor file, and deposition.json."""
-    import json
-    doi_dir = _doi_dir(ds_path)
-    doi_dir.mkdir(parents=True, exist_ok=True)
+#     doi = deposition.get("doi", "")
+#     doi_url = deposition.get("doi_url", "")
 
-    doi = deposition.get("doi", "")
-    doi_url = deposition.get("doi_url", "")
+#     if not doi:
+#         prereserve = deposition.get("metadata", {}).get("prereserve_doi", {})
+#         doi = prereserve.get("doi", "")
+#         doi_url = f"https://doi.org/{doi}"
 
-    if not doi:
-        prereserve = deposition.get("metadata", {}).get("prereserve_doi", {})
-        doi = prereserve.get("doi", "")
-        doi_url = f"https://doi.org/{doi}"
+#     if "conceptdoi" in deposition:
+#         concept_doi = deposition["conceptdoi"]
+#     else:
+#         concept_doi = f"10.5281/zenodo.{deposition['conceptrecid']}"
+#     concept_url = f"https://doi.org/{concept_doi}"
 
-    if "conceptdoi" in deposition:
-        concept_doi = deposition["conceptdoi"]
-    else:
-        concept_doi = f"10.5281/zenodo.{deposition['conceptrecid']}"
-    concept_url = f"https://doi.org/{concept_doi}"
+#     (doi_dir / "version.doi").write_text(doi)
+#     (doi_dir / "dataset.doi").write_text(concept_doi)
 
-    (doi_dir / "version.doi").write_text(doi)
-    (doi_dir / "dataset.doi").write_text(concept_doi)
+#     anchor = concept_doi.replace("/", "_")
+#     label = "CURRENT (prerelease)" if prerelease else "CURRENT            "
+#     (doi_dir / anchor).write_text(
+#         f"ALL_VERSIONS        : {concept_url}\n{label}: {doi_url}"
+#     )
 
-    anchor = concept_doi.replace("/", "_")
-    label = "CURRENT (prerelease)" if prerelease else "CURRENT            "
-    (doi_dir / anchor).write_text(
-        f"ALL_VERSIONS        : {concept_url}\n{label}: {doi_url}"
-    )
-
-    with open(doi_dir / "deposition.json", "w") as f:
-        json.dump(deposition, f, indent=2)
+#     with open(doi_dir / "deposition.json", "w") as f:
+#         json.dump(deposition, f, indent=2)
 
 
 # ── public API ─────────────────────────────────────────────────────────────────
@@ -352,6 +341,7 @@ def update_dataset_doi(
 
     if metadata is None:
         metadata = _read_doi_metadata(ds_path)
+        print(f"auto metadata to {doi_id}: {metadata}")
 
     zenodo.deposition_id = doi_id
     if zenodo.deposition.get("state") == "done":
