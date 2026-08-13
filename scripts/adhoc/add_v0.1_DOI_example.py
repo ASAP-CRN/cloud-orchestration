@@ -19,6 +19,7 @@
 from pathlib import Path
 import asap_orchestrator as ao
 import json
+import shutil
 
 %load_ext autoreload
 %autoreload 2
@@ -33,7 +34,7 @@ datasets_repo_path = root_path / "cloud-datasets"
 PUBLICATION_DATE = "2026-07-23"   # e.g. "2026-05-01"
 
 add_dataset_defs = [
-    'vangheluwe-ipsc-sn-rnaseq-3dorga-apoe-asyn'
+    'testing-test-sn-test'
 ]
 
 # step 0:  create dataset's path.   Code below assumes it lives in a "WIP".  
@@ -41,6 +42,16 @@ add_dataset_defs = [
 #. - `version` file
 #. - docx file in `ref/` path
 #  - `DOI/`` path
+
+ds_path = datasets_repo_path / "WIP" / add_dataset_defs[0]
+doi_path = ds_path / "DOI"
+if not doi_path.exists():
+    doi_path.mkdir(parents=True, exist_ok=True)
+
+ref_path = ds_path / "refs"
+if not ref_path.exists(): # 
+    ref_path.mkdir(parents=True, exist_ok=True)
+
 
 # %% [Step 1]  Ingest DOI reference documents
 # Place the team-supplied .docx reference file in <name>/refs/ first, then
