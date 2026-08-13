@@ -1169,7 +1169,10 @@ def create_draft_doi(
     #         print(f"Warning: Adding missing key {key} to metadata")
 
     # update metadata
+
     deposition = zenodo.change_metadata(metadata)
+
+    _write_doi_files(ds_path, deposition, prerelease=True)
 
     return zenodo.deposition, metadata
 

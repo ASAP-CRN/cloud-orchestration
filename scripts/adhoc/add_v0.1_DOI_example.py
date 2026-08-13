@@ -99,8 +99,8 @@ zenodo = ao.setup_zenodo()
 # %%
 for ds_def in add_dataset_defs:
     ds_path = datasets_repo_path / "WIP" / ds_def
-    deposition = ao.create_draft_doi(
-        ds_path, zenodo, version="v0.1", publication_date=PUBLICATION_DATE
+    deposition,metadata = ao.create_draft_doi(
+        zenodo, ds_path, version="v0.1", 
     )
     doi = deposition.get("doi") or deposition.get("metadata", {}).get("prereserve_doi", {}).get("doi", "draft")
     print(f"{ds_def}: {doi}")
@@ -116,7 +116,7 @@ for ds_def in add_dataset_defs:
     readme_pdf = ds_path / "DOI" / f"{ds_def}_README.pdf"
     doi_id = ao.get_doi_from_dataset(ds_path, version=True)
 
-    print(f"{ds_def.name}: {ds_def.doi} ||| {doi_id}")
+    print(f"{ds_def}: ||| {doi_id}")
 
     if readme_pdf.exists():
         deposition = ao.add_anchor_file_to_doi(zenodo, readme_pdf, doi_id)
@@ -129,7 +129,9 @@ for ds_def in add_dataset_defs:
 
 # %% [Step 2, continued]
 # publish 0.1 
-    
+##. warning this step might need to be currently performed by hand.  
+#   (It is currently performed by hand via the "Cloud Team" community)    
+
 zenodo = ao.setup_zenodo()
 
 for ds_def in add_dataset_defs:
@@ -141,6 +143,9 @@ for ds_def in add_dataset_defs:
     print(f"BETA: {ds_def}: {beta_doi_id}")
     zenodo.set_deposition_id(beta_doi_id)
     deposition = zenodo.deposition
+
+    # something has changed in the Zenodo API,
+    #. publish_doi seems to be stuck. .. might have just been an ORCID issue
     deposition = ao.publish_doi(zenodo, beta_doi_id)
     
     # archive deposition
@@ -176,7 +181,7 @@ for ds_def in add_dataset_defs:
     new_doi_id = f"{deposition['id']}"
 
 
-    print(f"NEW:  {ds_def.name}: ||| {new_doi_id}")
+    print(f"NEW:  {ds_def}: ||| {new_doi_id}")
     readme_pdf = ds_path / "DOI" / f"{ds_def}_README.pdf"
 
     # %%.  [Step 4] - v1.0 DOI creation
