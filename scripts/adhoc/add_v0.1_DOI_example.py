@@ -1,11 +1,16 @@
 # # ASAP CRN — New WIP Dataset Acceptance Template
-#\
-# ** add v0.1 DOI EXAMPLE **
+#
+# ** add v0.1->v1.0 DOI EXAMPLE **
 #   1. Ingest DOI reference `.docx` files to generate Zenodo metadata
 #   2. Create Zenodo draft DOIs at `v0.1`
-# ** ADD V1.0 DOI EXAMPLE
-#   1. Ingest DOI reference `.docx` files to generate Zenodo metadata
-#   2. Create Zenodo draft DOIs at `v0.1`
+#        - update zenodo metadata
+#        - upload README .pdf
+#        - publish
+#   3. add v1.0 DOI 
+#        - re-Ingest DOI reference `.docx` files to generate Zenodo metadata
+#        - "bumnp" DOI from v0.l1 to v1.0 
+#         - sync new README.dpf 
+#   4. publish v1.0 DOI EXAMPLE
 #
 
 # DO NOT EXECUTE THIS FILE DIRECTLY — it is a template only.
@@ -42,6 +47,7 @@ add_dataset_defs = [
 # run this cell to populate DOI/<name>.json, project.json, and the README.
 #
 # Update the filename in `ref_doc` for each dataset as needed.
+
 
 for ds_def in add_dataset_defs:
     ds_path = datasets_repo_path / "WIP" / ds_def
@@ -91,7 +97,7 @@ for ds_def in add_dataset_defs:
 
 # surmeier-mouse-sn-rnaseq-ventral-midbrain: 10.5281/zenodo.21308458
 
-# %% [Step 3] Upload README anchor file to each draft
+# %% [Step 2, continued] Upload README anchor file to each draft
 # Uploads the generated <name>_README.pdf as the anchor file for each DOI.
 
 for ds_def in add_dataset_defs:
@@ -110,7 +116,7 @@ for ds_def in add_dataset_defs:
         print(f"WARNING: README PDF not found for {ds_def}")
 
 
-# %% 
+# %% [Step 2, continued]
 # publish 0.1 
     
 zenodo = ao.setup_zenodo()
@@ -129,9 +135,9 @@ for ds_def in add_dataset_defs:
     # archive deposition
     ao.archive_deposition_local(ds_path, "v0.1-deposition", deposition)
 
-# %%
-# 
-# initialize the v1.0 DOI
+# %%.  [Step 3] - v1.0 DOI creation
+# initialize the v1.0 DOI, bump version, re-uploade
+
 
 for ds_def in add_dataset_defs:
     ds_path = datasets_repo_path / "WIP" / ds_def
@@ -150,6 +156,7 @@ for ds_def in add_dataset_defs:
 
     # bump to v1.0
     ao.write_version("1.0", ds_path / "version")
+    # re-ingest docx to update the Zenodo metadata for v1.0
     ao.setup_DOI_info(ds_path, ref_doc, publication_date=PUBLICATION_DATE)
 
     zenodo.set_deposition_id(beta_doi_id)
@@ -160,6 +167,9 @@ for ds_def in add_dataset_defs:
 
     print(f"NEW:  {ds_def.name}: ||| {new_doi_id}")
     readme_pdf = ds_path / "DOI" / f"{ds_def}_README.pdf"
+
+    # %%.  [Step 4] - v1.0 DOI creation
+    # initialize the v1.0 DOI
 
     if readme_pdf.exists():
         # not sure why this fails... seems that the REST API has changed behavior
@@ -176,8 +186,8 @@ for ds_def in add_dataset_defs:
 
 
     
-# %% 
-# publish release
+# %%  
+# %%.  [Step 4] -  publish v1.0 dataset doi with release
 zenodo = ao.setup_zenodo()
 
 for ds_def in add_dataset_defs:
