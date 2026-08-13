@@ -40,6 +40,7 @@ os.environ["CLOUDSDK_PYTHON"] = "/opt/homebrew/opt/python@3.13/bin/python3.13"
 # asap-cohort-invitro-bulk-rnaseq
 
 
+
 invitro_bulk_rnaseq = {
     "name": "invitro-bulk-rnaseq",
     "title": "In Vitro Bulk RNAseq",
@@ -49,14 +50,14 @@ invitro_bulk_rnaseq = {
     "datasets": [
       "jakobsson-invitro-bulk-rnaseq-dopaminergic",
       "jakobsson-invitro-bulk-rnaseq-microglia",
-      "asap-cohort-invitro-bulk-rnaseq"
+      "cohort-invitro-bulk-rnaseq"
     ],
     "curation": {
       "bucket": "gs://asap-crn-invitro-bulk-rnaseq-collection-v1",
       "datasets": {
         "jakobsson-invitro-bulk-rnaseq-dopaminergic" : "gs://asap-curated-team-jakobsson-invitro-bulk-rnaseq-dopaminergic/invitro_bulk_rnaseq/release/v5.0.0",
         "jakobsson-invitro-bulk-rnaseq-microglia" : "gs://asap-curated-team-jakobsson-invitro-bulk-rnaseq-microglia/invitro_bulk_rnaseq/release/v5.0.0",
-        "asap-cohort-invitro-bulk-rnaseq" : "gs://asap-curated-cohort-invitro-bulk-rnaseq/invitro_bulk_rnaseq/release/v5.0.0"
+        "cohort-invitro-bulk-rnaseq" : "gs://asap-curated-cohort-invitro-bulk-rnaseq/invitro_bulk_rnaseq/release/v5.0.0"
       },
       "workflow" : {
         "name": "bulk_rnaseq_analysis",
@@ -77,7 +78,7 @@ invitro_bulk_rnaseq = {
         "datasets": [
           "jakobsson-invitro-bulk-rnaseq-dopaminergic",
           "jakobsson-invitro-bulk-rnaseq-microglia",
-          "asap-cohort-invitro-bulk-rnaseq"
+          "cohort-invitro-bulk-rnaseq"
         ],
         "teams": [
           "jakobsson",
@@ -91,7 +92,7 @@ invitro_bulk_rnaseq = {
           "datasets": {
               "jakobsson-invitro-bulk-rnaseq-dopaminergic" : "gs://asap-curated-team-jakobsson-invitro-bulk-rnaseq-dopaminergic/invitro_bulk_rnaseq/release/v5.0.0",
               "jakobsson-invitro-bulk-rnaseq-microglia" : "gs://asap-curated-team-jakobsson-invitro-bulk-rnaseq-microglia/invitro_bulk_rnaseq/release/v5.0.0",
-              "asap-cohort-invitro-bulk-rnaseq" : "gs://asap-curated-cohort-invitro-bulk-rnaseq/invitro_bulk_rnaseq/release/v5.0.0"
+              "cohort-invitro-bulk-rnaseq" : "gs://asap-curated-cohort-invitro-bulk-rnaseq/invitro_bulk_rnaseq/release/v5.0.0"
           },
           "workflow" : {
             "name": "bulk_rnaseq_analysis",
@@ -110,6 +111,7 @@ invitro_bulk_rnaseq = {
 
 
 
+
 # # pmdbs-sc-atac
 # asap-crn-pmdbs-sc-atacseq-collection-v1
 # team-voet-pmdbs-sn-atacseq-10x
@@ -121,6 +123,7 @@ invitro_bulk_rnaseq = {
 
 
 
+
 pmdbs_sc_atacseq = {
     "name": "pmdbs-sc-atacseq",
     "title": "PMDBS single-cell ATACseq",
@@ -128,31 +131,31 @@ pmdbs_sc_atacseq = {
     "current_version": "v1.0.0",
     "doi": "10.5281/zenodo.17149267",
     "datasets": [
-      "voet-pmdbs-sc-atacseq-10x"
+      "voet-pmdbs-sn-atacseq-10x"
     ],
     "curation": {
       "bucket": "gs://asap-crn-pmdbs-sc-atacseq-collection-v1",
       "datasets": {
-          "voet-pmdbs-sc-atacseq-10x" : "gs://asap-curated-team-voet-pmdbs-sn-atacseq-10x/pmdbs_sc_atacseq/release/v5.0.0"
+          "voet-pmdbs-sn-atacseq-10x" : "gs://asap-curated-team-voet-pmdbs-sn-atacseq-10x/release/v1.0.0/"
       },
-      "workflow" : {
-        "name": "pmdbs_sc_atacseq",
-        "version":"v1.0.0",
-        "github_url":"https://github.com/ASAP-CRN/sc-atacseq-wf/releases/tag/sc_atacseq_analysis-v1.0.0",
-      }
+        "workflow" : {
+          "name": "bulk_rnaseq_analysis-v2.0.0",
+          "version":"v2.0.0",
+          "github_url":"https://github.com/ASAP-CRN/bulk-rnaseq-wf/releases/tag/bulk_rnaseq_analysis-v2.0.0",
+        },
     },  
     "release": {
       "version": "v5.0.0",
-      "cde_version": "v4.4",
+      "cde_version": "v4.3",
       "date": "2026-06-15"
     },
     "versions": {
       "v1.0.0": {
         "version": "v1.0.0",
         "date": "2025-12-15",
-        "doi": "10.5281/zenodo.17860975",
+        "doi": "10.5281/zenodo.20400939",
         "datasets": [
-          "voet-pmdbs-sc-atacseq-10x"
+          "voet-pmdbs-sn-atacseq-10x"
         ],
         "teams": [
           "voet",
@@ -163,23 +166,22 @@ pmdbs_sc_atacseq = {
         "curation": {
           "bucket": "gs://asap-crn-pmdbs-sc-atacseq-collection-v1",
           "datasets": {
-              "voet-pmdbs-sc-atacseq-10x" : "gs://asap-curated-team-voet-pmdbs-sn-atacseq-10x/pmdbs_sc_atacseq/release/v5.0.0"
+              "voet-pmdbs-sn-atacseq-10x" : "gs://asap-curated-team-voet-pmdbs-sn-atacseq-10x/release/v1.0.0/"
           },
           "workflow" : {
-          "name": "sc-atacseq",
-          "version":"v1.0.0",
-          "github_url":"https://github.com/ASAP-CRN/sc-atacseq-wf/releases/tag/sc_atacseq_analysis-v1.0.0",
-          }
+            "name": "bulk_rnaseq_analysis-v2.0.0",
+            "version":"v2.0.0",
+            "github_url":"https://github.com/ASAP-CRN/bulk-rnaseq-wf/releases/tag/bulk_rnaseq_analysis-v2.0.0",
+          },
         },
         "release": {
           "version": "v5.0.0",
-          "cde_version": "v4.4",
+          "cde_version": "v4.3",
           "date": "2026-06-15"
         }
       }
     }
 }
-
 
 
 
@@ -681,12 +683,22 @@ RELEASE_DATE = "2026-06-15"
 #. get collections
 
 # load collections.json
-with open(collections_repo_path / "collections.json", "r") as f:
-    collections = json.load(f)
+# with open(collections_repo_path / "collections.json", "r") as f:
+#     collections = json.load(f)
 
 # %%
-
-
+    
+collections = dict(
+    mouse_bulk_rnaseq=mouse_bulk_rnaseq,
+    mouse_sc_rnaseq=mouse_sc_rnaseq,
+    invitro_bulk_rnaseq=invitro_bulk_rnaseq,
+    pmdbs_bulk_rnaseq=pmdbs_bulk_rnaseq,
+    pmdbs_sc_rnaseq=pmdbs_sc_rnaseq,
+    pmdbs_sc_atacseq=pmdbs_sc_atacseq,
+    pmdbs_spatial_rnaseq=pmdbs_spatial_rnaseq,
+    mouse_spatial_rnaseq=mouse_spatial_rnaseq,
+)
+    
 # make a table of from, to
 
 
@@ -694,168 +706,194 @@ copy_dirs = ["artifacts","file_metadata","metadata"]
 outs = []
 col_manifests = {}
 for c_name, c_info in collections.items():
-    # if c_name == "mouse-sc-rnaseq":
-    #     continue
+  # if c_name == "mouse-sc-rnaseq":
+  #     continue
 
-    # define bucket by getting the base version.
-    full_version = c_info["current_version"]
-    version = full_version.split(".")[0]
+  # define bucket by getting the base version.
+  full_version = c_info["current_version"]
+  version = full_version.split(".")[0]
 
-    #
-    collection_bucket = f"gs://asap-crn-{c_name}-collection-{version}"
+  #
+  collection_bucket = f"gs://asap-crn-{c_name}-collection-{version}"
 
-    datasets = c_info["datasets"]
-
-
-    check if we already have a bucket?
-    buk = ao.describe_bucket(collection_bucket)
-    # if not make the bucket
-    if len(buk)<1:
-        print(f"need to make collection bucket: {collection_bucket}")
-        ao.create_collection_bucket(collection_bucket)
-    else:
-        print(f"we already have a collection bucket... just need to rsync data")
+  datasets = c_info["datasets"]
 
 
+  check if we already have a bucket?
+  buk = ao.describe_bucket(collection_bucket)
+  # if not make the bucket
+  if len(buk)<1:
+      print(f"need to make collection bucket: {collection_bucket}")
+      ao.create_collection_bucket(collection_bucket)
+  else:
+      print(f"we already have a collection bucket... just need to rsync data")
 
 
 
 
-
-
-    print(f"DATASET: {c_name}::  source -> destination")
-
-    for ds in datasets:
-        if "spatial" in ds:
-            if "geomx" in ds:
-                dirs = copy_dirs + ["spatial", "spatial_geomx"]
-            elif "visium" in ds:
-                dirs = copy_dirs + ["spatial","spatial_visium"]
-            else:
-                print(f"ERROR:  non-geomx or visium {ds}")
+  # %%
+  print(f"DATASET: {c_name}::  source -> destination")
+  for ds in datasets:
+    if "spatial" in ds:
+        if "geomx" in ds:
+            dirs = copy_dirs + ["spatial", "spatial_geomx"]
+        elif "visium" in ds:
+            dirs = copy_dirs + ["spatial","spatial_visium"]
         else:
-            dirs = copy_dirs + [c_name.replace("-","_")]
+            print(f"ERROR:  non-geomx or visium {ds}")
+    else:
+        dirs = copy_dirs + [c_name.replace("-","_")]
 
-        print(f"################################\nfound these dirs: {dirs} for dataset: {ds}\n################################\n")
-
-        # load datset.json
-        ds_path = datasets_repo_path / "datasets" / ds
-        with open(ds_path / "dataset.json", "r") as f:
-            ds_info = json.load(f)
-        dataset_model = ao.Dataset.load(ds_path)
-        ds_ver = dataset_model.version
-
-        ds_bucket = dataset_model.buckets.prod
-        c_rel_ver = c_info["release"]["version"]  # curated data
-        rel_highest = max(dataset_model.releases.keys())  # metadata
-        print(f"|{ds}\t|\t{c_rel_ver=}\t|\t{rel_highest=}")
-
-        all_manifests = pd.DataFrame()
-
-        for d in dirs:
-            ds_source = f"{ds_bucket}/{d}"
-            ds_dest = f"{collection_bucket}/{ds}/{d}"
-
-            # print(f"{ds_source} -> {ds_dest}")
-            manifest=pd.DataFrame()
-
-            skip_archive = False
-
-            if d in ["spatial_visium", "spatial_geomx","pmdbs_bulk_rnaseq","pmdbs_sc_rnaseq","mouse_bulk_rnaseq","mouse_sc_rnaseq"]:
-                # curated artifacts
-                # need to find the ghithest version in the release.
-                ds_sourcepath = f"{d}/release/"
-                # we need to loop over the subdirectories
-                subdirs = ao.gcloud_ls(ds_bucket,prefix=ds_sourcepath)
-
-                curated_vers = [sd.split("/")[-2] for sd in subdirs if sd != ""]
-                max_ver = max(curated_vers)
-
-                
-                ds_source = f"{ds_bucket}/{d}/release/{max_ver}"
-                ds_dest = f"{collection_bucket}/{ds}/{d}"
-                text = f"""
-The curated files in this directory were copied from the dataset bucket\n({ds_bucket}) path 
-`/{d}/release/{max_ver}/` to the collection bucket ({collection_bucket}/{ds}\n" path `{d}/`.  
-The version numbers represent the most recent _release_ version of the curated data.  This is 
-not the same as the _collection_ version ({version}).
-"""
-
-                subdirs = ao.gcloud_ls(ds_bucket,prefix=f"{d}/release/{max_ver}/")
-                subdirs = [sd for sd in subdirs if sd.endswith("/")]
-
-                # # # first remove ds_dest if it exists
-                ao.gcloud_rm(ds_dest, directory=True)
-                # # also remove archive.
-                ao.gcloud_rm(f"{collection_bucket}/{ds}/archive/", directory=True)
-                skip_archive = True
-
-            elif d in ["metadata","file_metadata"]:
-                ds_source = f"{ds_bucket}/{d}/release/{rel_highest}"
-                ds_dest = f"{collection_bucket}/{ds}/{d}"
-                text = f"""
-The metadata files in this directory were copied from the dataset bucket\n({ds_bucket}) path 
-`/{d}/release/{rel_highest}/` to the collection bucket\n({collection_bucket}/{ds} path `{d}/`.
-This is not the same as the _cde_ version, but simply the most recent release's Dataset and 
-File metadata.
-"""
-                # #  remove ds_dest if it exists
-                ao.gcloud_rm(ds_dest, directory=True)
-            else:
-                ds_source = f"{ds_bucket}/{d}"
-                ds_dest = f"{collection_bucket}/{ds}/{d}"
-                text = f"""
-The artifact files in this directory were copied from the dataset bucket\n({ds_bucket}) path 
-`{d}/` to the collection bucket\n({collection_bucket}/{ds} path `{d}/`.
-"""
-                # #  remove ds_dest if it exists
-                ao.gcloud_rm(ds_dest, directory=True)
+    # print(f"################################\nfound these dirs: {dirs} for dataset: {ds}\n################################\n")
 
 
-            # skip archive ... we'll create it later
-            if skip_archive:
-                # we need to loop over the subdirectories
-                # defined above
-                for sd in subdirs:
-                    if sd in ["archive", ""]:
-                        continue
-                    sd_source = f"{sd}"
-                    sd_dest = f"{ds_dest}/{sd.split("/")[-2]}"
-                    ao.gcloud_rsync(sd_source,sd_dest, directory=True, dry_run=False)   
-                    print(f"{ds}:{sd_source} -> {sd_dest}")
-
-            else: 
-                ao.gcloud_rsync(ds_source,ds_dest, directory=True, dry_run=False)
+    ds_ver = 'v1.0'
+    if "cohort" in ds:
+      ds_bucket = f"gs://asap-curated-{ds}"
+    else:
+      ds_bucket = f"gs://asap-curated-team-{ds}"
 
 
-            manifest.loc[0,"dataset"] = ds
-            manifest.loc[0,"source_url"] = ds_source
-            manifest.loc[0,"dest_url"] = ds_dest
-            print(f"{ds}:{ds_source.lstrip(ds_bucket)} -> {ds_dest.lstrip(collection_bucket)}")
-            # file
-            manifest_dest = f"{ds_dest}/data_source.csv"
-            
-            # make temp file for manifest_source
-            manifest_source = collections_repo_path / c_name / f"data_source_{d}.csv"
-            manifest.to_csv(manifest_source)
 
-            # copy the message
-            readme_source = collections_repo_path / c_name / f"README_{d}.txt"
-            with open(readme_source, "w") as f:
-                f.write(text)
+    # # load datset.json
+    # ds_path = datasets_repo_path / "datasets" / ds
+    # with open(ds_path / "dataset.json", "r") as f:
+    #     ds_info = json.load(f)
+    # dataset_model = ao.Dataset.load(ds_path)
+    # ds_ver = dataset_model.version
 
-            ao.gcloud_cp(readme_source,f"{ds_dest}/sourceREADME.txt", directory=False, dry_run=False)
-            ao.gcloud_cp(manifest_source,f"{ds_dest}/data_source.csv", directory=False, dry_run=False)
+    c_rel_ver = rel_highest = "v5.0.0"
+
+    # ds_bucket = dataset_model.buckets.prod
+    # c_rel_ver = c_info["release"]["version"]  # curated data
+    # rel_highest = max(dataset_model.releases.keys())  # metadata
+    # print(f"|{ds}\t|\t{c_rel_ver=}\t|\t{rel_highest=}")
+
+    all_manifests = pd.DataFrame()
+
+    caveats = []
+    for d in dirs:
+      ds_source = f"{ds_bucket}/{d}"
+      ds_dest = f"{collection_bucket}/{ds}/{d}"
 
 
-            all_manifests = pd.concat([all_manifests, manifest])
+      manifest=pd.DataFrame()
+
+      # if d != "pmdbs_sc_atacseq":
+      #   continue
+
+      skip_archive = False
+      if d in [
+        "spatial_visium", 
+        "spatial_geomx",
+        "pmdbs_bulk_rnaseq",
+        "pmdbs_sc_rnaseq",
+        "mouse_bulk_rnaseq",
+        "mouse_sc_rnaseq",
+        "invitro_bulk_rnaseq",
+        "pmdbs_sc_atacseq"
+        ]:
+        # curated artifacts
+        # need to find the ghithest version in the release.
+        ds_sourcepath = f"{d}/release/"
+        # we need to loop over the subdirectories
+        subdirs = ao.gcloud_ls(ds_bucket,prefix=ds_sourcepath)
+
+        curated_vers = [sd.split("/")[-2] for sd in subdirs if sd != ""]
+        max_ver = max(curated_vers)
+
+        ds_source = f"{ds_bucket}/{d}/release/{max_ver}"
+        ds_dest = f"{collection_bucket}/{ds}/{d}"
+        text = f"The curated files in this directory were copied from the dataset's curated bucket (`{ds_bucket}/{d}/release/{max_ver}/`) to the collection bucket (`{collection_bucket}/{ds}/{d}/`).  The version numbers represent the most recent _release_ version of the curated data.  This is not the same as the _collection_ version ({version})."
+        subdirs = ao.gcloud_ls(ds_bucket,prefix=f"{d}/release/{max_ver}/")
+        subdirs = [sd for sd in subdirs if sd.endswith("/")]
+
+        # # # # first remove ds_dest if it exists
+        ao.gcloud_rm(ds_dest, directory=True)
+        # # # also remove archive.
+        # ao.gcloud_rm(f"{collection_bucket}/{ds}/archive/", directory=True)
+        skip_archive = True
+
+      elif d in ["metadata","file_metadata"]:
+        ds_source = f"{ds_bucket}/{d}/release/{rel_highest}"
+        ds_dest = f"{collection_bucket}/{ds}/{d}"
+        text = f"The metadata files in this directory were copied from the dataset's curated bucket (`{ds_bucket}/{d}/release/{rel_highest}/`) to the collection bucket (`{collection_bucket}/{ds}/{d}/`).  The version numbers represent the most recent _release_ version of the curated data. This is not the same as the _cde_ version, but simply the most recent release's Dataset and File metadata."
+        # #  remove ds_dest if it exists
+        ao.gcloud_rm(ds_dest, directory=True)
+        skip_archive = False
+        
+
+      else:
+        ds_source = f"{ds_bucket}/{d}"
+        ds_dest = f"{collection_bucket}/{ds}/{d}"
+        text = f"The artifact files in this directory were copied from the dataset's curated bucket (`{ds_bucket}/{d}/`) to the collection bucket\n(`{collection_bucket}/{ds}/{d}/`)."
+        # # #  remove ds_dest if it exists
+        ao.gcloud_rm(ds_dest, directory=True)
+        skip_archive = False
+        
+
+      print(f"{ds_source} -> {ds_dest}")
+
+      # skip archive ... we'll create it later
+      if skip_archive:
+          # we need to loop over the subdirectories
+          # defined above
+          for sd in subdirs:
+              if sd in ["archive", ""]:
+                  continue
+              sd_source = f"{sd}"
+              sd_dest = f"{ds_dest}/{sd.split("/")[-2]}"
+              print(f"+++++++++ {ds}:{sd_source} -> {sd_dest}")
+
+              if sd_source.endswith("VERSION"):
+                ao.gcloud_rsync(sd_source,sd_dest, directory=False, dry_run=False)
+              else:
+                ao.gcloud_rsync(sd_source,sd_dest, directory=True, dry_run=False)
+
+      else: 
+        print(f"SKIP{ds}:{ds_source} -> {ds_dest}")
+        ao.gcloud_rsync(ds_source,ds_dest, directory=True, dry_run=False)
+
+      print(f"XXXXXX{ds}:{ds_source}\n\t-> {ds_dest}")
+      # print(f"TEXT ::: {text}")
+
+      caveats.append(text)
+
+      manifest.loc[0,"dataset"] = ds
+      manifest.loc[0,"source_url"] = ds_source
+      manifest.loc[0,"dest_url"] = ds_dest
+      print(f"{ds}:{ds_source}\n\t-> {ds_dest}")
+      # file
+      manifest_dest = f"{ds_dest}/data_source.csv"
+      
+      # make temp file for manifest_source
+      if not (collections_repo_path / c_name).exists():
+        (collections_repo_path / c_name).mkdir()
+
+      manifest_source = collections_repo_path / c_name / f"data_source_{d}.csv"
+      manifest.to_csv(manifest_source)
+
+      # copy the message
+      readme_source = collections_repo_path / c_name / f"README_{d}.txt"
+      with open(readme_source, "w") as f:
+          f.write(text)
+
+      ao.gcloud_cp(readme_source,f"{ds_dest}/sourceREADME.txt", directory=False, dry_run=False)
+      ao.gcloud_cp(manifest_source,f"{ds_dest}/data_source.csv", directory=False, dry_run=False)
+
+
+      # copy version files
+      ver_src = collections_repo_path / c_name / "VERSION"
+      ver_dest = f"{ds_dest}/version.txt"
+
+      all_manifests = pd.concat([all_manifests, manifest])
+
+
 
     all_manifest_source = collections_repo_path / c_name / f"data_source.csv"
     all_manifests.to_csv(all_manifest_source)
 
 
-    all_manifests = all_manifests.reset_index(drop=True)
-    col_manifests[c_name] = all_manifests
 
 # %%
 
