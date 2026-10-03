@@ -40,12 +40,12 @@ do_nothing_datasets = [
     "lee-mouse-bulk-rnaseq-striatum-g2019s-hf-diet",
     # "lee-mouse-sn-rnaseq-midbrain-g2019s-hf-diet",
     "schlossmacher-mouse-sn-rnaseq-osn-aav-transd",
-    "voet-pmdbs-sn-rnaseq"
+    # "voet-pmdbs-sn-rnaseq"
 ]
 
 updated_datasets = [
-    "cragg-mouse-sn-rnaseq-striatum",
-    "voet-pmdbs-sn-multimodal"
+    "cragg-mouse-sn-rnaseq-striatum", # v1.0 -> v2.0 fixed metadata AND replaced corrupt fastqs
+    "voet-pmdbs-sn-multimodal"  # new samples v1.0 -> v2.0
 ]
 
 all_datasets = old_datasets + new_datasets + do_nothing_datasets + updated_datasets
@@ -53,6 +53,7 @@ all_datasets = old_datasets + new_datasets + do_nothing_datasets + updated_datas
 
 # %%
 
+all_datasets = old_datasets
 
 for dataset in all_datasets:
     # print(dataset)

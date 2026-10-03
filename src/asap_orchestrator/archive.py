@@ -1,12 +1,15 @@
 """Archive management for versioned snapshots in cloud-datasets and cloud-collections.
 
 **Dataset archives** — ``archive/<version>/dataset.json`` snapshots represent a
-dataset *at* a given version.  The key invariant: ``releases`` contains only
-entries where ``dataset_version == version``.
+dataset *at* a given version, with its history up to that version: ``releases``
+and ``curation`` cover every release of ``all_versions``, which ends at that
+version.
 
 **Collection archives** — ``archive/<version>/collection.json`` snapshots represent
-a collection *at* a given version.  The key invariant: ``versions`` contains
-exactly the one target version entry.
+a collection *at* a given version, with its history up to that version:
+``versions`` contains every entry up to and including the target version, and
+the top-level current fields (``version``, ``date``, ``doi``, ``datasets``,
+``teams``, ``release``) describe the target version.
 
 Usage::
 
@@ -55,23 +58,11 @@ def _load_json(path: Path) -> dict:
         return json.load(f)
 
 
-def _releases_for_version(
-    ds_releases: dict[str, dict], version: str
-) -> dict[str, dict]:
-    """Filter a dataset's releases dict to entries where ``dataset_version == version``."""
-    return {
-        rv: rec
-        for rv, rec in ds_releases.items()
-        if rec.get("dataset_version", "") == version
-    }
-
-
-def _cde_for_version(filtered_releases: dict[str, dict], fallback: str = "") -> str:
-    """Return the CDE version from the most recent release in *filtered_releases*."""
-    if not filtered_releases:
-        return fallback
-    latest_rv = max(filtered_releases.keys())
-    return filtered_releases[latest_rv].get("cde_version", fallback)
+def _versions_up_to(all_versions: list[str], version: str) -> list[str]:
+    """Return *all_versions* up to and including *version*."""
+    if version not in all_versions:
+        raise KeyError(f"version '{version}' not in all_versions {all_versions}")
+    return all_versions[: all_versions.index(version) + 1]
 
 
 # ── public API ────────────────────────────────────────────────────────────────
@@ -83,10 +74,9 @@ def build_archive_dataset(ds_path: Path | str, version: str) -> dict:
     dataset *at* *version*:
 
     - ``version`` is forced to *version*.
-    - ``releases`` is filtered to entries where ``dataset_version == version``.
-    - ``all_releases`` is derived from the filtered releases.
-    - ``cde_version`` is taken from the most recent filtered release.
-    - ``all_versions`` is set to ``[version]`` (single-version snapshot).
+    - ``all_versions`` is truncated after *version*.
+    - ``releases`` is filtered to releases that shipped one of those versions.
+    - ``curation`` is filtered to those same releases.
 
     All other fields (name, doi, creators, buckets, etc.) are carried over
     unchanged from the current ``dataset.json``.
@@ -97,20 +87,23 @@ def build_archive_dataset(ds_path: Path | str, version: str) -> dict:
 
     Returns:
         Dict ready to write as ``archive/<version>/dataset.json``.
+
+    Raises:
+        KeyError: When *version* is not in ``all_versions``.
     """
     ds_path = Path(ds_path)
     ds = _load_json(ds_path / "dataset.json")
 
-    filtered = _releases_for_version(ds.get("releases", {}), version)
-    cde = _cde_for_version(filtered, fallback=ds.get("cde_version", "") or "")
+    versions = _versions_up_to(ds.get("all_versions", []), version)
+    filtered = {rv: dv for rv, dv in ds.get("releases", {}).items() if dv in versions}
+    curation = ds.get("curation", {})
 
     # Build the archive entry from the current dataset, overriding version-specific fields
     entry = {k: v for k, v in ds.items()}
     entry["version"] = version
-    entry["cde_version"] = cde
+    entry["curation"] = {rv: curation[rv] for rv in filtered if rv in curation}
+    entry["all_versions"] = versions
     entry["releases"] = filtered
-    entry["all_releases"] = sorted(filtered.keys())
-    entry["all_versions"] = [version]
 
     return entry
 
@@ -174,9 +167,8 @@ def validate_archive_entry(
 
     - The archive directory and ``dataset.json`` exist.
     - The ``version`` field in the archive matches the directory name.
-    - Every ``releases`` entry has ``dataset_version == version``.
-    - ``all_releases`` matches ``releases.keys()``.
-    - ``all_versions``, if present, equals ``[version]``.
+    - ``all_versions``, if present, ends at *version*.
+    - Every ``releases`` entry maps to a version in ``all_versions``.
     - If *releases_repo_path* given: each listed release exists in
       cloud-releases and contains this dataset at the correct version.
 
@@ -202,8 +194,7 @@ def validate_archive_entry(
     arch = _load_json(archive_json)
     ds_name: str = arch.get("name", ds_path.name)
     arch_version: str = arch.get("version", "")
-    arch_releases: dict = arch.get("releases", {})
-    arch_all_releases: list = arch.get("all_releases", [])
+    arch_releases: dict[str, str] = arch.get("releases", {})
     arch_all_versions: Optional[list] = arch.get("all_versions")  # may be absent in old format
 
     # ── version field must match directory name ───────────────────────────────
@@ -217,33 +208,23 @@ def validate_archive_entry(
             f"archive directory '{version}'"
         )
 
-    # ── releases must all be for this version ─────────────────────────────────
-    wrong = {
-        rv: rec.get("dataset_version", "")
-        for rv, rec in arch_releases.items()
-        if rec.get("dataset_version", "") not in (version, arch_version)
-    }
+    # ── all_versions, if present, must end at this version ───────────────────
+    if arch_all_versions is not None and (
+        not arch_all_versions or _vn(arch_all_versions[-1]) != _vn(version)
+    ):
+        issues.append(
+            f"all_versions should end at '{version}' for an archive snapshot, "
+            f"got {arch_all_versions}"
+        )
+
+    # ── releases must all be for versions up to this one ─────────────────────
+    known = {_vn(v) for v in (arch_all_versions or [version])}
+    wrong = {rv: dv for rv, dv in arch_releases.items() if _vn(dv) not in known}
     if wrong:
         issues.append(
-            f"releases contain entries for wrong dataset versions: "
+            f"releases contain entries for versions after '{version}': "
             + ", ".join(f"'{rv}' (dataset_version='{dv}')" for rv, dv in wrong.items())
         )
-
-    # ── all_releases must match releases.keys() ───────────────────────────────
-    if sorted(arch_all_releases) != sorted(arch_releases.keys()):
-        issues.append(
-            f"all_releases {sorted(arch_all_releases)} does not match "
-            f"releases.keys() {sorted(arch_releases.keys())}"
-        )
-
-    # ── all_versions, if present, should be a single-entry snapshot ──────────
-    if arch_all_versions is not None:
-        expected = [version] if version.startswith("v") else [f"v{version}"]
-        if arch_all_versions not in ([version], [arch_version], expected):
-            issues.append(
-                f"all_versions should be ['{version}'] for an archive snapshot, "
-                f"got {arch_all_versions}"
-            )
 
     # ── cross-reference against release.json files ───────────────────────────
     if releases_repo_path is not None:
@@ -256,8 +237,8 @@ def validate_archive_entry(
 
             release = _load_json(release_json)
             found = {
-                e["name"]: e.get("version") or e.get("dataset_version", "")
-                for e in release.get("datasets", [])
+                name: e.get("dataset_version", "")
+                for name, e in release.get("datasets", {}).items()
             }
             if ds_name not in found:
                 issues.append(
@@ -265,10 +246,10 @@ def validate_archive_entry(
                 )
             else:
                 rel_version = found[ds_name]
-                if rel_version and rel_version not in (version, arch_version):
+                if rel_version and rel_version != arch_releases[rv]:
                     issues.append(
                         f"version mismatch in release '{rv}': "
-                        f"release says '{rel_version}', archive is '{version}'"
+                        f"release says '{rel_version}', archive records '{arch_releases[rv]}'"
                     )
 
     return issues
@@ -361,8 +342,10 @@ def build_archive_collection(col_path: Path | str, version: str) -> dict:
     """Build a version-scoped ``collection.json`` dict for a collection archive entry.
 
     Reads the current ``collection.json`` and returns a new dict with the same
-    top-level metadata (``name``, ``title``, ``collection_doi``, ``types``) but
-    with ``versions`` containing **only** the single entry for *version*.
+    metadata (``name``, ``title``, ``collection_doi``, ``types``), ``versions``
+    truncated after *version*, the top-level current fields
+    (``date``, ``doi``, ``datasets``, ``teams``, ``release``, ``version``) set
+    from that entry, and ``curation`` limited to that version's datasets.
 
     Args:
         col_path: Collection directory containing ``collection.json``.
@@ -384,8 +367,20 @@ def build_archive_collection(col_path: Path | str, version: str) -> dict:
             f"available: {sorted(versions.keys())}"
         )
 
-    entry = {k: v for k, v in col.items() if k != "versions"}
-    entry["versions"] = {version: versions[version]}
+    keys = list(versions)
+    ver_entry = versions[version]
+
+    entry = {k: v for k, v in col.items()}
+    entry["date"] = ver_entry.get("date")
+    entry["doi"] = ver_entry.get("doi")
+    entry["datasets"] = ver_entry.get("datasets", [])
+    entry["teams"] = sorted({ds.split("-")[0] for ds in entry["datasets"]})
+    entry["release"] = ver_entry.get("release", {})
+    entry["version"] = version
+    entry["versions"] = {k: versions[k] for k in keys[: keys.index(version) + 1]}
+    entry["curation"] = {
+        ds: rec for ds, rec in col.get("curation", {}).items() if ds in entry["datasets"]
+    }
     return entry
 
 
@@ -417,7 +412,7 @@ def ensure_collection_archive_entry(
 
     archive_dir.mkdir(parents=True, exist_ok=True)
     entry = build_archive_collection(col_path, version)
-    archive_json.write_text(json.dumps(entry, indent=2))
+    archive_json.write_text(json.dumps(entry, indent=4))
     return archive_dir
 
 
@@ -445,7 +440,8 @@ def validate_collection_archive_entry(
     Checks:
 
     - The archive directory and ``collection.json`` exist.
-    - ``versions`` contains exactly the one entry keyed by *version*.
+    - ``versions`` ends at the entry keyed by *version* (no later versions),
+      and the top-level ``version`` equals *version*.
     - The collection ``name`` matches the directory name.
     - The version entry's ``release.version`` exists in cloud-releases (if
       *releases_repo_path* given), and the release contains this collection at
@@ -492,10 +488,16 @@ def validate_collection_archive_entry(
         )
         return issues  # remaining checks would all fail
 
-    extra = [v for v in arch_versions if v != version]
-    if extra:
+    keys = list(arch_versions)
+    later = keys[keys.index(version) + 1:]
+    if later:
         issues.append(
-            f"archive contains extra versions (expected only '{version}'): {extra}"
+            f"archive contains versions after '{version}': {later}"
+        )
+    if arch.get("version") != version:
+        issues.append(
+            f"top-level version '{arch.get('version')}' does not match "
+            f"archive directory '{version}'"
         )
 
     ver_entry: dict = arch_versions[version]
@@ -515,9 +517,7 @@ def validate_collection_archive_entry(
             )
         else:
             release = _load_json(release_json)
-            rel_cols = release.get("collections", {})
-            if isinstance(rel_cols, list):
-                rel_cols = {c.get("name", ""): c for c in rel_cols}
+            rel_cols: dict[str, dict] = release.get("collections", {})
 
             if arch_name not in rel_cols:
                 issues.append(

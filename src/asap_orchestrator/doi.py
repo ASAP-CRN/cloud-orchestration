@@ -275,6 +275,7 @@ def ingest_DOI_doc_v1(
     document = docx.Document(doi_doc_path)
 
     table_names = ["affiliations", "datasets", "projects", "extra1", "extra2"]
+
     for name, table in zip(table_names, document.tables):
         table_data = []
         for row in table.rows:
@@ -517,6 +518,7 @@ def  ingest_DOI_doc(
 ):
     """
     read docx, extract the information, and save in os.path.join(dataset, DOI) subdirectory
+       assumes v1.1 doc format
     """
     ds_path = Path(ds_path)
     doi_doc_path = Path(doi_doc_path)
@@ -565,12 +567,24 @@ def  ingest_DOI_doc(
     document = docx.Document(doi_doc_path)
 
     table_names = ["affiliations", "datasets", "projects", "extra1", "extra2"]
-    for name, table in zip(table_names, document.tables):
+    doc_tables = document.tables
+    if len(doc_tables) < 1:
+        try:
+            # Search for all table elements using the document's namespace map
+            doc_tables = document.element.body.xpath(".//w:tbl")
+            print(f"Found {len(doc_tables)} tables via XPath")
+            doc_tables = [docx.table.Table(tbl, document) for tbl in doc_tables]
+        except Exception as e:
+            print(f"Failed to find tables via XPath: {e}")
+
+    for name, table in zip(table_names, doc_tables):
+    # for name, table in zip(table_names, document.tables):
         table_data = []
         for row in table.rows:
             row_data = [cell.text for cell in row.cells]
             table_data.append(row_data)
         # Assuming the first row is the header
+        # print(f"table name: {name}, rows: {len(table_data)}")
         if name == "affiliations":
             fields = table_data[0]
             data = table_data[1:]
@@ -579,7 +593,7 @@ def  ingest_DOI_doc(
             #     affiliations = affiliations.iloc[0, 0]
 
             print("made affiliation table")
-        elif name == "datasets":
+        elif name == "datasets": 
             dataset_title = (
                 table_data[0][1].strip().replace("\n", " ").replace("\u2019", "'")
             )
@@ -1297,7 +1311,7 @@ def bump_doi_version(zenodo: ZenodoClient, old_doi_id: str | int) -> dict:
         print(f"Warning: You are using the record id {old_doi_id} instead of the doi")
         old_doi_id = str(old_doi_id)
 
-    zenodo.deposition_id = old_doi_id
+    # zenodo.deposition_id = old_doi_id
     deposition = zenodo.make_new_version()
     return deposition
 
@@ -1468,3 +1482,6 @@ def archive_deposition_local(ds_path: Path, arch_name: str, deposition: dict):
 #         except json.JSONDecodeError as e2:
 #             print(f"Still couldn't decode JSON after aggressive cleaning: {e2}")
 #             raise
+
+
+# %%

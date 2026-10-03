@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Optional
 import json
 
-from .models import Creator, Dataset, DatasetBuckets, ReleaseRecord #, VersionRecord
+from .models import Creator, Dataset, DatasetBuckets, ensure_v_prefix
 from .zenodo_util import ZenodoClient
 from .doi import _write_doi_files, _doi_dir, _read_doi_metadata
 
@@ -63,7 +63,8 @@ def define_dataset(
             for uncurated/urgent-release datasets.
         version: Initial version string (default ``"v0.1"``).
         doi: Zenodo concept DOI if already assigned.
-        cde_version: CDE schema version to apply.
+        cde_version: Ignored; ``dataset.json`` no longer stores a CDE version
+            (it lives on the release).  Kept for call compatibility.
         title: Human-readable title; defaults to *name*.
         description: Short description; auto-generated from *collection* and
             team name if omitted.
@@ -112,12 +113,10 @@ def define_dataset(
         # references=list(references) if references else [],
         collection=collection,
         buckets=resolved_buckets,
-        cde_version=cde_version or None,
         releases={},
         dataset_title=title or name,
         curation = {},
         all_versions = [],
-        all_releases = [],
         short_description = auto_description,
     )
 
@@ -202,7 +201,6 @@ def fill_dataset_stub(
 
     dataset_def.version = f"v{version}"
     dataset_def.doi = doi_id
-    dataset_def.cde_version = project.get("cde_version")
     dataset_def.title = project.get("title")
     dataset_def.dataset_title = project.get("dataset_title")
     dataset_def.keywords = project.get("keywords")
@@ -214,18 +212,16 @@ def fill_dataset_stub(
 def read_dataset_entry(ds_path: Path | str) -> dict:
     """Read a dataset's release entry from its ``dataset.json``.
 
-    Returns the minimal ``{"name", "doi", "version"}`` dict used in release
-    and collection manifests.
+    Returns the ``{"dataset_version", "doi"}`` dict stored under
+    ``release.json["datasets"][<dataset name>]``.
 
     Args:
         ds_path: Path to the dataset directory in cloud-datasets.
+
+    Raises:
+        FileNotFoundError: When ``dataset.json`` is absent.
     """
-    ds_path = Path(ds_path)
-    try:
-        dataset = Dataset.load(ds_path)
-        return dataset.to_release_entry()
-    except FileNotFoundError:
-        return {"name": ds_path.name, "doi": "", "version": ""}
+    return Dataset.load(ds_path).to_release_entry()
 
 
 # ── helpers ────────────────────────────────────────────────────────────────────
@@ -392,14 +388,15 @@ def update_dataset_version(
 
     Copies ``DOI/`` and ``refs/`` to ``archive/<old_version>/``, then updates
     ``dataset.json`` with the new version, records the version in
-    ``all_versions``, and adds a release record.  If *zenodo* is supplied, a
+    ``all_versions``, and maps *release_version* to it in ``releases``.  If *zenodo* is supplied, a
     new Zenodo version draft is created via the ``newversion`` action.
 
     Args:
         ds_path: Path to the dataset directory.
         new_version: New version string, e.g. ``"v1.0"``.
         release_version: Release this bump is tied to, e.g. ``"v4.1.0"``.
-        cde_version: CDE schema version for this release, e.g. ``"v3.3"``.
+        cde_version: Ignored; the CDE version lives on the release.  Kept for
+            call compatibility.
         zenodo: Optional :class:`~asap_orchestrator.zenodo_util.ZenodoClient`;
             when provided creates a Zenodo version draft for the new version.
     """
@@ -425,21 +422,18 @@ def update_dataset_version(
             new_dep = zenodo.make_new_version()
             _write_doi_files(ds_path, new_dep, prerelease=True)
 
-    version_doi = ""
-    doi_file = _doi_dir(ds_path) / "version.doi"
-    if doi_file.exists():
-        version_doi = doi_file.read_text().strip()
-
-    dataset.version = new_version
-    dataset.all_versions[new_version] = VersionRecord(doi=version_doi)
-    dataset.releases[release_version] = ReleaseRecord(
-        cde_version=cde_version, dataset_version=new_version
-    )
+    # attribute assignment skips validation, so normalize the v-prefix here
+    dataset.version = ensure_v_prefix(new_version)
+    if dataset.version not in dataset.all_versions:
+        dataset.all_versions.append(dataset.version)
+    dataset.releases[ensure_v_prefix(release_version)] = dataset.version
     dataset.save(ds_path)
 
 
 def update_datasets_index(datasets_repo_path: Path | str) -> None:
     """Rebuild ``datasets.json`` master index from all ``dataset.json`` files.
+
+    The index maps each dataset name to its full ``dataset.json`` content.
 
     Args:
         datasets_repo_path: Path to the cloud-datasets repository root.
@@ -455,15 +449,7 @@ def update_datasets_index(datasets_repo_path: Path | str) -> None:
             dataset = Dataset.load(ds_dir)
         except FileNotFoundError:
             continue
-        index[dataset.name] = {
-            "name": dataset.name,
-            "title": dataset.title,
-            "version": dataset.version,
-            "doi": dataset.doi or "",
-            "collection": dataset.collection or "",
-            "release": {k: v.model_dump() for k, v in dataset.releases.items()},
-        }
+        index[dataset.name] = dataset.to_dict()
 
-        
     with open(datasets_repo_path / "datasets.json", "w") as f:
-        json.dump(index, f, indent=2)
+        json.dump(index, f, indent=4)

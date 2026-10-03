@@ -1,6 +1,8 @@
 # %% 
 # # ASAP CRN — Release Template
-#
+#. we are going to hack v5.0.0 release into the database and use v5.1.0 as the start of 
+#.    a rational / scalable release process.  groundtruth archive is still a mess and we need a solid base
+#     to build on.
 # Copy this file and rename it, e.g. `define_v5.0.0_release.py`.
 # Fill in every section marked with TODO before running cell by cell.
 #
@@ -25,6 +27,7 @@ root_path = Path(__file__).resolve().parents[2]
 datasets_repo_path = root_path / "cloud-datasets"
 collections_repo_path = root_path / "cloud-collections"
 releases_repo_path = root_path / "cloud-releases"
+fixup_path = root_path / "cloud-fixup"
 
 
 # %% [Step 1] Release parameters
@@ -46,10 +49,6 @@ PUBLICATION_DATE = "2026-05-31"   # e.g. "2026-05-01"
 
 
 
-# new datasets
-new_datasets = [
-    "asap-cohort-invitro-bulk-rnaseq"
-]
 
 # %% [Step 2] Define datasets NEW or VERSION-BUMPED in this release
 # Each entry needs a published (or pre-reserved) Zenodo DOI.
@@ -60,6 +59,10 @@ new_datasets = [
     "team-jakobsson-invitro-bulk-rnaseq-microglia",
     "team-jakobsson-invitro-bulk-rnaseq-dopaminergic",
     "team-voet-pmdbs-sn-atacseq-10x",
+]
+# new datasets
+new_datasets = [
+    "asap-cohort-invitro-bulk-rnaseq"
 ]
 
 new_collections = [
@@ -129,58 +132,27 @@ all_datasets_list = [ dict( name = data.name, doi=data.doi, dataset_version=data
 new_datasets_list = [ dict( name = data.name, doi=data.doi, dataset_version=data.version) for data in new_dataset_defs]
 
 
-
-
-
-
-
-
 # get all the datasets and see if the jsons are up to spec
 all_datasets = [d.name for d in (datasets_repo_path / "datasets").glob("*")]
 
-# %%
+%%
+for ds in all_datasets:
+    ds_path = datasets_repo_path / "datasets" / ds
+    with open(ds_path / "dataset.json", "r") as f:
+        ds_info = json.load(f)
 
+    # fix title and description from project.json
+    project_json_path = ds_path / "DOI" / f"project.json"
+    if project_json_path.exists():
+        with open(project_json_path, "r") as f:
+            project_json = json.load(f)
+        short_desc = ds_info["description"]
+        ds_info["title"] = project_json.get("dataset_title", ds_info["title"])
+        ds_info["description"] = project_json.get("dataset_description", ds_info["description"])
+        ds_info["short_description"] = short_desc
 
-# for ds in all_datasets:
-#     ds_path = datasets_repo_path / "datasets" / ds
-#     with open(ds_path / "dataset.json", "r") as f:
-#         ds_info = json.load(f)
-
-#     # if len(ds_info["curation"]):
-#     #     curation_info = ds_info["curation"]
-
-#     #     print(f"dataset {ds} has curation info")
-#     #     release_version = ds_info["curation"]["release"]
-#     #     dataset_version =ds_info["releases"][release_version]["dataset_version"]
-#     #     collection_version = ds_info["curation"]["version"]
-#     #     new_curation_info = dict(
-#     #         name=curation_info["name"],
-#     #         dataset_version=dataset_version,
-#     #         release_version=release_version,
-#     #         collection_version=collection_version,
-#     #         collection=curation_info["collection"],
-#     #         releases=curation_info["releases"],
-#     #     )
-
-#     #     ds_info["curation"] = new_curation_info 
-
-#     # else:
-#     #     print(f"dataset {ds} has NO curation info, adding empty curation field")
-#     #     ds_info["curation"] = dict()
-
-
-#     # fix title and description from project.json
-#     project_json_path = ds_path / "DOI" / f"project.json"
-#     if project_json_path.exists():
-#         with open(project_json_path, "r") as f:
-#             project_json = json.load(f)
-#         short_desc = ds_info["description"]
-#         ds_info["title"] = project_json.get("dataset_title", ds_info["title"])
-#         ds_info["description"] = project_json.get("dataset_description", ds_info["description"])
-#         ds_info["short_description"] = short_desc
-
-#     with open(ds_path / "dataset.json", "w") as f:
-#         json.dump(ds_info, f, indent=4)
+    with open(ds_path / "dataset.json", "w") as f:
+        json.dump(ds_info, f, indent=4)
 
 # %%
 

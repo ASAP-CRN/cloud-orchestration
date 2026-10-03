@@ -55,49 +55,14 @@ def _load_json(path: Path) -> dict:
 
 
 def _release_datasets(release: dict) -> dict[str, dict]:
-    """Return ``{name: entry}`` from a raw release dict.
-
-    Normalises both ``dataset_version`` (historical) and ``version`` (current
-    model) key names into a unified ``"version"`` key.
-    """
-    result: dict[str, dict] = {}
-    for entry in release.get("datasets", []):
-        name = entry.get("name", "")
-        if not name:
-            continue
-        result[name] = {
-            "name": name,
+    """Return ``{name: {"doi", "version"}}`` from a raw release dict."""
+    return {
+        name: {
             "doi": entry.get("doi") or "",
-            # historical files use "dataset_version"; newer model uses "version"
-            "version": entry.get("version") or entry.get("dataset_version", ""),
+            "version": entry.get("dataset_version", ""),
         }
-    return result
-
-
-def _release_new_datasets(release: dict) -> dict[str, dict]:
-    """Return ``{name: entry}`` for ``new_datasets`` in a raw release dict."""
-    result: dict[str, dict] = {}
-    for entry in release.get("new_datasets", []):
-        name = entry.get("name", "")
-        if not name:
-            continue
-        result[name] = {
-            "name": name,
-            "doi": entry.get("doi") or "",
-            "version": entry.get("version") or entry.get("dataset_version", ""),
-        }
-    return result
-
-
-def _release_collections(release: dict) -> dict[str, dict]:
-    """Return ``{name: entry}`` for collections in a raw release dict.
-
-    Handles both list form (current model) and dict-keyed form (historical).
-    """
-    cols = release.get("collections", [])
-    if isinstance(cols, dict):
-        return {k: v for k, v in cols.items() if isinstance(v, dict)}
-    return {c.get("name", ""): c for c in cols if isinstance(c, dict)}
+        for name, entry in release.get("datasets", {}).items()
+    }
 
 
 # ── public API ────────────────────────────────────────────────────────────────
@@ -113,8 +78,7 @@ def check_dataset_consistency(
 
     - For each ``release_version`` in ``dataset.releases``: the release exists,
       the dataset appears in it, and versions/DOIs agree.
-    - ``all_releases`` matches ``releases.keys()``.
-    - ``all_versions`` matches the unique ``dataset_version`` values in ``releases``.
+    - ``all_versions`` matches the unique dataset versions in ``releases``.
     - Current ``version`` appears in ``all_versions``.
     - If *collections_repo_path* given and ``dataset.collection`` is set:
       the dataset appears in some version of that collection.
@@ -139,25 +103,12 @@ def check_dataset_consistency(
     ds_name: str = ds.get("name", ds_path.name)
     ds_version: str = ds.get("version", "")
     ds_doi: str = ds.get("doi", "") or ""
-    ds_releases: dict[str, dict] = ds.get("releases", {})
-    ds_all_releases: list[str] = ds.get("all_releases", [])
+    ds_releases: dict[str, str] = ds.get("releases", {})
     ds_all_versions: list[str] = ds.get("all_versions", [])
     ds_collection: str | None = ds.get("collection")
 
-    # ── all_releases consistency ──────────────────────────────────────────────
-    expected_all_releases = sorted(ds_releases.keys())
-    if sorted(ds_all_releases) != expected_all_releases:
-        issues.append(
-            f"all_releases out of sync: has {sorted(ds_all_releases)}, "
-            f"releases.keys()={expected_all_releases}"
-        )
-
     # ── all_versions consistency ──────────────────────────────────────────────
-    versions_in_releases = sorted({
-        v.get("dataset_version", "")
-        for v in ds_releases.values()
-        if v.get("dataset_version")
-    })
+    versions_in_releases = sorted({v for v in ds_releases.values() if v})
     if ds_all_versions and sorted(_vn(v) for v in ds_all_versions) != [_vn(v) for v in versions_in_releases]:
         issues.append(
             f"all_versions out of sync: has {sorted(ds_all_versions)}, "
@@ -170,8 +121,7 @@ def check_dataset_consistency(
         )
 
     # ── per-release checks ────────────────────────────────────────────────────
-    for rel_version, rel_record in ds_releases.items():
-        recorded_ds_version = rel_record.get("dataset_version", "")
+    for rel_version, recorded_ds_version in ds_releases.items():
 
         release_json = releases_repo_path / rel_version / "release.json"
         if not release_json.exists():
@@ -258,8 +208,8 @@ def check_release_consistency(
     release = _load_json(release_json_path)
     release_version: str = release.get("release_version", release_path.name)
     rel_datasets = _release_datasets(release)
-    rel_new_datasets = _release_new_datasets(release)
-    rel_collections = _release_collections(release)
+    rel_new_datasets: list[str] = release.get("new_datasets", [])
+    rel_collections: dict[str, dict] = release.get("collections", {})
 
     # ── new_datasets must be a subset of datasets ─────────────────────────────
     for ds_name in rel_new_datasets:
@@ -283,8 +233,8 @@ def check_release_consistency(
         ds = _load_json(ds_json_path)
         ds_version: str = ds.get("version", "")
         ds_doi: str = ds.get("doi", "") or ""
-        ds_releases: dict[str, dict] = ds.get("releases", {})
-        all_releases: list[str] = ds.get("all_releases", list(ds_releases.keys()))
+        ds_releases: dict[str, str] = ds.get("releases", {})
+        all_releases = list(ds_releases)
 
         # DOI must match concept DOI in dataset.json
         if rel_doi and ds_doi and rel_doi != ds_doi:
@@ -293,14 +243,15 @@ def check_release_consistency(
                 f"release='{rel_doi}', dataset.json='{ds_doi}'"
             )
 
-        # Dataset must record this release
+        # A new/updated dataset must record this release; carried-over datasets don't
         if release_version not in ds_releases:
-            result["datasets"].append(
-                f"[{ds_name}] release '{release_version}' not recorded "
-                f"in dataset.json releases"
-            )
+            if ds_name in rel_new_datasets:
+                result["datasets"].append(
+                    f"[{ds_name}] release '{release_version}' not recorded "
+                    f"in dataset.json releases"
+                )
         else:
-            recorded_version = ds_releases[release_version].get("dataset_version", "")
+            recorded_version = ds_releases[release_version]
             if rel_version and recorded_version and rel_version != recorded_version:
                 result["datasets"].append(
                     f"[{ds_name}] version mismatch in releases['{release_version}']: "
@@ -415,9 +366,7 @@ def check_collection_consistency(
                 )
             else:
                 release = _load_json(release_json)
-                rel_cols = release.get("collections", {})
-                if isinstance(rel_cols, list):
-                    rel_cols = {c.get("name", ""): c for c in rel_cols}
+                rel_cols: dict[str, dict] = release.get("collections", {})
 
                 if col_name not in rel_cols:
                     issues.append(

@@ -402,6 +402,8 @@ for ds_def in new_dataset_defs:
     doi = deposition.get("doi") or deposition.get("metadata", {}).get("prereserve_doi", {}).get("doi", "draft")
     print(f"{ds_def.name}: {doi}")
 
+    ao.finalize_DOI(ds_path, deposition, prerelease=True)
+    
 
 # surmeier-mouse-sn-rnaseq-ventral-midbrain: 10.5281/zenodo.21308458
 

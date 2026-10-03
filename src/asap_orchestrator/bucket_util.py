@@ -447,10 +447,11 @@ def create_collection_bucket(bucket: str, project: str | None = None, region: st
 
     _add_policy(bucket, project, MEMBER_READER, ROLE_READER)
     _add_policy(bucket, project, MEMBER_DTI, ROLE_DTI)
+    _enable_autoclass(bucket, project)
 
 def _add_policy(bucket: str, project: str, member: str, role:str):
     """
-    
+
     """
     gcloud = _get_gcloud_path()
     cmd = [
@@ -467,6 +468,31 @@ def _add_policy(bucket: str, project: str, member: str, role:str):
     else:
         print(f"gcloud command failed: {result.stderr}")
     return result.stdout
+
+def _enable_autoclass(bucket: str, project: str):
+    """
+    gcloud storage buckets update "${DESTINATION_BUCKET}" \
+        --enable-autoclass \
+        --autoclass-terminal-storage-class=ARCHIVE \
+        --billing-project="${PROJECT}"
+    """
+    gcloud = _get_gcloud_path()
+    cmd = [
+        gcloud,  "storage", "buckets", 
+        "update", 
+        bucket, f"--enable-autoclass", f"--autoclass-terminal-storage-class=ARCHIVE", 
+        f"--billing-project={project}"
+        ]
+    print(f"{' '.join(cmd)}")
+
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode == 0:
+        print(f"gcloud command succeeded: {' '.join(cmd)}")
+    else:
+        print(f"gcloud command failed: {result.stderr}")
+    return result.stdout
+
+
 
 def describe_bucket(bucket:str, project: str | None = None):
     """gcloud storage buckets describe gs://YOUR_BUCKET_NAME

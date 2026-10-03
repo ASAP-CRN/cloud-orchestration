@@ -8,7 +8,6 @@ Usage::
     ds_def = ao.define_dataset(
         name="teamX-pmdbs-sn-rnaseq",
         collection="pmdbs-sc-rnaseq",
-        cde_version="v3.3",
     )
     ds_path = ao.create_dataset_stub(ds_def, datasets_repo_path="/path/to/cloud-datasets")
 
@@ -24,21 +23,21 @@ Usage::
             collection="pmdbs-sc-rnaseq",
             version="v1.0",
             doi="10.5281/zenodo.XXXXXXXX",
-            cde_version="v3.3",
         ),
     ]
 
-    all_dataset_entries = [
-        ao.read_dataset_entry("/path/to/cloud-datasets/previously-released-dataset"),
-    ] + [ds.to_release_entry() for ds in new_datasets]
+    all_dataset_entries = {
+        "previously-released-dataset": ao.read_dataset_entry(
+            "/path/to/cloud-datasets/datasets/previously-released-dataset"
+        ),
+    } | {ds.name: ds.to_release_entry() for ds in new_datasets}
 
     release_def = ao.define_release(
         release_version="v4.1.0",
-        release_type="Minor",
         cde_version="v3.3",
         datasets=all_dataset_entries,
-        new_datasets=[ds.to_release_entry() for ds in new_datasets],
-        collections=[{"name": "pmdbs-sc-rnaseq", "doi": "10.5281/zenodo.YYYYYYYY", "version": "v3.2.0"}],
+        new_datasets=[ds.name for ds in new_datasets],
+        collections={"pmdbs-sc-rnaseq": {"doi": "10.5281/zenodo.YYYYYYYY", "version": "v3.2.0"}},
     )
 
     # ── Collection definition ────────────────────────────────────────────────
@@ -61,11 +60,12 @@ from .models import (
     Dataset,
     Creator,
     DatasetBuckets,
-    ReleaseRecord,
+    Curation,
+    GcpUri,
+    VStr,
     ReleaseType,
     DatasetEntry,
     CollectionEntry,
-    ReleaseMetadata,
     CollectionReleaseRef,
     CollectionVersion,
     Collection,
@@ -145,11 +145,12 @@ __all__ = [
     "Dataset",
     "Creator",
     "DatasetBuckets",
-    "ReleaseRecord",
+    "Curation",
+    "GcpUri",
+    "VStr",
     "ReleaseType",
     "DatasetEntry",
     "CollectionEntry",
-    "ReleaseMetadata",
     "CollectionReleaseRef",
     "CollectionVersion",
     "Collection",

@@ -9,11 +9,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from .models import CollectionEntry, DatasetEntry, ReleaseDefinition, ReleaseType  # noqa: F401 – re-exported
+from .models import CollectionEntry, DatasetEntry, ReleaseDefinition  # noqa: F401 – re-exported
 
 __all__ = [
     "ReleaseDefinition",
-    "ReleaseType",
     "define_release",
     "perform_release",
 ]
@@ -21,37 +20,35 @@ __all__ = [
 
 def define_release(
     release_version: str,
-    release_type: ReleaseType,
     cde_version: str,
-    datasets: list[dict],
-    new_datasets: list[dict],
-    collections: list[dict],
+    datasets: dict[str, dict],
+    new_datasets: list[str],
+    collections: dict[str, dict],
 ) -> ReleaseDefinition:
     """Build a :class:`ReleaseDefinition` describing a pending release.
 
-    Each dataset or collection entry should be a dict with at minimum
-    ``"name"``, ``"doi"``, and ``"version"`` keys.
-
     Args:
         release_version: New release version string, e.g. ``"v4.1.0"``.
-        release_type: One of ``"Urgent"``, ``"Minor"``, or ``"Major"``.
         cde_version: CDE schema version applied to all datasets, e.g. ``"v3.3"``.
-        datasets: All datasets included in the release.
-        new_datasets: Subset of *datasets* that are new or updated.
-        collections: All collections included in the release.
+        datasets: ``{dataset_name: {"dataset_version", "doi"}}`` for every
+            dataset in the release (see :meth:`Dataset.to_release_entry`).
+        new_datasets: Names of datasets that are new or updated.
+        collections: ``{collection_name: {"doi", "version"}}`` for every
+            collection in the release.
 
     Returns:
         A :class:`ReleaseDefinition` ready to be passed to
         :func:`perform_release` or
-        :func:`~asap_orchestrator.collection.update_collection`.
+        :func:`~asap_orchestrator.collection.define_collection`.
     """
     return ReleaseDefinition(
         release_version=release_version,
-        release_type=release_type,
         cde_version=cde_version,
-        datasets=[DatasetEntry.model_validate(d) for d in datasets],
-        new_datasets=[DatasetEntry.model_validate(d) for d in new_datasets],
-        collections=[CollectionEntry.model_validate(d) for d in collections],
+        datasets={name: DatasetEntry.model_validate(d) for name, d in datasets.items()},
+        new_datasets=list(new_datasets),
+        collections={name: CollectionEntry.model_validate(c) for name, c in collections.items()},
+        datasets_names=list(datasets),
+        collection_names=list(collections),
     )
 
 
@@ -62,13 +59,13 @@ def perform_release(
 ) -> Path:
     """Write ``release.json`` and update ``releases.json`` for a new release.
 
-    Creates ``<releases_repo_path>/<release_version>/release.json`` with the
-    full release manifest and appends an entry to the top-level
-    ``releases.json`` index (and its mirror at ``releases/releases.json`` if
-    that directory exists).
+    Creates ``<releases_repo_path>/<release_version>/release.json`` and sets
+    ``releases.json[<release_version>]`` to the same content (also mirrored to
+    ``releases/releases.json`` if that directory exists).
 
     Args:
         release_def: The release definition from :func:`define_release`.
+            ``created`` is set to now, and ``release_doi`` when given.
         releases_repo_path: Path to the cloud-releases repository root.
         release_doi: Optional Zenodo concept DOI for the release record itself.
 
@@ -81,29 +78,10 @@ def perform_release(
     release_dir = releases_repo_path / version
     release_dir.mkdir(parents=True, exist_ok=True)
 
-    created = datetime.now().isoformat()
-
-    datasets_list = [e.model_dump() for e in release_def.datasets]
-    new_datasets_list = [e.model_dump() for e in release_def.new_datasets]
-    collections_list = [e.model_dump() for e in release_def.collections]
-
-    release_manifest = {
-        "release_version": version,
-        "release_type": release_def.release_type,
-        "cde_version": release_def.cde_version,
-        "release_doi": release_doi or "",
-        "datasets": datasets_list,
-        "new_datasets": new_datasets_list,
-        "collections": collections_list,
-        "created": created,
-        "metadata": {
-            "total_datasets": len(datasets_list),
-            "total_collections": len(collections_list),
-        },
-    }
-
-    with open(release_dir / "release.json", "w") as f:
-        json.dump(release_manifest, f, indent=2)
+    if release_doi:
+        release_def.release_doi = release_doi
+    release_def.created = datetime.now().isoformat()
+    release_def.save(release_dir)
 
     # Update releases.json index
     index_path = releases_repo_path / "releases.json"
@@ -112,19 +90,15 @@ def perform_release(
         with open(index_path) as f:
             releases_index = json.load(f)
 
-    releases_index[version] = {
-        "all_datasets": datasets_list,
-        "new_datasets": new_datasets_list,
-        "all_collections": collections_list,
-    }
+    releases_index[version] = release_def.model_dump()
 
     with open(index_path, "w") as f:
-        json.dump(releases_index, f, indent=2)
+        json.dump(releases_index, f, indent=4)
 
     # Mirror to releases/releases.json if that directory exists
     mirror_dir = releases_repo_path / "releases"
     if mirror_dir.is_dir():
         with open(mirror_dir / "releases.json", "w") as f:
-            json.dump(releases_index, f, indent=2)
+            json.dump(releases_index, f, indent=4)
 
     return release_dir

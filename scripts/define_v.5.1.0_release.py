@@ -20,6 +20,7 @@ from pathlib import Path
 import asap_orchestrator as ao
 import json
 
+
 # TODO: confirm the root path resolves correctly for your environment
 root_path = Path(__file__).resolve().parents[2]
 datasets_repo_path = root_path / "cloud-datasets"
@@ -33,9 +34,9 @@ RELEASE_VERSION = "v5.1.0"    # e.g. "v5.1.0"
 RELEASE_TYPE = "Minor"        # "Urgent" | "Minor" | "Major"
 CDE_VERSION = "v4.5"          # e.g. "?"
 RELEASE_DOI = "10.5281/zenodo.20186059"              # Zenodo concept DOI for the release itself, or ""
-RELEASE_DATE = "2026-09-31"
+RELEASE_DATE = "2026-09-30"
 
-PUBLICATION_DATE = "2026-09-31"   # e.g. "2026-05-01"
+PUBLICATION_DATE = "2026-09-30"   # e.g. "2026-05-01"
 
 # steps
 # 1 define which datasets are new or newly curated 
@@ -51,10 +52,10 @@ old_datasets = [
 ]
 
 
-new_datasets = [   
+add_datasets = [   
     "desjardins-mouse-bulk-rnaseq-striatum-pink1",
     "desjardins-mouse-bulk-rnaseq-nigra-pink1",
-    "desjardins-human-pbmc-multimodal-sc-rna-tcr",
+    # "desjardins-human-pbmc-multimodal-sc-rna-tcr",
     "desjardins-mouse-sc-rnaseq-colon-immune-lrrk2",
     "desjardins-ipsc-sc-rnaseq-myeloid-pink1",
     "desjardins-mouse-sc-rnaseq-colon-immune-pink1",
@@ -80,6 +81,7 @@ updated_datasets = [
     "voet-pmdbs-sn-multimodal"
 ]
 
+all_datasets = old_datasets + add_datasets + do_nothing_datasets + updated_datasets
 
 ## STEP 1
 #. create dataset.json
@@ -89,8 +91,7 @@ updated_datasets = [
 
 # %% [Step 2] Define datasets NEW or VERSION-BUMPED in this release
 new_collections = [
-    "invitro-bulk-rnaseq",
-    "pmdbs-sc-atacseq",
+    "mouse-bulk-rnaseq",
 ]
 
 # define
@@ -98,17 +99,30 @@ new_collections = [
 new_dataset_defs = []
 
 # all of our datasets have previously been released.
-for ds in new_datasets:
+for ds in all_datasets:
     ds_path = datasets_repo_path / "datasets" / ds
-    with open(ds_path / "dataset.json", "r") as f:
-        ds_info = json.load(f)
 
-    dataset_model = ao.Dataset.load(ds_path)
+    ds_json = ds_path / "dataset.json"
+    if not ds_json.exists():
+        print(f"WARNING: dataset.json not found: {ds}")
+        ds_model = ao.define_dataset(
+            name=ds,           # TODO: replace
+            collection=None,           # TODO: replace, or None
+            cde_version=CDE_VERSION,
+            title="",  # TODO: replace
+            description="",  # TODO: replace
+        )
+        ds_model.save(ds_path)
+        ds_in = ao.Dataset.load(ds_path)
+        dataset_model = ao.fill_dataset_stub(ds_in,ds_path)
+    else:
+        dataset_model = ao.Dataset.load(ds_path)
+    
     new_dataset_defs.append(dataset_model)
 
 
 # %%
-
+    
 # %% [Step 3] Build the full dataset list for the release manifest
 # This must include ALL datasets (new + previously released).
 # Read existing dataset entries directly from their dataset.json files so DOIs
@@ -142,7 +156,7 @@ for ds in previously_released_names:
 # convert to release entries...
 
 # check for overlap
-re_released = set(previously_released_names) & set(new_datasets)
+re_released = set(previously_released_names) & set(all_datasets)
 if len(re_released)>0:
     print(f"careful!  we have some re-releasaed datasets: {re_released}")
 
@@ -161,7 +175,7 @@ new_datasets_list = [ dict( name = data.name, doi=data.doi, dataset_version=data
 
 
 # get all the datasets and see if the jsons are up to spec
-all_datasets = [d.name for d in (datasets_repo_path / "datasets").glob("*")]
+all_datasets = [d.name for d in (datasets_repo_path / "datasets").glob("*") if d.name not in [".DS_Store"]  ]
 
 # %%
 
@@ -234,6 +248,7 @@ for ds in all_datasets:
     # print(f"Loaded dataset: {dataset_model.name} (version: {dataset_model.version}, doi: {dataset_model.doi})")
     all_ds_model[ds] = dataset_model
 
+# %%
 ####################
 # update the dataset.json stubs for the new datasets being released in this tranche. This is necessary to ensure the release manifest is up to date with the correct DOIs and versions, which are used as the source of truth for this information.
 
@@ -242,7 +257,7 @@ for ds in all_datasets:
 
 is_major_release = lambda v: v.split(".")[1:] == ["0", "0"]
 
-
+# %%
 
 # for ds in all_datasets:
 #     ds_path = datasets_repo_path / "datasets" / ds
@@ -294,13 +309,11 @@ is_major_release = lambda v: v.split(".")[1:] == ["0", "0"]
 
 
 
-
-
-
+# %%
 # get collections
 # none new in this release
 collections={}
-for ds in all_datasets:
+for ds_name, ds in all_ds_model.items():
     collection = ds.collection
     if collection is not None:
         print(f"dataset {ds.name} belongs to collection {collection}")
@@ -318,6 +331,8 @@ for ds in all_datasets:
         else:
             print(f"WARNING: collection {collection} already has version {collection_vers[cver]} >= release version {RELEASE_VERSION}")
 
+
+# %%
 # build metadata
 metadata = dict(
     total_datasets = len(all_datasets_list),
@@ -343,6 +358,8 @@ release_dict = dict(
 # write release.json
 release_path = releases_repo_path / RELEASE_VERSION 
 
+if not release_path.exists():
+    release_path.mkdir()
 with open(release_path / "release.json", "w") as f:
     json.dump(release_dict, f, indent=4)
 
@@ -354,11 +371,14 @@ with open(release_path / "release.json", "w") as f:
 ############################    for name in previously_released_names
 ############################    for name in previously_released_names
 
-
-
+############################  ############################  ############################ 
+############################  ############################  ############################ 
+############################  ############################  ############################ 
+############################  ############################  ############################ 
+############################  ############################  ############################ 
 # %%
 all_dataset_entries = [
-    ao.read_dataset_entry(datasets_repo_path / "datasets" / name)
+    ao.read_dataset_entry(datasets_repo_path / "datasets" / ds.name)
 ] + [ds.to_release_entry() for ds in new_dataset_defs]
 
 new_dataset_entries = [ds.to_release_entry() for ds in new_dataset_defs]
@@ -371,6 +391,8 @@ new_dataset_entries = [ds.to_release_entry() for ds in new_dataset_defs]
 # The DOI here is the Zenodo concept DOI for the new collection version.
 
 collection_entries = [
+    "mouse-sc-rnaseq",
+    "mouse-bulk-rnaseq",
     # TODO: fill in for each updated collection, e.g.:
     # {"name": "pmdbs-sc-rnaseq", "doi": "10.5281/zenodo.YYYYYYYY", "version": "v3.2.0"},
 ]
