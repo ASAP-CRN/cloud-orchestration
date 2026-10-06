@@ -22,7 +22,7 @@ old_datasets = [
 new_datasets = [   
     "desjardins-mouse-bulk-rnaseq-striatum-pink1",
     "desjardins-mouse-bulk-rnaseq-nigra-pink1",
-    "desjardins-human-pbmc-multimodal-sc-rna-tcr",
+    # "desjardins-human-pbmc-multimodal-sc-rna-tcr",
     "desjardins-mouse-sc-rnaseq-colon-immune-lrrk2",
     "desjardins-ipsc-sc-rnaseq-myeloid-pink1",
     "desjardins-mouse-sc-rnaseq-colon-immune-pink1",
@@ -38,9 +38,14 @@ do_nothing_datasets = [
     "alessi-mouse-sn-rnaseq-dorsal-striatum-g2019s",
     "lee-mouse-liver-bulk-rnaseq-g2019s",
     "lee-mouse-bulk-rnaseq-striatum-g2019s-hf-diet",
-    # "lee-mouse-sn-rnaseq-midbrain-g2019s-hf-diet",
+    "lee-mouse-sn-rnaseq-midbrain-g2019s-hf-diet",
     "schlossmacher-mouse-sn-rnaseq-osn-aav-transd",
-    # "voet-pmdbs-sn-rnaseq"
+    "voet-pmdbs-sn-atacseq-10x",
+    "voet-pmdbs-sn-rnaseq",
+    "voet-pmdbs-sn-rnaseq-parsebio",
+    "voet-pmdbs-sn-atacseq-hydrop",
+    "voet-pmdbs-sn-atacseq-scalebio-10x",
+    "voet-pmdbs-sn-atacseq-scalebio-hydrop"
 ]
 
 updated_datasets = [
@@ -53,7 +58,7 @@ all_datasets = old_datasets + new_datasets + do_nothing_datasets + updated_datas
 
 # %%
 
-all_datasets = old_datasets
+# all_datasets = old_datasets
 
 for dataset in all_datasets:
     # print(dataset)
@@ -63,7 +68,6 @@ for dataset in all_datasets:
         src_path = source_path_wip / dataset
     # check if the dataset is already in published, if it is in published
     elif (soruce_path_published / dataset).exists():
-        print(f"we already have a DOI for {dataset}, copy from published to dest")
         src_path = soruce_path_published / dataset
     else:
         print(f"Dataset {dataset} not found in WIP or published. Skipping.")
@@ -71,24 +75,28 @@ for dataset in all_datasets:
 
 
     # check if we have a dataset path in the dest
-    if (dest_path / dataset).exists():
-        print(f"Destination stub  exists")
-        # check if DOI is there
-        if (dest_path / dataset / "DOI").exists():
-            # if so we will need to check if the dataset
-            print(f" {dataset} already has a DOI path.")
+    if not (dest_path / dataset).exists():
+        print(f"Destination stub missing")
+        # # check if DOI is there
+        # if (dest_path / dataset / "DOI").exists():
+        #     # if so we will need to check if the dataset
+        #     print(f" {dataset} already has a DOI path.")
    
     dst_path = dest_path / dataset 
     # create the dataset path if it doesn't exist
     dst_path.mkdir(parents=True, exist_ok=True)
-    print(f"Copy {src_path} to {dst_path}")
+    print(f"Copy {src_path} -> {dst_path}")
 
     shutil.copytree(src_path/"DOI", dst_path/"DOI", dirs_exist_ok=True)
+    shutil.copytree(src_path/"refs", dst_path/"refs", dirs_exist_ok=True)
+
+    # copy dataset.json
+    shutil.copy(src_path/"dataset.json", dst_path/"dataset.json")
 
     if dataset in updated_datasets:
         print(f"WARNING {dataset} is scheduled for version bump.")
         
-
+# %%
 
 
 # %%

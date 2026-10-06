@@ -139,6 +139,18 @@ from .archive import (
     validate_all_collection_archives,
     ensure_all_collection_archives,
 )
+from .archive_util import (
+    RELEASE_RESOURCES_BUCKET,
+    releases_up_to,
+    report_rsync,
+    latest_release_dir,
+    archive_dataset,
+    archive_datasets,
+    archive_collections,
+    archive_releases,
+    archive_cdes,
+    push_archive_to_bucket,
+)
 
 __all__ = [
     # models
@@ -196,6 +208,7 @@ __all__ = [
     "get_cde_version",
     "write_version",
     "archive_CDE",
+    "local_rsync",
     # bucket_util
     "gcloud_ls",
     "gcloud_rsync",
@@ -228,6 +241,17 @@ __all__ = [
     "validate_collection_archive_entry",
     "validate_all_collection_archives",
     "ensure_all_collection_archives",
+    # archive_util — release archive
+    "RELEASE_RESOURCES_BUCKET",
+    "releases_up_to",
+    "report_rsync",
+    "latest_release_dir",
+    "archive_dataset",
+    "archive_datasets",
+    "archive_collections",
+    "archive_releases",
+    "archive_cdes",
+    "push_archive_to_bucket",
 ]
 
 # Unused functions identified (not removed, just documented):

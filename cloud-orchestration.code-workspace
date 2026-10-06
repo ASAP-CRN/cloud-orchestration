@@ -20,6 +20,9 @@
 		},
 		{
 			"path": "../release_archive"
+		},
+		{
+			"path": "../cloud-fixup"
 		}
 	],
 	"settings": {}

@@ -176,9 +176,13 @@ def gcloud_rsync(
         destination (str): local file path or GCS bucket path
         directory (bool): indicates if source the input is a directory
         project (str | None): GCP project name. If None, uses default project [dnastack-asap-parkinsons]
+        dry_run (bool): report what would be copied/deleted without changing anything
+        clobber (bool): delete destination objects not present in source
+            (combined with ``dry_run``, the report includes the would-be deletions)
 
     Returns:
-       None.
+       str: gcloud stdout. With ``dry_run``, stdout + stderr, since gcloud
+       writes the "Would copy ..." / "Would remove ..." report to stderr.
     """
     # if source.is_dir():
     #     if directory == False:
@@ -215,9 +219,9 @@ def gcloud_rsync(
 
     if dry_run:
         cmd += ["--dry-run"]
-    elif clobber:
+    if clobber:
         cmd += ["--delete-unmatched-destination-objects"]
-    
+
     print(f"IN: {' '.join(cmd)}")
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode == 0:
@@ -225,6 +229,8 @@ def gcloud_rsync(
         pass
     else:
         print(f"gcloud command failed: {result.stderr}")
+    if dry_run:
+        return result.stdout + result.stderr
     return result.stdout
 
 
